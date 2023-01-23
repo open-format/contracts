@@ -39,3 +39,31 @@ forge build
 ```
 forge test
 ```
+
+### Formatting (vscode only)
+To enable the built-in formatter that comes with Foundry to automatically format your code on save, you can add the following settings to your .vscode/settings.json:
+
+```
+{
+  "editor.formatOnSave": true,
+  "[solidity]": {
+    "editor.defaultFormatter": "JuanBlanco.solidity" 
+  },
+  "solidity.formatter": "forge",
+}
+```
+
+### Static Analyzers
+[Slither](https://github.com/crytic/slither) is a Solidity static analysis framework written in Python 3. It runs a suite of vulnerability detectors, prints visual information about contract details, and provides an API to easily write custom analyses. Slither enables developers to find vulnerabilities, enhance their code comprehension, and quickly prototype custom analyses.
+
+```
+slither .
+```
+
+[Mythril](https://github.com/ConsenSys/mythril) is a security analysis tool for EVM bytecode. It detects security vulnerabilities in smart contracts built for Ethereum, Hedera, Quorum, Vechain, Roostock, Tron and other EVM-compatible blockchains.
+
+```
+myth analyze src/*
+```
+
+
