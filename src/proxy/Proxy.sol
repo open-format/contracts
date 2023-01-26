@@ -34,7 +34,7 @@ abstract contract Proxy is IProxy, Readable, SafeOwnable, ERC165Base {
 
     fallback() external payable {
         address facet = _facetAddress(msg.sig);
-        if (facet == address(0)) revert FunctionSelectorNotFound();
+        if (facet == address(0)) revert Error_FunctionSelectorNotFound();
 
         assembly {
             calldatacopy(0, 0, calldatasize())
