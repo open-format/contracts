@@ -7,9 +7,19 @@ import {UpgradableStorage} from "./UpgradableStorage.sol";
 import {UpgradableInternal} from "./UpgradableInternal.sol";
 
 abstract contract Upgradable is IUpgradable, UpgradableInternal, OwnableInternal {
+    /**
+     * @notice query the address of the registry
+     * @return registryAddress address of registry
+     */
+
     function getRegistryAddress() external view returns (address registryAddress) {
         return _getRegistryAddress();
     }
+
+    /**
+     * @notice set the address of the registry
+     * @param registryAddress address of registry
+     */
 
     function setRegistryAddress() external onlyOwner returns (address registryAddress) {
         _setRegistryAddress(registryAddress);

@@ -1,9 +1,6 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.16;
 
-/**
- * @dev derived from https://github.com/mudgen/diamond-2 (MIT license)
- */
 library UpgradableStorage {
     struct Layout {
         address registryAddress;
