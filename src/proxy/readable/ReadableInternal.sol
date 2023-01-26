@@ -13,6 +13,9 @@ abstract contract ReadableInternal is UpgradableInternal {
 
     function _facetAddress(bytes4 selector) internal view returns (address facet) {
         ReadableStorage.CachedFacet memory cachedFacet = ReadableStorage.layout().selectors[selector];
+
+        // use case is unlikely to be gamed by miners
+        // slither-disable-next-line timestamp
         if (cachedFacet.facet != address(0) && cachedFacet.timestamp > block.timestamp) {
             return cachedFacet.facet;
         }

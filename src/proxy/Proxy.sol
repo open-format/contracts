@@ -32,10 +32,12 @@ abstract contract Proxy is IProxy, Readable, SafeOwnable, ERC165Base {
      * @dev assembly code derived from @solidstate/contracts/proxy/Proxy.sol
      */
 
+    // slither-disable-next-line locked-ether
     fallback() external payable {
         address facet = _facetAddress(msg.sig);
         if (facet == address(0)) revert Error_FunctionSelectorNotFound();
 
+        // slither-disable-next-line assembly
         assembly {
             calldatacopy(0, 0, calldatasize())
             let result := delegatecall(gas(), facet, 0, calldatasize(), 0, 0)
@@ -47,6 +49,8 @@ abstract contract Proxy is IProxy, Readable, SafeOwnable, ERC165Base {
         }
     }
 
+    // withdraw functionality can be in a facet
+    // slither-disable-next-line locked-ether
     receive() external payable {}
 
     function _transferOwnership(address account) internal virtual override(SafeOwnable) {

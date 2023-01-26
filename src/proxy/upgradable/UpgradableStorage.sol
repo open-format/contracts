@@ -10,6 +10,8 @@ library UpgradableStorage {
 
     function layout() internal pure returns (Layout storage l) {
         bytes32 slot = STORAGE_SLOT;
+
+        // slither-disable-next-line assembly
         assembly {
             l.slot := slot
         }
