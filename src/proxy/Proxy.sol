@@ -10,6 +10,10 @@ import {ERC165Base, ERC165BaseStorage} from "@solidstate/contracts/introspection
 import {IProxy} from "./IProxy.sol";
 import {Readable} from "./readable/Readable.sol";
 
+/**
+ * @title "Open Format "Proxy" reference contract
+ * @notice used to interact with open foramt
+ */
 abstract contract Proxy is IProxy, Readable, SafeOwnable, ERC165Base {
     constructor(address registry) {
         _setSupportsInterface(type(IDiamondReadable).interfaceId, true);
@@ -21,14 +25,26 @@ abstract contract Proxy is IProxy, Readable, SafeOwnable, ERC165Base {
         _setRegistryAddress(registry);
     }
 
-    fallback(bytes calldata data) external payable returns (bytes memory) {
+    /**
+     * @notice looks up implementation address and delegate all calls to implementation contract
+     * @dev reverts if function selector is not in registry
+     * @dev memory location in use by assembly may be unsafe in other contexts
+     * @dev assembly code derived from @solidstate/contracts/proxy/Proxy.sol
+     */
+
+    fallback() external payable {
         address facet = _facetAddress(msg.sig);
         if (facet == address(0)) revert FunctionSelectorNotFound();
 
-        (bool ok, bytes memory resp) = facet.delegatecall(data);
-        if (!ok) revert FunctionCallReverted();
+        assembly {
+            calldatacopy(0, 0, calldatasize())
+            let result := delegatecall(gas(), facet, 0, calldatasize(), 0, 0)
+            returndatacopy(0, 0, returndatasize())
 
-        return resp;
+            switch result
+            case 0 { revert(0, returndatasize()) }
+            default { return(0, returndatasize()) }
+        }
     }
 
     receive() external payable {}
