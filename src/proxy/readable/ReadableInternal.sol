@@ -6,6 +6,11 @@ import {UpgradableInternal} from "../upgradable/UpgradableInternal.sol";
 import {ReadableStorage} from "./ReadableStorage.sol";
 
 abstract contract ReadableInternal is UpgradableInternal {
+    /**
+     * @dev checks storage before looking up on Registry contract
+     * @dev note: a more gas optimised implementation may look like @solidstate/contract/proxy/diamond/base/DiamondBase.sol
+     */
+
     function _facetAddress(bytes4 selector) internal view returns (address facet) {
         ReadableStorage.CachedFacet memory cachedFacet = ReadableStorage.layout().selectors[selector];
         if (cachedFacet.facet != address(0) && cachedFacet.timestamp > block.timestamp) {

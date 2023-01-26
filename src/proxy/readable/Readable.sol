@@ -5,6 +5,11 @@ import {IDiamondReadable} from "@solidstate/contracts/proxy/diamond/readable/IDi
 import {UpgradableInternal} from "../upgradable/UpgradableInternal.sol";
 import {ReadableInternal} from "./ReadableInternal.sol";
 
+/**
+ * @title Proxy Readable
+ * @notice complies with EIP-2535 "Diamond" introspection by calling Registry contract
+ */
+
 abstract contract Readable is IDiamondReadable, UpgradableInternal, ReadableInternal {
     function facets() external view returns (Facet[] memory diamondFacets) {
         return IDiamondReadable(_getRegistryAddress()).facets();

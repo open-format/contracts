@@ -1,6 +1,12 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.16;
 
+/**
+ * @dev gives Proxy contract ability to check storage for facet addresses
+ * before looking up on Registry contract
+ * @custom:wip this is experimental and may not make final
+ */
+
 library ReadableStorage {
     struct CachedFacet {
         address facet;
