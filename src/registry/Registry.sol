@@ -8,7 +8,7 @@ import {IRegistry} from "./IRegistry.sol";
 
 /**
  * @title Registry reference implementation
- * @notice essentially the same as solid state diamond but prevents and facet writing to the state
+ * @notice essentially the same as solid state diamond but prevents any facet's writing to the state
  */
 abstract contract Registry is IRegistry, SolidStateDiamond {
     /**
