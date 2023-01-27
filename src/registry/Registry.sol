@@ -21,10 +21,11 @@ abstract contract Registry is IRegistry, SolidStateDiamond {
     }
 
     /**
-     * @notice cannot send ether to this contract
-     * @dev override SolidStateDiamond receive to prevent ether being locked up in contract
+     * @notice allows owner to withdraw any ether sent
+     * @dev prevents ether being locked up
      */
-    receive() external payable override(SolidStateDiamond, ISolidStateDiamond) {
-        revert Error_PreventLockedEther();
+
+    function withdraw() public onlyOwner {
+        payable(_owner()).transfer(address(this).balance);
     }
 }

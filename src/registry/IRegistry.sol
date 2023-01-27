@@ -6,5 +6,4 @@ import {ISolidStateDiamond} from "@solidstate/contracts/proxy/diamond/SolidState
 
 interface IRegistry is ISolidStateDiamond {
     error Error_CannotInteractWithRegistryDirectly();
-    error Error_PreventLockedEther();
 }
