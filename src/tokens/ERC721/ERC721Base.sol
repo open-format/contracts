@@ -2,10 +2,12 @@
 pragma solidity ^0.8.16;
 
 import {ERC721AUpgradeable} from "@erc721a-upgradeable/contracts/ERC721AUpgradeable.sol";
+import {Ownable} from "@solidstate/contracts/access/ownable/Ownable.sol";
 
-abstract contract ERC721Base is ERC721AUpgradeable {
+abstract contract ERC721Base is ERC721AUpgradeable, Ownable {
     function __ERC721AMock_init(string memory name_, string memory symbol_) internal onlyInitializingERC721A {
         __ERC721A_init_unchained(name_, symbol_);
+        _setOwner(msg.sender);
     }
 
     function numberMinted(address owner) public view returns (uint256) {
