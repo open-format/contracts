@@ -60,3 +60,29 @@ contract ERC721Base__mintTo is Setup {
         assertEq(other, erc721Base.ownerOf(0));
     }
 }
+
+contract ERC721Base__batchMintTo is Setup {
+    function test_mints_multiple_to_address() public {
+        vm.prank(creator);
+        erc721Base.batchMintTo(other, 3);
+
+        assertEq(other, erc721Base.ownerOf(0));
+        assertEq(other, erc721Base.ownerOf(1));
+        assertEq(other, erc721Base.ownerOf(2));
+    }
+}
+
+contract ERC721Base__burn is Setup {
+    function setUpAfter() public override {
+        vm.prank(creator);
+        erc721Base.mintTo(other);
+    }
+
+    function test_burns_token() public {
+        vm.prank(other);
+        erc721Base.burn(0);
+
+        vm.expectRevert();
+        erc721Base.ownerOf(0);
+    }
+}
