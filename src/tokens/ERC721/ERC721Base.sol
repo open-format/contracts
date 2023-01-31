@@ -3,74 +3,78 @@ pragma solidity ^0.8.16;
 
 import {ERC721AUpgradeable} from "@erc721a-upgradeable/contracts/ERC721AUpgradeable.sol";
 import {Ownable} from "@solidstate/contracts/access/ownable/Ownable.sol";
+import {IERC165} from "@solidstate/contracts/interfaces/IERC165.sol";
+import {ERC165BaseInternal} from "@solidstate/contracts/introspection/ERC165/base/ERC165BaseInternal.sol";
+import {ERC2981, ERC2981Storage} from "@solidstate/contracts/token/common/ERC2981/ERC2981.sol";
 
-abstract contract ERC721Base is ERC721AUpgradeable, Ownable {
-    function __ERC721AMock_init(string memory name_, string memory symbol_) internal onlyInitializingERC721A {
-        __ERC721A_init_unchained(name_, symbol_);
+abstract contract ERC721Base is ERC721AUpgradeable, Ownable, ERC2981, ERC165BaseInternal {
+    function initialize(string memory _name, string memory _symbol, address _royaltyReciever, uint16 _royaltyBPS)
+        public
+        initializerERC721A
+    {
+        __ERC721A_init(_name, _symbol);
         _setOwner(msg.sender);
+        _setRoyaltyDefault(_royaltyReciever, _royaltyBPS);
     }
 
-    function numberMinted(address owner) public view returns (uint256) {
-        return _numberMinted(owner);
+    /*//////////////////////////////////////////////////////////////
+                            Minting logic
+    //////////////////////////////////////////////////////////////*/
+
+    /**
+     *  @notice          Lets an authorized address mint an NFT to a recipient.
+     *  @dev             The logic in the `_canMint` function determines whether the caller is authorized to mint NFTs.
+     *
+     *  @param _to       The recipient of the NFT to mint.
+     */
+    function mintTo(address _to) public virtual {
+        require(_canMint(), "Not authorized to mint.");
+        _safeMint(_to, 1);
     }
 
-    function totalMinted() public view returns (uint256) {
-        return _totalMinted();
+    /**
+     *  @notice          Lets an authorized address mint an NFT to a recipient.
+     *  @dev             The logic in the `_canMint` function determines whether the caller is authorized to mint NFTs.
+     *
+     *  @param _to       The recipient of the NFT to mint.
+     *  @param _quantity The number of NFTs to mint.
+     */
+
+    function batchMintTo(address _to, uint256 _quantity) public virtual {
+        require(_canMint(), "Not authorized to mint.");
+        _safeMint(_to, _quantity);
     }
 
-    function totalBurned() public view returns (uint256) {
-        return _totalBurned();
+    /**
+     *  @notice         Lets an owner or approved operator burn the NFT of the given tokenId.
+     *  @dev            ERC721A's `_burn(uint256,bool)` internally checks for token approvals.
+     *
+     *  @param _tokenId The tokenId of the NFT to burn.
+     */
+
+    function burn(uint256 _tokenId) external virtual {
+        _burn(_tokenId, true);
     }
 
-    function nextTokenId() public view returns (uint256) {
-        return _nextTokenId();
+    /**
+     * @dev override ERC721AUpgradeable to use solidstate ERC165Base
+     */
+
+    function supportsInterface(bytes4 interfaceId) public view override(ERC721AUpgradeable, IERC165) returns (bool) {
+        return _supportsInterface(interfaceId);
     }
 
-    function getAux(address owner) public view returns (uint64) {
-        return _getAux(owner);
+    /**
+     * @dev internal function to set the royalty receiver and amount in BPS
+     */
+
+    function _setRoyaltyDefault(address defaultRoyaltyReceiver, uint16 defaultRoyaltyBPS) internal {
+        ERC2981Storage.Layout storage l = ERC2981Storage.layout();
+        l.defaultRoyaltyBPS = defaultRoyaltyBPS;
+        l.defaultRoyaltyReceiver = defaultRoyaltyReceiver;
     }
 
-    function setAux(address owner, uint64 aux) public {
-        _setAux(owner, aux);
-    }
-
-    function directApprove(address to, uint256 tokenId) public {
-        _approve(to, tokenId);
-    }
-
-    function baseURI() public view returns (string memory) {
-        return _baseURI();
-    }
-
-    function exists(uint256 tokenId) public view returns (bool) {
-        return _exists(tokenId);
-    }
-
-    function safeMint(address to, uint256 quantity) public {
-        _safeMint(to, quantity);
-    }
-
-    function safeMint(address to, uint256 quantity, bytes memory _data) public {
-        _safeMint(to, quantity, _data);
-    }
-
-    function mint(address to, uint256 quantity) public {
-        _mint(to, quantity);
-    }
-
-    function burn(uint256 tokenId) public {
-        _burn(tokenId);
-    }
-
-    function burn(uint256 tokenId, bool approvalCheck) public {
-        _burn(tokenId, approvalCheck);
-    }
-
-    function getOwnershipAt(uint256 index) public view returns (TokenOwnership memory) {
-        return _ownershipAt(index);
-    }
-
-    function getOwnershipOf(uint256 index) public view returns (TokenOwnership memory) {
-        return _ownershipOf(index);
+    function _canMint() internal view virtual returns (bool) {
+        return msg.sender == _owner();
     }
 }
