@@ -2,6 +2,7 @@
 pragma solidity ^0.8.16;
 
 import "forge-std/Test.sol";
+import {IERC2981} from "@solidstate/contracts/interfaces/IERC2981.sol";
 import {ERC721BaseMock} from "../../../src/tokens/ERC721/ERC721BaseMock.sol";
 
 contract Setup is Test {
@@ -49,6 +50,10 @@ contract ERC721Base__royaltyInfo is Setup {
         (address reciever, uint256 amount) = erc721Base.royaltyInfo(0, 1 ether);
         assertEq(reciever, creator);
         assertEq(amount, 0.1 ether);
+    }
+
+    function test_supports_ERC2981_interface() public {
+        assertTrue(erc721Base.supportsInterface(type(IERC2981).interfaceId));
     }
 }
 
