@@ -116,3 +116,39 @@ contract ERC721Base__burn is Setup {
         erc721Base.ownerOf(0);
     }
 }
+
+contract ERC721Base__setContractURI is Setup {
+    function test_sets_contract_uri() public {
+        vm.prank(creator);
+        erc721Base.setContractURI(tokenURI);
+
+        assertEq(tokenURI, erc721Base.contractURI());
+    }
+
+    function test_only_owner_can_set_contract_uri() public {
+        vm.prank(other);
+        vm.expectRevert();
+        erc721Base.setContractURI(tokenURI);
+    }
+}
+
+contract ERC721Base__transferFrom is Setup {
+    function setUpAfter() public override {
+        vm.prank(creator);
+        erc721Base.mintTo(other, tokenURI);
+    }
+
+    function test_can_transfer_token() public {
+        vm.prank(other);
+        erc721Base.transferFrom(other, creator, 0);
+
+        assertEq(erc721Base.ownerOf(0), creator);
+    }
+
+    function test_can_safe_transfer_token() public {
+        vm.prank(other);
+        erc721Base.safeTransferFrom(other, creator, 0);
+
+        assertEq(erc721Base.ownerOf(0), creator);
+    }
+}
