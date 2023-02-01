@@ -13,7 +13,7 @@ contract Setup is Test {
     uint16 tenPercentBPS = 1000;
 
     // ipfs uri taken from https://docs.ipfs.tech/how-to/best-practices-for-nft-data/#types-of-ipfs-links-and-when-to-use-them
-    string baseURI = "ipfs://bafybeibnsoufr2renqzsh347nrx54wcubt5lgkeivez63xvivplfwhtpym";
+    string baseURI = "ipfs://bafybeibnsoufr2renqzsh347nrx54wcubt5lgkeivez63xvivplfwhtpym/";
     string tokenURI = "ipfs://bafybeibnsoufr2renqzsh347nrx54wcubt5lgkeivez63xvivplfwhtpym/metadata.json";
 
     function setUp() public {
@@ -78,6 +78,27 @@ contract ERC721Base__batchMintTo is Setup {
         assertEq(other, erc721Base.ownerOf(0));
         assertEq(other, erc721Base.ownerOf(1));
         assertEq(other, erc721Base.ownerOf(2));
+    }
+
+    function test_appends_token_id_to_baseURI() public {
+        vm.prank(creator);
+        erc721Base.batchMintTo(other, 3, baseURI);
+
+        assertEq(erc721Base.tokenURI(0), string.concat(baseURI, "0"));
+        assertEq(erc721Base.tokenURI(1), string.concat(baseURI, "1"));
+        assertEq(erc721Base.tokenURI(2), string.concat(baseURI, "2"));
+    }
+
+    function test_can_be_mixed_with_mintTo() public {
+        vm.prank(creator);
+        erc721Base.mintTo(other, tokenURI);
+
+        vm.prank(creator);
+        erc721Base.batchMintTo(other, 2, baseURI);
+
+        assertEq(erc721Base.tokenURI(0), tokenURI);
+        assertEq(erc721Base.tokenURI(1), string.concat(baseURI, "1"));
+        assertEq(erc721Base.tokenURI(2), string.concat(baseURI, "2"));
     }
 }
 
