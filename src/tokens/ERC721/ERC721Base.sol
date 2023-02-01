@@ -13,6 +13,7 @@ import {ERC721AUpgradeable} from "@erc721a-upgradeable/contracts/ERC721AUpgradea
 
 import {BatchMintMetadata} from "./batchMintMetadata/BatchMintMetadata.sol";
 import {ContractMetadata, IContractMetadata} from "./contractMetadata/ContractMetadata.sol";
+import {DefaultOperatorFilterer, DEFAULT_SUBSCRIPTION} from "./defaultOperatorFilterer/DefaultOperatorFilterer.sol";
 
 abstract contract ERC721Base is
     ERC721AUpgradeable,
@@ -20,7 +21,8 @@ abstract contract ERC721Base is
     ERC2981,
     ERC165BaseInternal,
     BatchMintMetadata,
-    ContractMetadata
+    ContractMetadata,
+    DefaultOperatorFilterer
 {
     mapping(uint256 => string) private fullURI;
 
@@ -31,6 +33,7 @@ abstract contract ERC721Base is
         __ERC721A_init(_name, _symbol);
         _setOwner(msg.sender);
         _setRoyaltyDefault(_royaltyReciever, _royaltyBPS);
+        _registerToDefaultOperatorFilterer(DEFAULT_SUBSCRIPTION, true);
 
         _setSupportsInterface(type(IERC165).interfaceId, true);
         _setSupportsInterface(type(IERC721).interfaceId, true);
@@ -140,6 +143,59 @@ abstract contract ERC721Base is
     /// @notice Returns whether a given token id has been minted
     function exists(uint256 _tokenId) external virtual returns (bool) {
         return _exists(_tokenId);
+    }
+
+    /*//////////////////////////////////////////////////////////////
+                        ERC-721A overrides
+    //////////////////////////////////////////////////////////////*/
+
+    /// @dev See {ERC721-setApprovalForAll}.
+    function setApprovalForAll(address operator, bool approved)
+        public
+        override(ERC721AUpgradeable)
+        onlyAllowedOperatorApproval(operator)
+    {
+        super.setApprovalForAll(operator, approved);
+    }
+
+    /// @dev See {ERC721-approve}.
+    function approve(address operator, uint256 tokenId)
+        public
+        payable
+        override(ERC721AUpgradeable)
+        onlyAllowedOperatorApproval(operator)
+    {
+        super.approve(operator, tokenId);
+    }
+
+    /// @dev See {ERC721-_transferFrom}.
+    function transferFrom(address from, address to, uint256 tokenId)
+        public
+        payable
+        override(ERC721AUpgradeable)
+        onlyAllowedOperator(from)
+    {
+        super.transferFrom(from, to, tokenId);
+    }
+
+    /// @dev See {ERC721-_safeTransferFrom}.
+    function safeTransferFrom(address from, address to, uint256 tokenId)
+        public
+        payable
+        override(ERC721AUpgradeable)
+        onlyAllowedOperator(from)
+    {
+        super.safeTransferFrom(from, to, tokenId);
+    }
+
+    /// @dev See {ERC721-_safeTransferFrom}.
+    function safeTransferFrom(address from, address to, uint256 tokenId, bytes memory data)
+        public
+        payable
+        override(ERC721AUpgradeable)
+        onlyAllowedOperator(from)
+    {
+        super.safeTransferFrom(from, to, tokenId, data);
     }
 
     /*//////////////////////////////////////////////////////////////
