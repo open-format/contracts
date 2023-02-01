@@ -12,6 +12,10 @@ contract Setup is Test {
 
     uint16 tenPercentBPS = 1000;
 
+    // ipfs uri taken from https://docs.ipfs.tech/how-to/best-practices-for-nft-data/#types-of-ipfs-links-and-when-to-use-them
+    string baseURI = "ipfs://bafybeibnsoufr2renqzsh347nrx54wcubt5lgkeivez63xvivplfwhtpym";
+    string tokenURI = "ipfs://bafybeibnsoufr2renqzsh347nrx54wcubt5lgkeivez63xvivplfwhtpym/metadata.json";
+
     function setUp() public {
         vm.prank(creator);
         erc721Base = new ERC721BaseMock(
@@ -31,7 +35,7 @@ contract Setup is Test {
 contract ERC721Base__initialize is Setup {
     function setUpAfter() public override {
         vm.prank(creator);
-        erc721Base.mintTo(creator);
+        erc721Base.mintTo(creator, tokenURI);
     }
 
     function test_can_only_be_run_once() public {
@@ -43,7 +47,7 @@ contract ERC721Base__initialize is Setup {
 contract ERC721Base__royaltyInfo is Setup {
     function setUpAfter() public override {
         vm.prank(creator);
-        erc721Base.mintTo(creator);
+        erc721Base.mintTo(creator, tokenURI);
     }
 
     function test_gets_reciever_and_amount() public {
@@ -60,7 +64,7 @@ contract ERC721Base__royaltyInfo is Setup {
 contract ERC721Base__mintTo is Setup {
     function test_mints_to_address() public {
         vm.prank(creator);
-        erc721Base.mintTo(other);
+        erc721Base.mintTo(other, tokenURI);
 
         assertEq(other, erc721Base.ownerOf(0));
     }
@@ -69,7 +73,7 @@ contract ERC721Base__mintTo is Setup {
 contract ERC721Base__batchMintTo is Setup {
     function test_mints_multiple_to_address() public {
         vm.prank(creator);
-        erc721Base.batchMintTo(other, 3);
+        erc721Base.batchMintTo(other, 3, baseURI);
 
         assertEq(other, erc721Base.ownerOf(0));
         assertEq(other, erc721Base.ownerOf(1));
@@ -80,7 +84,7 @@ contract ERC721Base__batchMintTo is Setup {
 contract ERC721Base__burn is Setup {
     function setUpAfter() public override {
         vm.prank(creator);
-        erc721Base.mintTo(other);
+        erc721Base.mintTo(other, tokenURI);
     }
 
     function test_burns_token() public {
