@@ -12,8 +12,16 @@ import {UintUtils} from "@solidstate/contracts/utils/UintUtils.sol";
 import {ERC721AUpgradeable} from "@erc721a-upgradeable/contracts/ERC721AUpgradeable.sol";
 
 import {BatchMintMetadata} from "./batchMintMetadata/BatchMintMetadata.sol";
+import {ContractMetadata, IContractMetadata} from "./contractMetadata/ContractMetadata.sol";
 
-abstract contract ERC721Base is ERC721AUpgradeable, Ownable, ERC2981, ERC165BaseInternal, BatchMintMetadata {
+abstract contract ERC721Base is
+    ERC721AUpgradeable,
+    Ownable,
+    ERC2981,
+    ERC165BaseInternal,
+    BatchMintMetadata,
+    ContractMetadata
+{
     mapping(uint256 => string) private fullURI;
 
     function initialize(string memory _name, string memory _symbol, address _royaltyReciever, uint16 _royaltyBPS)
@@ -28,6 +36,7 @@ abstract contract ERC721Base is ERC721AUpgradeable, Ownable, ERC2981, ERC165Base
         _setSupportsInterface(type(IERC721).interfaceId, true);
         _setSupportsInterface(0x5b5e139f, true); // ERC165 interface ID for ERC721Metadata
         _setSupportsInterface(type(IERC2981).interfaceId, true);
+        _setSupportsInterface(type(IContractMetadata).interfaceId, true);
     }
 
     /*//////////////////////////////////////////////////////////////
@@ -123,6 +132,10 @@ abstract contract ERC721Base is ERC721AUpgradeable, Ownable, ERC2981, ERC165Base
     }
 
     function _canMint() internal view virtual returns (bool) {
+        return msg.sender == _owner();
+    }
+
+    function _canSetContractURI() internal view virtual override returns (bool) {
         return msg.sender == _owner();
     }
 }
