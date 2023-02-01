@@ -95,6 +95,10 @@ abstract contract ERC721Base is ERC721AUpgradeable, Ownable, ERC2981, ERC165Base
         _burn(_tokenId, true);
     }
 
+    function exists(uint256 _tokenId) external virtual returns (bool) {
+        return _exists(_tokenId);
+    }
+
     /**
      * @dev override ERC721AUpgradeable to use solidstate ERC165Base
      */
