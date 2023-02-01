@@ -40,6 +40,18 @@ abstract contract ERC721Base is
     }
 
     /*//////////////////////////////////////////////////////////////
+                            ERC165 Logic
+    //////////////////////////////////////////////////////////////*/
+
+    /**
+     * @dev override ERC721AUpgradeable to use solidstates ERC165BaseInternal
+     */
+
+    function supportsInterface(bytes4 interfaceId) public view override(ERC721AUpgradeable, IERC165) returns (bool) {
+        return _supportsInterface(interfaceId);
+    }
+
+    /*//////////////////////////////////////////////////////////////
                         Overriden ERC721A logic
     //////////////////////////////////////////////////////////////*/
 
@@ -104,17 +116,35 @@ abstract contract ERC721Base is
         _burn(_tokenId, true);
     }
 
+    /*//////////////////////////////////////////////////////////////
+                        Public getters
+    //////////////////////////////////////////////////////////////*/
+
+    /// @notice The tokenId assigned to the next new NFT to be minted.
+    function nextTokenIdToMint() public view virtual returns (uint256) {
+        return _nextTokenId();
+    }
+
+    /// @notice Returns whether a given address is the owner, or approved to transfer an NFT.
+    function isApprovedOrOwner(address _operator, uint256 _tokenId)
+        public
+        view
+        virtual
+        returns (bool isApprovedOrOwnerOf)
+    {
+        address owner = ownerOf(_tokenId);
+        isApprovedOrOwnerOf =
+            (_operator == owner || isApprovedForAll(owner, _operator) || getApproved(_tokenId) == _operator);
+    }
+
+    /// @notice Returns whether a given token id has been minted
     function exists(uint256 _tokenId) external virtual returns (bool) {
         return _exists(_tokenId);
     }
 
-    /**
-     * @dev override ERC721AUpgradeable to use solidstate ERC165Base
-     */
-
-    function supportsInterface(bytes4 interfaceId) public view override(ERC721AUpgradeable, IERC165) returns (bool) {
-        return _supportsInterface(interfaceId);
-    }
+    /*//////////////////////////////////////////////////////////////
+                        Internal (overrideable) functions
+    //////////////////////////////////////////////////////////////*/
 
     function _setTokenURI(uint256 _tokenId, string memory _tokenURI) internal virtual {
         require(bytes(fullURI[_tokenId]).length == 0, "URI already set");
@@ -124,8 +154,8 @@ abstract contract ERC721Base is
     /**
      * @dev internal function to set the royalty receiver and amount in BPS
      */
-
-    function _setRoyaltyDefault(address defaultRoyaltyReceiver, uint16 defaultRoyaltyBPS) internal {
+    // TODO: refactor out into royalty extenstion that allows for seperate royalties per token
+    function _setRoyaltyDefault(address defaultRoyaltyReceiver, uint16 defaultRoyaltyBPS) internal virtual {
         ERC2981Storage.Layout storage l = ERC2981Storage.layout();
         l.defaultRoyaltyBPS = defaultRoyaltyBPS;
         l.defaultRoyaltyReceiver = defaultRoyaltyReceiver;
