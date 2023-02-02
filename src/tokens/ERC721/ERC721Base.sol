@@ -28,8 +28,6 @@ abstract contract ERC721Base is
     Royalty,
     Multicall
 {
-    mapping(uint256 => string) private fullURI;
-
     function initialize(string memory _name, string memory _symbol, address _royaltyRecipient, uint16 _royaltyBps)
         public
         initializerERC721A
