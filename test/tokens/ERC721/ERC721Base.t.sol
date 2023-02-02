@@ -3,6 +3,7 @@ pragma solidity ^0.8.16;
 
 import "forge-std/Test.sol";
 import {IERC2981} from "@solidstate/contracts/interfaces/IERC2981.sol";
+import {IERC721} from "@solidstate/contracts/interfaces/IERC721.sol";
 import {ERC721BaseMock} from "../../../src/tokens/ERC721/ERC721BaseMock.sol";
 
 contract Setup is Test {
@@ -150,5 +151,24 @@ contract ERC721Base__transferFrom is Setup {
         erc721Base.safeTransferFrom(other, creator, 0);
 
         assertEq(erc721Base.ownerOf(0), creator);
+    }
+}
+
+contract ERC721Base__multicall is Setup {
+    function setUpAfter() public override {
+        vm.prank(creator);
+        erc721Base.batchMintTo(creator, 2, tokenURI);
+    }
+
+    function test_can_perfom_multiple_calls_in_one_transaction() public {
+        bytes[] memory calls = new bytes[](2);
+        calls[0] = abi.encodeCall(erc721Base.transferFrom, (creator, other, 0));
+        calls[1] = abi.encodeCall(erc721Base.transferFrom, (creator, other, 1));
+
+        vm.prank(creator);
+        erc721Base.multicall(calls);
+
+        assertEq(erc721Base.ownerOf(0), other);
+        assertEq(erc721Base.ownerOf(1), other);
     }
 }
