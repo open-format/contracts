@@ -27,3 +27,4 @@ jobs:
       with:
         sarif: results.sarif
         fail-on: medium
+        slither-version: "0.9.1"
