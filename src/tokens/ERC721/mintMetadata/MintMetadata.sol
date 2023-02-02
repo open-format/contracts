@@ -11,4 +11,6 @@ import {MintMetadataInternal} from "./MintMetadataInternal.sol";
  *           storage and internal logic have been split out into seperate files
  */
 
-abstract contract MintMetadata is MintMetadataInternal {}
+abstract contract MintMetadata is MintMetadataInternal {
+/// @dev all functions are internal see MintMetadataInternal.sol
+}
