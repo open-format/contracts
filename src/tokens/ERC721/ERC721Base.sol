@@ -12,6 +12,7 @@ import {UintUtils} from "@solidstate/contracts/utils/UintUtils.sol";
 import {ERC721AUpgradeable} from "@erc721a-upgradeable/contracts/ERC721AUpgradeable.sol";
 
 import {Royalty} from "./royalty/Royalty.sol";
+import {MintMetadata} from "./mintMetadata/MintMetadata.sol";
 import {BatchMintMetadata} from "./batchMintMetadata/BatchMintMetadata.sol";
 import {ContractMetadata, IContractMetadata} from "./contractMetadata/ContractMetadata.sol";
 import {DefaultOperatorFilterer, DEFAULT_SUBSCRIPTION} from "./defaultOperatorFilterer/DefaultOperatorFilterer.sol";
@@ -20,6 +21,7 @@ abstract contract ERC721Base is
     ERC721AUpgradeable,
     Ownable,
     ERC165BaseInternal,
+    MintMetadata,
     BatchMintMetadata,
     ContractMetadata,
     DefaultOperatorFilterer,
@@ -68,9 +70,9 @@ abstract contract ERC721Base is
      */
     function tokenURI(uint256 _tokenId) public view virtual override returns (string memory) {
         // tokenURI was stored using mintTo
-        string memory fullUriForToken = fullURI[_tokenId];
-        if (bytes(fullUriForToken).length > 0) {
-            return fullUriForToken;
+        string memory fullTokenURI = _getTokenURI(_tokenId);
+        if (bytes(fullTokenURI).length > 0) {
+            return fullTokenURI;
         }
 
         // tokenURI was stored using batchMintTo
@@ -91,7 +93,7 @@ abstract contract ERC721Base is
      */
     function mintTo(address _to, string memory _tokenURI) public virtual {
         require(_canMint(), "Not authorized to mint.");
-        _setTokenURI(_nextTokenId(), _tokenURI);
+        _mintMetadata(_nextTokenId(), _tokenURI);
         _safeMint(_to, 1);
     }
 
@@ -203,11 +205,6 @@ abstract contract ERC721Base is
     /*//////////////////////////////////////////////////////////////
                         Internal (overrideable) functions
     //////////////////////////////////////////////////////////////*/
-
-    function _setTokenURI(uint256 _tokenId, string memory _tokenURI) internal virtual {
-        require(bytes(fullURI[_tokenId]).length == 0, "URI already set");
-        fullURI[_tokenId] = _tokenURI;
-    }
 
     /// @dev Returns whether a token can be minted in the given execution context.
     function _canMint() internal view virtual returns (bool) {
