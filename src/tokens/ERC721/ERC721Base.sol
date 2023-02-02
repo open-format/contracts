@@ -5,6 +5,7 @@ import {IERC165} from "@solidstate/contracts/interfaces/IERC165.sol";
 import {IERC721} from "@solidstate/contracts/interfaces/IERC721.sol";
 import {IERC2981} from "@solidstate/contracts/interfaces/IERC2981.sol";
 import {Ownable} from "@solidstate/contracts/access/ownable/Ownable.sol";
+import {Multicall} from "@solidstate/contracts/utils/Multicall.sol";
 import {ERC165BaseInternal} from "@solidstate/contracts/introspection/ERC165/base/ERC165BaseInternal.sol";
 import {ERC2981, ERC2981Storage} from "@solidstate/contracts/token/common/ERC2981/ERC2981.sol";
 import {UintUtils} from "@solidstate/contracts/utils/UintUtils.sol";
@@ -22,7 +23,8 @@ abstract contract ERC721Base is
     ERC165BaseInternal,
     BatchMintMetadata,
     ContractMetadata,
-    DefaultOperatorFilterer
+    DefaultOperatorFilterer,
+    Multicall
 {
     mapping(uint256 => string) private fullURI;
 
