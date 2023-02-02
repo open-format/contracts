@@ -60,6 +60,17 @@ contract ERC721Base__royaltyInfo is Setup {
     function test_supports_ERC2981_interface() public {
         assertTrue(erc721Base.supportsInterface(type(IERC2981).interfaceId));
     }
+
+    function test_returns_token_specific_royalty_info() public {
+        vm.prank(creator);
+
+        uint16 fivePercentBPS = 500;
+        erc721Base.setRoyaltyInfoForToken(0, other, fivePercentBPS);
+
+        (address reciever, uint256 amount) = erc721Base.royaltyInfo(0, 1 ether);
+        assertEq(reciever, other);
+        assertEq(amount, 0.05 ether);
+    }
 }
 
 contract ERC721Base__mintTo is Setup {
