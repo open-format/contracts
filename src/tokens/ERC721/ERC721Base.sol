@@ -7,11 +7,11 @@ import {IERC2981} from "@solidstate/contracts/interfaces/IERC2981.sol";
 import {Ownable} from "@solidstate/contracts/access/ownable/Ownable.sol";
 import {Multicall} from "@solidstate/contracts/utils/Multicall.sol";
 import {ERC165BaseInternal} from "@solidstate/contracts/introspection/ERC165/base/ERC165BaseInternal.sol";
-import {ERC2981, ERC2981Storage} from "@solidstate/contracts/token/common/ERC2981/ERC2981.sol";
 import {UintUtils} from "@solidstate/contracts/utils/UintUtils.sol";
 
 import {ERC721AUpgradeable} from "@erc721a-upgradeable/contracts/ERC721AUpgradeable.sol";
 
+import {Royalty} from "./royalty/Royalty.sol";
 import {BatchMintMetadata} from "./batchMintMetadata/BatchMintMetadata.sol";
 import {ContractMetadata, IContractMetadata} from "./contractMetadata/ContractMetadata.sol";
 import {DefaultOperatorFilterer, DEFAULT_SUBSCRIPTION} from "./defaultOperatorFilterer/DefaultOperatorFilterer.sol";
@@ -19,22 +19,22 @@ import {DefaultOperatorFilterer, DEFAULT_SUBSCRIPTION} from "./defaultOperatorFi
 abstract contract ERC721Base is
     ERC721AUpgradeable,
     Ownable,
-    ERC2981,
     ERC165BaseInternal,
     BatchMintMetadata,
     ContractMetadata,
     DefaultOperatorFilterer,
+    Royalty,
     Multicall
 {
     mapping(uint256 => string) private fullURI;
 
-    function initialize(string memory _name, string memory _symbol, address _royaltyReciever, uint16 _royaltyBPS)
+    function initialize(string memory _name, string memory _symbol, address _royaltyRecipient, uint16 _royaltyBps)
         public
         initializerERC721A
     {
         __ERC721A_init(_name, _symbol);
         _setOwner(msg.sender);
-        _setRoyaltyDefault(_royaltyReciever, _royaltyBPS);
+        _setDefaultRoyaltyInfo(_royaltyRecipient, _royaltyBps);
         _registerToDefaultOperatorFilterer(DEFAULT_SUBSCRIPTION, true);
 
         _setSupportsInterface(type(IERC165).interfaceId, true);
@@ -209,20 +209,17 @@ abstract contract ERC721Base is
         fullURI[_tokenId] = _tokenURI;
     }
 
-    /**
-     * @dev internal function to set the royalty receiver and amount in BPS
-     */
-    // TODO: refactor out into royalty extenstion that allows for seperate royalties per token
-    function _setRoyaltyDefault(address defaultRoyaltyReceiver, uint16 defaultRoyaltyBPS) internal virtual {
-        ERC2981Storage.Layout storage l = ERC2981Storage.layout();
-        l.defaultRoyaltyBPS = defaultRoyaltyBPS;
-        l.defaultRoyaltyReceiver = defaultRoyaltyReceiver;
-    }
-
+    /// @dev Returns whether a token can be minted in the given execution context.
     function _canMint() internal view virtual returns (bool) {
         return msg.sender == _owner();
     }
 
+    /// @dev Returns whether royalty info can be set in the given execution context.
+    function _canSetRoyaltyInfo() internal view virtual override returns (bool) {
+        return msg.sender == owner();
+    }
+
+    /// @dev Returns whether contract metadata can be set in the given execution context.
     function _canSetContractURI() internal view virtual override returns (bool) {
         return msg.sender == _owner();
     }
