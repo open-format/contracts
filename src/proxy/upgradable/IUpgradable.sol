@@ -8,11 +8,4 @@ interface IUpgradable {
      */
 
     function getRegistryAddress() external view returns (address registryAddress);
-
-    /**
-     * @notice set the address of the registry
-     * @param registryAddress address of registry
-     */
-
-    function setRegistryAddress(address registryAddress) external;
 }

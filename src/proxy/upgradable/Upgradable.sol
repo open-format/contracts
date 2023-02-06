@@ -15,13 +15,4 @@ abstract contract Upgradable is IUpgradable, UpgradableInternal, OwnableInternal
     function getRegistryAddress() external view returns (address registryAddress) {
         return _getRegistryAddress();
     }
-
-    /**
-     * @notice set the address of the registry
-     * @param registryAddress address of registry
-     */
-
-    function setRegistryAddress() external onlyOwner returns (address registryAddress) {
-        _setRegistryAddress(registryAddress);
-    }
 }
