@@ -65,7 +65,7 @@ contract Proxy is IProxy, Readable, Upgradable, ERC165Base, Initializable, SafeO
     // slither-disable-next-line locked-ether
     receive() external payable {}
 
-    function _transferOwnership(address account) internal virtual override(OwnableInternal, SafeOwnable) {
+    function _transferOwnership(address account) internal virtual override(SafeOwnable) {
         super._transferOwnership(account);
     }
 }
