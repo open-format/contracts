@@ -5,7 +5,9 @@ import {Proxy} from "./Proxy.sol";
 
 contract ProxyMock is Proxy {
     /**
-     * @dev inherits proxy constructor
+     * @dev override constructer that disablesInitilizers with one that calls innit
      */
-    constructor(address registry) Proxy(registry) {}
+    constructor(address _registry) Proxy(false) {
+        innit(msg.sender, _registry);
+    }
 }

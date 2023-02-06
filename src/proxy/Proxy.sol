@@ -2,27 +2,39 @@
 pragma solidity ^0.8.16;
 
 import {IDiamondReadable} from "@solidstate/contracts/proxy/diamond/readable/IDiamondReadable.sol";
-import {SafeOwnable} from "@solidstate/contracts/access/ownable/SafeOwnable.sol";
+import {SafeOwnable, OwnableInternal} from "@solidstate/contracts/access/ownable/SafeOwnable.sol";
 import {IERC165} from "@solidstate/contracts/interfaces/IERC165.sol";
 import {IERC173} from "@solidstate/contracts/interfaces/IERC173.sol";
-import {ERC165Base, ERC165BaseStorage} from "@solidstate/contracts/introspection/ERC165/base/ERC165Base.sol";
+import {ERC165Base} from "@solidstate/contracts/introspection/ERC165/base/ERC165Base.sol";
 
 import {IProxy} from "./IProxy.sol";
 import {Readable} from "./readable/Readable.sol";
+import {Upgradable} from "./upgradable/Upgradable.sol";
+import {Initializable} from "../extensions/initializable/Initializable.sol";
 
 /**
- * @title "Open Format "Proxy" reference contract
- * @notice used to interact with open foramt
+ * @title   "Open Format Proxy" contract
+ * @notice  used to interact with open-format
+ * @dev     is intended to not to be called directly but via a minimal proxy https://eips.ethereum.org/EIPS/eip-1167
  */
-abstract contract Proxy is IProxy, Readable, SafeOwnable, ERC165Base {
-    constructor(address registry) {
+contract Proxy is IProxy, Readable, Upgradable, ERC165Base, Initializable, SafeOwnable {
+    /// @param _disable disables initilizers, mainly used for testing and should be set to true in production
+    constructor(bool _disable) {
+        // As this contract is intended to be called from minimal proxy contracts
+        // lock contract on deployment
+        if (_disable) {
+            _disableInitializers();
+        }
+    }
+
+    /// @dev to be called on each clone as soon as possible
+    function innit(address _owner, address _registry) public initializer {
+        _setOwner(_owner);
+        _setRegistryAddress(_registry);
+
         _setSupportsInterface(type(IDiamondReadable).interfaceId, true);
         _setSupportsInterface(type(IERC165).interfaceId, true);
         _setSupportsInterface(type(IERC173).interfaceId, true);
-
-        _setOwner(msg.sender);
-
-        _setRegistryAddress(registry);
     }
 
     /**
@@ -53,7 +65,7 @@ abstract contract Proxy is IProxy, Readable, SafeOwnable, ERC165Base {
     // slither-disable-next-line locked-ether
     receive() external payable {}
 
-    function _transferOwnership(address account) internal virtual override(SafeOwnable) {
+    function _transferOwnership(address account) internal virtual override(OwnableInternal, SafeOwnable) {
         super._transferOwnership(account);
     }
 }
