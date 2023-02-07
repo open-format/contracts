@@ -238,7 +238,7 @@ contract Proxy_and_Registry__intergration is Test, Helpers {
             messages[i] = genMessage;
 
             // deploy new proxy
-            proxies[i] = (new ProxyMock(payable(diamond)));
+            proxies[i] = (new ProxyMock(payable(diamond), address(0))); //TODO: add globals instead of zero address
 
             // set message
             (bool ok,) = address(proxies[i]).call(abi.encodeWithSelector(MessageFacet.setMessage.selector, messages[i]));

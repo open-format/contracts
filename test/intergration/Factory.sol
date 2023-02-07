@@ -49,9 +49,10 @@ contract Factory__intergration is Test, Helpers {
     uint256 numberOfProxies = 2;
 
     function setUp() public {
+        address globals = address(0); // TODO: add globals contract
         registry = new RegistryMock();
         template = new  Proxy(true);
-        appFactory = new Factory(address(template), address(registry));
+        appFactory = new Factory(address(template), address(registry), globals);
         message = new MessageFacet();
 
         // add hello facet to registry
