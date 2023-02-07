@@ -14,14 +14,16 @@ import {Proxy} from "../proxy/Proxy.sol";
 contract Factory is MinimalProxyFactory, Ownable {
     address public template;
     address public registry;
+    address public globals;
 
     // store created apps
     mapping(bytes32 => address) apps; // salt => deployment addres
 
-    constructor(address _template, address _registry) {
+    constructor(address _template, address _registry, address _globals) {
         _setOwner(msg.sender);
         template = _template;
         registry = _registry;
+        globals = _globals;
     }
 
     function create(bytes32 _salt) external returns (address appAddress) {
@@ -33,7 +35,7 @@ contract Factory is MinimalProxyFactory, Ownable {
 
         // deploys new proxy using CREATE2
         appAddress = _deployMinimalProxy(template, _salt);
-        Proxy(payable(appAddress)).innit(msg.sender, registry);
+        Proxy(payable(appAddress)).innit(msg.sender, registry, globals);
 
         apps[_salt] = appAddress;
     }
@@ -44,5 +46,9 @@ contract Factory is MinimalProxyFactory, Ownable {
 
     function setRegistry(address _registry) public onlyOwner {
         registry = _registry;
+    }
+
+    function setGlobals(address _globals) public onlyOwner {
+        registry = _globals;
     }
 }
