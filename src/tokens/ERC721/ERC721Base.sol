@@ -17,7 +17,7 @@ import {BatchMintMetadata} from "./batchMintMetadata/BatchMintMetadata.sol";
 import {ContractMetadata, IContractMetadata} from "./contractMetadata/ContractMetadata.sol";
 import {DefaultOperatorFilterer, DEFAULT_SUBSCRIPTION} from "./defaultOperatorFilterer/DefaultOperatorFilterer.sol";
 
-abstract contract ERC721Base is
+contract ERC721Base is
     ERC721AUpgradeable,
     Ownable,
     ERC165BaseInternal,

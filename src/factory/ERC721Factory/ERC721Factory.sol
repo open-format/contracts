@@ -11,7 +11,7 @@ import {ERC721FactoryInternal} from "./ERC721FactoryInternal.sol";
  *      there is an internal dependency on the globals extension.
  */
 
-abstract contract ERC721Factory is ERC721FactoryInternal, MinimalProxyFactory {
+contract ERC721Factory is ERC721FactoryInternal, MinimalProxyFactory {
     // TODO: add onlyOwner modifyer or could extend with a _canDeploy role
     function createERC721(string memory _name, string memory _symbol, address _royaltyRecipient, uint16 _royaltyBps)
         external
