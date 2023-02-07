@@ -10,6 +10,7 @@ import {ERC165Base} from "@solidstate/contracts/introspection/ERC165/base/ERC165
 import {IProxy} from "./IProxy.sol";
 import {Readable} from "./readable/Readable.sol";
 import {Upgradable} from "./upgradable/Upgradable.sol";
+import {Global} from "../extensions/global/Global.sol";
 import {Initializable} from "../extensions/initializable/Initializable.sol";
 
 /**
@@ -17,7 +18,7 @@ import {Initializable} from "../extensions/initializable/Initializable.sol";
  * @notice  used to interact with open-format
  * @dev     is intended to not to be called directly but via a minimal proxy https://eips.ethereum.org/EIPS/eip-1167
  */
-contract Proxy is IProxy, Readable, Upgradable, ERC165Base, Initializable, SafeOwnable {
+contract Proxy is IProxy, Readable, Upgradable, Global, ERC165Base, Initializable, SafeOwnable {
     /// @param _disable disables initilizers, mainly used for testing and should be set to true in production
     constructor(bool _disable) {
         // As this contract is intended to be called from minimal proxy contracts
@@ -28,9 +29,10 @@ contract Proxy is IProxy, Readable, Upgradable, ERC165Base, Initializable, SafeO
     }
 
     /// @dev to be called on each clone as soon as possible
-    function innit(address _owner, address _registry) public initializer {
+    function innit(address _owner, address _registry, address _globals) public initializer {
         _setOwner(_owner);
         _setRegistryAddress(_registry);
+        _setGlobals(_globals);
 
         _setSupportsInterface(type(IDiamondReadable).interfaceId, true);
         _setSupportsInterface(type(IERC165).interfaceId, true);
