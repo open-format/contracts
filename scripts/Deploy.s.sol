@@ -2,6 +2,7 @@
 pragma solidity ^0.8.16;
 
 import "forge-std/Script.sol";
+import "forge-std/console.sol";
 import {
     IDiamondWritable,
     IDiamondWritableInternal
@@ -17,7 +18,7 @@ import {ERC721Factory} from "../src/factory/ERC721Factory/ERC721Factory.sol";
 
 contract DeployRegistry is Script {
     function run() external {
-        uint256 deployerPrivateKey = vm.envUint("ANVIL_PRIVATE_KEY");
+        uint256 deployerPrivateKey = vm.envUint("PRIVATE_KEY");
         vm.startBroadcast(deployerPrivateKey);
 
         Globals globals = new Globals();
@@ -51,7 +52,9 @@ contract DeployRegistry is Script {
         Proxy app = Proxy(payable(appAddress));
 
         // deploy nft
-        ERC721Factory(appAddress).createERC721("hello", "hello", address(0x10), 1000);
+        // ERC721Factory(appAddress).createERC721("hello", "hello", address(0x10), 1000);
+
+        console.log("THIS IS YOUR APP >>>>>> %s", appAddress);
 
         vm.stopBroadcast();
     }
