@@ -3,17 +3,20 @@ pragma solidity ^0.8.16;
 
 import {Ownable} from "@solidstate/contracts/access/ownable/Ownable.sol";
 /**
- * @title Open Format Globals
+ * @title Globals
  * @notice holds all global variables that need to be shared between all proxy apps
- * @dev facets can access global variables by calling this contract. see the `extensions/global`
+ * @dev facets can access global variables by calling this contract via `extensions/global`
  *      for example:
  *      ```solidity
- *           import {Globals} from "./global/Globals.sol";
+ *             import {Global} from "./extensions/Global.sol";
  *
- *           //...inside a function
+ *             contract Example is Global {
+ *                 exampleFunction() {
+ *                     address ERC721Iplementation = _getGlobals.ERC721Implementation();
+ *                 }
  *
- *           address ERC721Iplementation = Globals(GlobalStorage.layout().globals).ERC721Implementation();
- *      ```
+ *             }
+ *         ```
  * @dev Note: if this is deployed behind an upgradable proxy the global variabls can be added to
  */
 

@@ -5,19 +5,20 @@ import {Ownable} from "@solidstate/contracts/access/ownable/Ownable.sol";
 import {MinimalProxyFactory} from "@solidstate/contracts/factory/MinimalProxyFactory.sol";
 import {Proxy} from "../proxy/Proxy.sol";
 // WIP experimenting with minimal clone factory to see how to use it
-// TODO: test with intergration
-// TODO: see if it can be refactored and used as a facet in a diamond
-// TODO: look into vanity addresses
 
-// salt could be hash of msg.sender and app name? avoiding all conflicts?
-
+/**
+ * @title "App Factory"
+ * @notice (WIP) a factory contract for creating proxy(app) contracts
+ * @dev    deploys minimal proxys that point to Proxy implementation/template
+ *         is designed to be deployed sepertly from the registry and manged by open-format
+ */
 contract Factory is MinimalProxyFactory, Ownable {
     address public template;
     address public registry;
     address public globals;
 
     // store created apps
-    mapping(bytes32 => address) apps; // salt => deployment addres
+    mapping(bytes32 => address) apps; // salt => deployment address
 
     constructor(address _template, address _registry, address _globals) {
         _setOwner(msg.sender);
@@ -26,6 +27,9 @@ contract Factory is MinimalProxyFactory, Ownable {
         globals = _globals;
     }
 
+    /**
+     * @dev _salt param can be thought as the app id
+     */
     function create(bytes32 _salt) external returns (address appAddress) {
         // TODO: WIP need to see other examples of factorys and handerling salt
         // check proxy not already deployed
