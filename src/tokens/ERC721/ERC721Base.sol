@@ -17,7 +17,7 @@ import {BatchMintMetadata} from "./batchMintMetadata/BatchMintMetadata.sol";
 import {ContractMetadata, IContractMetadata} from "./contractMetadata/ContractMetadata.sol";
 import {DefaultOperatorFilterer, DEFAULT_SUBSCRIPTION} from "./defaultOperatorFilterer/DefaultOperatorFilterer.sol";
 
-abstract contract ERC721Base is
+contract ERC721Base is
     ERC721AUpgradeable,
     Ownable,
     ERC165BaseInternal,
@@ -211,7 +211,7 @@ abstract contract ERC721Base is
 
     /// @dev Returns whether royalty info can be set in the given execution context.
     function _canSetRoyaltyInfo() internal view virtual override returns (bool) {
-        return msg.sender == owner();
+        return msg.sender == _owner();
     }
 
     /// @dev Returns whether contract metadata can be set in the given execution context.

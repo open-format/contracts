@@ -28,12 +28,13 @@ interface INotRegistered {
 }
 
 contract Proxy__fallback is Test {
+    address global = address(0); // TODO: add dummy global
     RegistryDummy registry;
     ProxyMock proxy;
 
     function setUp() public {
         registry = new RegistryDummy();
-        proxy = new ProxyMock(address(registry));
+        proxy = new ProxyMock(address(registry), global);
     }
 
     function test_data_is_forwarded_to_implementation() public {

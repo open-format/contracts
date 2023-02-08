@@ -2,9 +2,9 @@ name: Slither Analysis
 
 on:
   push:
-    branches: [ main ]
+    branches: [main]
   pull_request:
-    branches: [ main ]
+    branches: [main]
 
 jobs:
   analyze:
@@ -13,18 +13,21 @@ jobs:
       contents: read
       security-events: write
     steps:
-    - name: Checkout repository
-      uses: actions/checkout@v3
-    
-    - name: Install Foundry
-      uses: onbjerg/foundry-toolchain@v1
-      with:
-        version: nightly
+      - name: Checkout repository
+        uses: actions/checkout@v3
 
-    - name: Run Slither
-      uses: crytic/slither-action@v0.2.0
-      id: slither
-      with:
-        sarif: results.sarif
-        fail-on: medium
-        slither-version: "0.9.1"
+      - name: Temp Add safe directory
+        run: git config --global --add safe.directory /github/workspace
+
+      - name: Install Foundry
+        uses: onbjerg/foundry-toolchain@v1
+        with:
+          version: nightly
+
+      - name: Run Slither
+        uses: crytic/slither-action@v0.2.0
+        id: slither
+        with:
+          sarif: results.sarif
+          fail-on: medium
+          slither-version: "0.9.1"
