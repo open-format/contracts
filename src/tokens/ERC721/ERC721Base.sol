@@ -211,7 +211,7 @@ contract ERC721Base is
 
     /// @dev Returns whether royalty info can be set in the given execution context.
     function _canSetRoyaltyInfo() internal view virtual override returns (bool) {
-        return msg.sender == owner();
+        return msg.sender == _owner();
     }
 
     /// @dev Returns whether contract metadata can be set in the given execution context.

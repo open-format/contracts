@@ -5,6 +5,9 @@ import {Globals} from "../../globals/Globals.sol";
 import {GlobalStorage} from "./GlobalStorage.sol";
 
 abstract contract GlobalInternal {
+    /**
+     * @dev returns Globals contract so inherited contracts can call without the need to explicitly import Globals
+     */
     function _getGlobals() internal view returns (Globals) {
         return Globals(GlobalStorage.layout().globals);
     }
