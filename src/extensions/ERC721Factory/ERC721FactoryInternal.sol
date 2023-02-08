@@ -16,4 +16,6 @@ abstract contract ERC721FactoryInternal is Global {
     function _getImplementation() internal view returns (address) {
         return _getGlobals().ERC721Implementation();
     }
+
+    function _canCreate() internal view virtual returns (bool);
 }
