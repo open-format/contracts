@@ -13,7 +13,7 @@ import {Factory} from "../src/factory/Factory.sol";
 import {Globals} from "../src/globals/Globals.sol";
 import {ERC721Base} from "../src/tokens/ERC721/ERC721Base.sol";
 
-import {ERC721Factory} from "../src/factory/ERC721Factory/ERC721Factory.sol";
+import {ERC721FactoryFacet} from "../src/facet/ERC721FactoryFacet.sol";
 
 contract DeployRegistry is Script {
     function run() external {
@@ -30,15 +30,15 @@ contract DeployRegistry is Script {
         globals.setERC721Implementation(address(erc721template));
 
         // FACETS
-        ERC721Factory erc721Factory = new ERC721Factory();
+        ERC721FactoryFacet erc721Factory = new ERC721FactoryFacet();
 
         // Add facets to registy
         IDiamondWritableInternal.FacetCut[] memory cuts = new IDiamondWritableInternal.FacetCut[](1);
         // ERC721Factory
         {
             bytes4[] memory selectors = new bytes4[](2);
-            selectors[0] = ERC721Factory.createERC721.selector;
-            selectors[1] = ERC721Factory.getERC721FactoryImplementation.selector;
+            selectors[0] = erc721Factory.createERC721.selector;
+            selectors[1] = erc721Factory.getERC721FactoryImplementation.selector;
             cuts[0] = IDiamondWritableInternal.FacetCut(
                 address(erc721Factory), IDiamondWritableInternal.FacetCutAction.ADD, selectors
             );
@@ -51,7 +51,7 @@ contract DeployRegistry is Script {
         Proxy app = Proxy(payable(appAddress));
 
         // deploy nft
-        ERC721Factory(appAddress).createERC721("hello", "hello", address(0x10), 1000);
+        ERC721FactoryFacet(appAddress).createERC721("hello", "hello", address(0x10), 1000);
 
         vm.stopBroadcast();
     }
