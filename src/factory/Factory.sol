@@ -13,6 +13,8 @@ import {Proxy} from "../proxy/Proxy.sol";
  *         is designed to be deployed sepertly from the registry and manged by open-format
  */
 contract Factory is MinimalProxyFactory, Ownable {
+    event created(address id, address owner);
+
     address public template;
     address public registry;
     address public globals;
@@ -30,18 +32,20 @@ contract Factory is MinimalProxyFactory, Ownable {
     /**
      * @dev _salt param can be thought as the app id
      */
-    function create(bytes32 _salt) external returns (address appAddress) {
+    function create(bytes32 _salt) external returns (address id) {
         // TODO: WIP need to see other examples of factorys and handerling salt
         // check proxy not already deployed
         if (apps[_salt] != address(0)) {
             revert("salt already used");
         }
 
-        // deploys new proxy using CREATE2
-        appAddress = _deployMinimalProxy(template, _salt);
-        Proxy(payable(appAddress)).innit(msg.sender, registry, globals);
+        apps[_salt] = id;
 
-        apps[_salt] = appAddress;
+        // deploys new proxy using CREATE2
+        id = _deployMinimalProxy(template, _salt);
+        Proxy(payable(id)).innit(msg.sender, registry, globals);
+
+        emit created(id, msg.sender);
     }
 
     function setTemplate(address _template) public onlyOwner {
