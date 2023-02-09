@@ -13,8 +13,10 @@ import {Proxy} from "../src/proxy/ProxyMock.sol";
 import {Factory} from "../src/factory/Factory.sol";
 import {Globals} from "../src/globals/Globals.sol";
 import {ERC721Base} from "../src/tokens/ERC721/ERC721Base.sol";
+import {ERC20Base} from "../src/tokens/ERC20/ERC20Base.sol";
 
 import {ERC721FactoryFacet} from "../src/facet/ERC721FactoryFacet.sol";
+import {ERC20FactoryFacet} from "../src/facet/ERC20FactoryFacet.sol";
 
 contract Deploy is Script {
     function run() external {
@@ -26,22 +28,38 @@ contract Deploy is Script {
         Proxy template = new Proxy(true);
         Factory factory = new Factory(address(template), address(registry), address(globals));
 
+        // Templates
         ERC721Base erc721template = new ERC721Base();
-        // save across all of open format
-        globals.setERC721Implementation(address(erc721template));
+        ERC20Base erc20template = new ERC20Base();
 
-        // FACETS
+        // Set globals
+        globals.setERC721Implementation(address(erc721template));
+        globals.setERC20Implementation(address(erc20template));
+
+        // Facets
         ERC721FactoryFacet erc721Factory = new ERC721FactoryFacet();
+        ERC20FactoryFacet erc20Factory = new ERC20FactoryFacet();
 
         // Add facets to registy
-        IDiamondWritableInternal.FacetCut[] memory cuts = new IDiamondWritableInternal.FacetCut[](1);
+        IDiamondWritableInternal.FacetCut[] memory cuts = new IDiamondWritableInternal.FacetCut[](2);
         // ERC721Factory
         {
             bytes4[] memory selectors = new bytes4[](2);
             selectors[0] = erc721Factory.createERC721.selector;
             selectors[1] = erc721Factory.getERC721FactoryImplementation.selector;
+
             cuts[0] = IDiamondWritableInternal.FacetCut(
                 address(erc721Factory), IDiamondWritableInternal.FacetCutAction.ADD, selectors
+            );
+        }
+        // ERC20Factory
+        {
+            bytes4[] memory selectors = new bytes4[](2);
+            selectors[0] = erc20Factory.createERC20.selector;
+            selectors[1] = erc20Factory.getERC20FactoryImplementation.selector;
+
+            cuts[1] = IDiamondWritableInternal.FacetCut(
+                address(erc20Factory), IDiamondWritableInternal.FacetCutAction.ADD, selectors
             );
         }
 
