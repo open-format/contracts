@@ -43,7 +43,7 @@ contract Factory is MinimalProxyFactory, Ownable {
 
         // deploys new proxy using CREATE2
         id = _deployMinimalProxy(template, _salt);
-        Proxy(payable(id)).innit(msg.sender, registry, globals);
+        Proxy(payable(id)).init(msg.sender, registry, globals);
 
         emit Created(id, msg.sender);
     }
