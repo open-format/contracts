@@ -22,6 +22,7 @@ import {Ownable} from "@solidstate/contracts/access/ownable/Ownable.sol";
 
 contract Globals is Ownable {
     address public ERC721Implementation;
+    address public ERC20Implementation;
 
     constructor() {
         _setOwner(msg.sender);
@@ -29,5 +30,9 @@ contract Globals is Ownable {
 
     function setERC721Implementation(address _implementation) public onlyOwner {
         ERC721Implementation = _implementation;
+    }
+
+    function setERC20Implementation(address _implementation) public onlyOwner {
+        ERC20Implementation = _implementation;
     }
 }
