@@ -28,8 +28,8 @@ contract ERC721Base is
     Royalty,
     Multicall
 {
-    event minted(address to, string tokenURI);
-    event batchMinted(address to, uint256 quantity, string baseURI);
+    event Minted(address to, string tokenURI);
+    event BatchMinted(address to, uint256 quantity, string baseURI);
 
     function initialize(string memory _name, string memory _symbol, address _royaltyRecipient, uint16 _royaltyBps)
         public
@@ -97,7 +97,7 @@ contract ERC721Base is
         _mintMetadata(_nextTokenId(), _tokenURI);
         _safeMint(_to, 1);
 
-        emit minted(_to, _tokenURI);
+        emit Minted(_to, _tokenURI);
     }
 
     /**
@@ -114,7 +114,7 @@ contract ERC721Base is
         _batchMintMetadata(_nextTokenId(), _quantity, _baseURI);
         _safeMint(_to, _quantity);
 
-        emit batchMinted(_to, _quantity, _baseURI);
+        emit BatchMinted(_to, _quantity, _baseURI);
     }
 
     /**

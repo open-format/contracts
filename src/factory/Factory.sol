@@ -13,7 +13,7 @@ import {Proxy} from "../proxy/Proxy.sol";
  *         is designed to be deployed sepertly from the registry and manged by open-format
  */
 contract Factory is MinimalProxyFactory, Ownable {
-    event created(address id, address owner);
+    event Created(address id, address owner);
 
     address public template;
     address public registry;
@@ -45,7 +45,7 @@ contract Factory is MinimalProxyFactory, Ownable {
         id = _deployMinimalProxy(template, _salt);
         Proxy(payable(id)).innit(msg.sender, registry, globals);
 
-        emit created(id, msg.sender);
+        emit Created(id, msg.sender);
     }
 
     function setTemplate(address _template) public onlyOwner {
