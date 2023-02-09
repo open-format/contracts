@@ -8,6 +8,6 @@ contract ERC721BaseMock is ERC721Base {
         payable
         initializerERC721A
     {
-        initialize(_name, _symbol, _royaltyReciever, _royaltyBPS);
+        initialize(msg.sender, _name, _symbol, _royaltyReciever, _royaltyBPS);
     }
 }

@@ -33,11 +33,11 @@ import {Initializable} from "@extensions/initializable/Initializable.sol";
  */
 
 contract ERC20Base is SolidStateERC20, Ownable, Multicall, ContractMetadata, Initializable, ERC165Base {
-    function initialize(string memory _name, string memory _symbol, uint8 _decimals, uint256 supply)
+    function initialize(address _owner, string memory _name, string memory _symbol, uint8 _decimals, uint256 supply)
         public
         initializer
     {
-        _setOwner(msg.sender);
+        _setOwner(_owner);
 
         _setName(_name);
         _setSymbol(_symbol);

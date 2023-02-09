@@ -44,7 +44,7 @@ abstract contract ERC721Factory is IERC721Factory, ERC721FactoryInternal, Minima
 
         // deploys new proxy using CREATE2
         id = _deployMinimalProxy(implementation, salt);
-        ERC721Base(payable(id)).initialize(_name, _symbol, _royaltyRecipient, _royaltyBps);
+        ERC721Base(payable(id)).initialize(msg.sender, _name, _symbol, _royaltyRecipient, _royaltyBps);
 
         emit Created(id, msg.sender, _name, _symbol, _royaltyRecipient, _royaltyBps);
     }

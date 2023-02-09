@@ -44,7 +44,7 @@ abstract contract ERC20Factory is IERC20Factory, ERC20FactoryInternal, MinimalPr
 
         // deploys new proxy using CREATE2
         id = _deployMinimalProxy(implementation, salt);
-        ERC20Base(payable(id)).initialize(_name, _symbol, _decimals, _supply);
+        ERC20Base(payable(id)).initialize(msg.sender, _name, _symbol, _decimals, _supply);
 
         emit Created(id, msg.sender, _name, _symbol, _decimals, _supply);
     }

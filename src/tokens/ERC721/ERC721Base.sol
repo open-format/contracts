@@ -34,12 +34,15 @@ contract ERC721Base is
     event Minted(address to, string tokenURI);
     event BatchMinted(address to, uint256 quantity, string baseURI);
 
-    function initialize(string memory _name, string memory _symbol, address _royaltyRecipient, uint16 _royaltyBps)
-        public
-        initializerERC721A
-    {
+    function initialize(
+        address _owner,
+        string memory _name,
+        string memory _symbol,
+        address _royaltyRecipient,
+        uint16 _royaltyBps
+    ) public initializerERC721A {
         __ERC721A_init(_name, _symbol);
-        _setOwner(msg.sender);
+        _setOwner(_owner);
         _setDefaultRoyaltyInfo(_royaltyRecipient, _royaltyBps);
         _registerToDefaultOperatorFilterer(DEFAULT_SUBSCRIPTION, true);
 

@@ -41,7 +41,7 @@ contract ERC721Base__initialize is Setup {
 
     function test_can_only_be_run_once() public {
         vm.expectRevert("ERC721A__Initializable: contract is already initialized");
-        erc721Base.initialize("Name", "Symbol", creator, uint16(tenPercentBPS));
+        erc721Base.initialize(creator, "Name", "Symbol", creator, uint16(tenPercentBPS));
     }
 }
 
