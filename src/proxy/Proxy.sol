@@ -29,7 +29,7 @@ contract Proxy is IProxy, Readable, Upgradable, Global, ERC165Base, Initializabl
     }
 
     /// @dev to be called on each clone as soon as possible
-    function innit(address _owner, address _registry, address _globals) public initializer {
+    function init(address _owner, address _registry, address _globals) public initializer {
         _setOwner(_owner);
         _setRegistryAddress(_registry);
         _setGlobals(_globals);

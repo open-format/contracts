@@ -16,7 +16,7 @@ import {ERC721Base} from "../src/tokens/ERC721/ERC721Base.sol";
 
 import {ERC721FactoryFacet} from "../src/facet/ERC721FactoryFacet.sol";
 
-contract DeployRegistry is Script {
+contract Deploy is Script {
     function run() external {
         uint256 deployerPrivateKey = vm.envUint("PRIVATE_KEY");
         vm.startBroadcast(deployerPrivateKey);

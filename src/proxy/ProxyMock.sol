@@ -8,6 +8,6 @@ contract ProxyMock is Proxy {
      * @dev override constructer that disablesInitilizers with one that calls innit
      */
     constructor(address _registry, address _globals) Proxy(false) {
-        innit(msg.sender, _registry, _globals);
+        init(msg.sender, _registry, _globals);
     }
 }

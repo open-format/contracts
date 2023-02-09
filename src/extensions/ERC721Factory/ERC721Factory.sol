@@ -20,7 +20,7 @@ abstract contract ERC721Factory is IERC721Factory, ERC721FactoryInternal, Minima
     function createERC721(string memory _name, string memory _symbol, address _royaltyRecipient, uint16 _royaltyBps)
         external
         virtual
-        returns (address deployment)
+        returns (address id)
     {
         if (!_canCreate()) {
             revert("do not have permission to create");
@@ -35,16 +35,18 @@ abstract contract ERC721Factory is IERC721Factory, ERC721FactoryInternal, Minima
         bytes32 salt = keccak256(abi.encode(_name));
         // check proxy has not deployed erc721 with the same name
         // deploying with the same salt would override that ERC721
-        if (_getDeployment(salt) != address(0)) {
+        if (_getId(salt) != address(0)) {
             revert("name already used");
         }
 
-        // deploys new proxy using CREATE2
-        deployment = _deployMinimalProxy(implementation, salt);
-        ERC721Base(payable(deployment)).initialize(_name, _symbol, _royaltyRecipient, _royaltyBps);
-
         // saves deployment for checking later
-        _setDeployment(salt, deployment);
+        _setId(salt, id);
+
+        // deploys new proxy using CREATE2
+        id = _deployMinimalProxy(implementation, salt);
+        ERC721Base(payable(id)).initialize(_name, _symbol, _royaltyRecipient, _royaltyBps);
+
+        emit Created(id, msg.sender, _name, _symbol, _royaltyRecipient, _royaltyBps);
     }
 
     function getERC721FactoryImplementation() external view returns (address) {
