@@ -14,6 +14,9 @@ contract Setup is Test {
     address other = address(0x11);
     ERC20BaseMock erc20Base;
 
+    // ipfs uri taken from https://docs.ipfs.tech/how-to/best-practices-for-nft-data/#types-of-ipfs-links-and-when-to-use-them
+    string contractURI = "ipfs://bafybeibnsoufr2renqzsh347nrx54wcubt5lgkeivez63xvivplfwhtpym/";
+
     function setUp() public {
         vm.prank(creator);
         erc20Base = new ERC20BaseMock(
@@ -70,5 +73,68 @@ contract ERC20__initialize is Setup {
     function test_cannot_be_initialized_again() public {
         vm.expectRevert("Initializable: contract is already initialized");
         erc20Base.initialize(other, "Name", "Symbol", 18, 10_000);
+    }
+}
+
+contract ERC20__mintTo is Setup {
+    function test_can_mint_to_an_address() public {
+        vm.prank(creator);
+        erc20Base.mintTo(other, 10_000);
+        assertEq(erc20Base.balanceOf(other), 10_000);
+    }
+
+    function test_reverts_if_not_the_owner() public {
+        vm.prank(other);
+        vm.expectRevert("Not authorized to mint.");
+        erc20Base.mintTo(other, 10_000);
+    }
+
+    function test_reverts_amount_is_zero() public {
+        vm.prank(creator);
+        vm.expectRevert("Minting zero tokens.");
+        erc20Base.mintTo(other, 0);
+    }
+}
+
+contract ERC20__burn is Setup {
+    function test_can_burn() public {
+        vm.prank(creator);
+        erc20Base.burn(10_000);
+        assertEq(erc20Base.balanceOf(creator), 0);
+    }
+
+    function test_reverts_if_not_enough_balance() public {
+        vm.prank(creator);
+        vm.expectRevert("not enough balance");
+        erc20Base.burn(10_001);
+    }
+}
+
+contract ERC20Base__setContractURI is Setup {
+    function test_sets_contract_uri() public {
+        vm.prank(creator);
+        erc20Base.setContractURI(contractURI);
+
+        assertEq(contractURI, erc20Base.contractURI());
+    }
+
+    function test_reverts_if_not_the_owner() public {
+        vm.prank(other);
+        vm.expectRevert();
+        erc20Base.setContractURI(contractURI);
+    }
+}
+
+contract ERC20Base__multicall is Setup {
+    function test_can_perfom_multiple_calls_in_one_transaction() public {
+        bytes[] memory calls = new bytes[](2);
+        calls[0] = abi.encodeCall(erc20Base.transfer, (other, 5_000));
+        calls[1] = abi.encodeCall(erc20Base.burn, (4_000));
+
+        vm.prank(creator);
+        erc20Base.multicall(calls);
+
+        assertEq(erc20Base.balanceOf(creator), 1_000);
+        assertEq(erc20Base.balanceOf(other), 5_000);
     }
 }
