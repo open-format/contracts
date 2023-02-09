@@ -3,7 +3,7 @@ pragma solidity ^0.8.16;
 
 library ERC721FactoryStorage {
     struct Layout {
-        mapping(bytes32 => address) ERC721Contracts; // salt() => deployment addres
+        mapping(bytes32 => address) ERC721Contracts; // salt => id
     }
 
     bytes32 internal constant STORAGE_SLOT = keccak256("openformat.contracts.storage.ERC721Factory");
