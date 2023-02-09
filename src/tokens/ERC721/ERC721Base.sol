@@ -11,11 +11,14 @@ import {UintUtils} from "@solidstate/contracts/utils/UintUtils.sol";
 
 import {ERC721AUpgradeable} from "@erc721a-upgradeable/contracts/ERC721AUpgradeable.sol";
 
-import {Royalty} from "./royalty/Royalty.sol";
-import {MintMetadata} from "./mintMetadata/MintMetadata.sol";
-import {BatchMintMetadata} from "./batchMintMetadata/BatchMintMetadata.sol";
-import {ContractMetadata, IContractMetadata} from "./contractMetadata/ContractMetadata.sol";
-import {DefaultOperatorFilterer, DEFAULT_SUBSCRIPTION} from "./defaultOperatorFilterer/DefaultOperatorFilterer.sol";
+import {Royalty} from "@extensions/royalty/Royalty.sol";
+import {MintMetadata} from "@extensions/mintMetadata/MintMetadata.sol";
+import {BatchMintMetadata} from "@extensions/batchMintMetadata/BatchMintMetadata.sol";
+import {ContractMetadata, IContractMetadata} from "@extensions/contractMetadata/ContractMetadata.sol";
+import {
+    DefaultOperatorFilterer,
+    DEFAULT_SUBSCRIPTION
+} from "@extensions/defaultOperatorFilterer/DefaultOperatorFilterer.sol";
 
 contract ERC721Base is
     ERC721AUpgradeable,
