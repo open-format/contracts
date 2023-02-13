@@ -2,22 +2,22 @@
 pragma solidity ^0.8.16;
 
 import {MinimalProxyFactory} from "@solidstate/contracts/factory/MinimalProxyFactory.sol";
-import {ERC721Base} from "../../tokens/ERC721/ERC721Base.sol";
+import {ERC20Base} from "../../tokens/ERC20/ERC20Base.sol";
 
-import {IERC721Factory} from "./IERC721Factory.sol";
-import {ERC721FactoryInternal} from "./ERC721FactoryInternal.sol";
+import {IERC20Factory} from "./IERC20Factory.sol";
+import {ERC20FactoryInternal} from "./ERC20FactoryInternal.sol";
 
 /**
- * @title   "ERC721Factory Extension"
- * @notice  (WIP) a factory contract for creating ECR721 contracts
- * @dev     deploys minimal proxys that point to ERC721Base implementation
+ * @title   "ERC20Factory Extension"
+ * @notice  (WIP) a factory contract for creating ECR20 contracts
+ * @dev     deploys minimal proxys that point to ERC20Base implementation
  *          compatible to be inherited by facet contract
  *          there is an internal dependency on the globals extension.
  * @dev     inheriting contracts must override the internal _canCreate function
  */
 
-abstract contract ERC721Factory is IERC721Factory, ERC721FactoryInternal, MinimalProxyFactory {
-    function createERC721(string memory _name, string memory _symbol, address _royaltyRecipient, uint16 _royaltyBps)
+abstract contract ERC20Factory is IERC20Factory, ERC20FactoryInternal, MinimalProxyFactory {
+    function createERC20(string memory _name, string memory _symbol, uint8 _decimals, uint256 _supply)
         external
         virtual
         returns (address id)
@@ -33,8 +33,8 @@ abstract contract ERC721Factory is IERC721Factory, ERC721FactoryInternal, Minima
 
         // TODO: WIP need to see other examples of factorys and handerling salt
         bytes32 salt = keccak256(abi.encode(_name));
-        // check proxy has not deployed erc721 with the same name
-        // deploying with the same salt would override that ERC721
+        // check proxy has not deployed erc20 with the same name
+        // deploying with the same salt would override that ERC20
         if (_getId(salt) != address(0)) {
             revert("name already used");
         }
@@ -44,12 +44,12 @@ abstract contract ERC721Factory is IERC721Factory, ERC721FactoryInternal, Minima
 
         // deploys new proxy using CREATE2
         id = _deployMinimalProxy(implementation, salt);
-        ERC721Base(payable(id)).initialize(msg.sender, _name, _symbol, _royaltyRecipient, _royaltyBps);
+        ERC20Base(payable(id)).initialize(msg.sender, _name, _symbol, _decimals, _supply);
 
-        emit Created(id, msg.sender, _name, _symbol, _royaltyRecipient, _royaltyBps);
+        emit Created(id, msg.sender, _name, _symbol, _decimals, _supply);
     }
 
-    function getERC721FactoryImplementation() external view returns (address) {
+    function getERC20FactoryImplementation() external view returns (address) {
         return _getImplementation();
     }
 }
