@@ -24,6 +24,14 @@ contract Globals is Ownable {
     address public ERC721Implementation;
     address public ERC20Implementation;
 
+    struct PlatformFee {
+        uint256 base;
+        uint16 percentageBPS;
+        address reciever;
+    }
+
+    PlatformFee platformFee;
+
     constructor() {
         _setOwner(msg.sender);
     }
@@ -34,5 +42,14 @@ contract Globals is Ownable {
 
     function setERC20Implementation(address _implementation) public onlyOwner {
         ERC20Implementation = _implementation;
+    }
+
+    function setPlatformFee(uint256 _base, uint16 _percentage, address reciever) public onlyOwner {
+        platformFee = PlatformFee(_base, _percentage, reciever);
+    }
+
+    function platformFeeInfo(uint256 _price) external view returns (address reciever, uint256 fee) {
+        reciever = platformFee.reciever;
+        fee = (_price > 0) ? platformFee.base + (_price * platformFee.percentageBPS) / 10_000 : platformFee.base;
     }
 }
