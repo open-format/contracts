@@ -2,8 +2,9 @@
 pragma solidity ^0.8.16;
 
 import {Global} from "../global/Global.sol";
+import {IPlatformFee} from "./IPlatformFee.sol";
 
-abstract contract PlatformFeeInternal is Global {
+abstract contract PlatformFeeInternal is IPlatformFee, Global {
     /**
      * @dev returns base fee from globals contract
      */
@@ -15,12 +16,12 @@ abstract contract PlatformFeeInternal is Global {
      * @dev inspired by openzepplin Address.sendValue
      *      https://github.com/OpenZeppelin/openzeppelin-contracts/blob/master/contracts/utils/Address.sol
      */
-    function _payPlatformFee(address recipient, uint256 amount) internal {
+    function _payPlatformFee(address recipient, uint256 amount) internal virtual {
         require(address(this).balance >= amount, "PlatformFee: insufficient balance");
 
         (bool success,) = recipient.call{value: amount}("");
         require(success, "PlatformFee: unable to send value, recipient may have reverted");
 
-        // TODO: emit PayedPlatfromFee(this)
+        emit PaidPlatformFee(address(0), amount);
     }
 }

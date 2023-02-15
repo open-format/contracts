@@ -16,7 +16,7 @@ import {RegistryMock} from "../../src/registry/RegistryMock.sol";
 import {Factory} from "../../src/factory/Factory.sol";
 import {Globals} from "../../src/globals/Globals.sol";
 
-import {PlatformFee} from "../../src/extensions/platformFee/PlatformFee.sol";
+import {PlatformFee, IPlatformFee} from "../../src/extensions/platformFee/PlatformFee.sol";
 
 contract DummyFacet is PlatformFee {
     string public message = "";
@@ -91,7 +91,7 @@ contract Setup is Test, Helpers {
     }
 }
 
-contract PlatformFee__intergration is Setup {
+contract PlatformFee__intergration is Setup, IPlatformFee {
     function test_platform_fee_is_paid() public {
         DummyFacet(address(app)).write{value: 0.1 ether}();
 
@@ -126,6 +126,13 @@ contract PlatformFee__intergration is Setup {
 
         DummyFacet(address(app)).purchase{value: 1 ether}(1 ether);
         assertEq(socialConscious.balance, 0.2 ether);
+    }
+
+    function test_emits_paid_platform_fee_event() public {
+        vm.expectEmit(true, true, true, true, address(app));
+        emit PaidPlatformFee(address(0), 0.1 ether);
+
+        DummyFacet(address(app)).write{value: 0.1 ether}();
     }
 
     function test_reverts_when_no_value_is_sent() public {
