@@ -24,6 +24,9 @@ contract Globals is Ownable {
     address public ERC721Implementation;
     address public ERC20Implementation;
 
+    uint256 public baseFee;
+    address payable public baseFeeReciever;
+
     constructor() {
         _setOwner(msg.sender);
     }
@@ -34,5 +37,18 @@ contract Globals is Ownable {
 
     function setERC20Implementation(address _implementation) public onlyOwner {
         ERC20Implementation = _implementation;
+    }
+
+    function setBaseFee(uint256 _baseFee) public onlyOwner {
+        baseFee = _baseFee;
+    }
+
+    function setBaseFeeReciver(address payable _baseFeeReciever) public onlyOwner {
+        baseFeeReciever = _baseFeeReciever;
+    }
+
+    function baseFeeInfo() external view returns (uint256 amount, address payable reciever) {
+        amount = baseFee;
+        reciever = baseFeeReciever;
     }
 }
