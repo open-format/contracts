@@ -3,6 +3,8 @@ pragma solidity ^0.8.16;
 
 import {Ownable} from "@solidstate/contracts/access/ownable/Ownable.sol";
 import {MinimalProxyFactory} from "@solidstate/contracts/factory/MinimalProxyFactory.sol";
+
+import {IFactory} from "./IFactory.sol";
 import {Proxy} from "../proxy/Proxy.sol";
 // WIP experimenting with minimal clone factory to see how to use it
 
@@ -12,15 +14,13 @@ import {Proxy} from "../proxy/Proxy.sol";
  * @dev    deploys minimal proxys that point to Proxy implementation/template
  *         is designed to be deployed sepertly from the registry and manged by open-format
  */
-contract Factory is MinimalProxyFactory, Ownable {
-    event Created(address id, address owner);
-
+contract Factory is IFactory, MinimalProxyFactory, Ownable {
     address public template;
     address public registry;
     address public globals;
 
     // store created apps
-    mapping(bytes32 => address) apps; // salt => deployment address
+    mapping(bytes32 => address) public apps; // salt => deployment address
 
     constructor(address _template, address _registry, address _globals) {
         _setOwner(msg.sender);
@@ -32,20 +32,20 @@ contract Factory is MinimalProxyFactory, Ownable {
     /**
      * @dev _salt param can be thought as the app id
      */
-    function create(bytes32 _salt) external returns (address id) {
+    function create(bytes32 _name) external returns (address id) {
         // TODO: WIP need to see other examples of factorys and handerling salt
         // check proxy not already deployed
-        if (apps[_salt] != address(0)) {
-            revert("salt already used");
+        if (apps[_name] != address(0)) {
+            revert("name already used");
         }
 
-        apps[_salt] = id;
+        // deploy new proxy using CREATE2
+        id = _deployMinimalProxy(template, _name);
+        apps[_name] = id;
 
-        // deploys new proxy using CREATE2
-        id = _deployMinimalProxy(template, _salt);
         Proxy(payable(id)).init(msg.sender, registry, globals);
 
-        emit Created(id, msg.sender);
+        emit Created(id, msg.sender, string(abi.encodePacked(_name)));
     }
 
     function setTemplate(address _template) public onlyOwner {
