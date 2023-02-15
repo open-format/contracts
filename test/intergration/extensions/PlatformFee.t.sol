@@ -10,13 +10,13 @@ import {
     IDiamondWritableInternal
 } from "@solidstate/contracts/proxy/diamond/writable/IDiamondWritable.sol";
 
-import {Proxy} from "../../src/proxy/Proxy.sol";
-import {Upgradable} from "../../src/proxy/upgradable/Upgradable.sol";
-import {RegistryMock} from "../../src/registry/RegistryMock.sol";
-import {Factory} from "../../src/factory/Factory.sol";
-import {Globals} from "../../src/globals/Globals.sol";
+import {Proxy} from "src/proxy/Proxy.sol";
+import {Upgradable} from "src/proxy/upgradable/Upgradable.sol";
+import {RegistryMock} from "src/registry/RegistryMock.sol";
+import {Factory} from "src/factory/Factory.sol";
+import {Globals} from "src/globals/Globals.sol";
 
-import {PlatformFee, IPlatformFee} from "../../src/extensions/platformFee/PlatformFee.sol";
+import {PlatformFee, IPlatformFee} from "src/extensions/platformFee/PlatformFee.sol";
 
 contract DummyFacet is PlatformFee {
     string public message = "";
