@@ -39,13 +39,20 @@ contract Factory__create is Setup, IFactory {
     }
 
     function test_emits_created_event() public {
-        // id is determinastic based of creator and name
+        /**
+         * @dev id is determinastic and derived from factory address and name
+         */
         address id = 0x2bC632E15Eb74471E9C40D3915c7Dfae878D681c;
 
-        // TODO: investigate why checking the data fails
-        // vm.expectEmit(true, true, ture, true);
-        vm.expectEmit(true, true, true, false);
-        emit Created(id, creator, "app_name");
+        /**
+         * @dev the name param in the Created event is converted from bytes32 to string
+         *      in the create function. To ensure vm.expectEmit matches the event data
+         *      we have to also zero pad the string to 32 bytes.
+         */
+        string memory zeroPaddedAppName = string(abi.encodePacked(bytes32("app_name")));
+
+        vm.expectEmit(true, true, true, true);
+        emit Created(id, creator, zeroPaddedAppName);
 
         vm.prank(creator);
         factory.create("app_name");
