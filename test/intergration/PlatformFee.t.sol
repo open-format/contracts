@@ -22,17 +22,11 @@ contract DummyFacet is PlatformFee {
     string public message = "";
 
     function purchase(uint256 _price) external payable {
-        (address recipient, uint256 amount) = _platformFeeInfo(_price);
-        if (amount > 0) {
-            _payPlatformFee(recipient, amount);
-        }
+        _payPlatfromFee(_price);
     }
 
     function write() external payable {
-        (address recipient, uint256 amount) = _platformFeeInfo(0);
-        if (amount > 0) {
-            _payPlatformFee(recipient, amount);
-        }
+        _payPlatfromFee(0);
     }
 
     function read() external view returns (string memory) {
@@ -135,8 +129,20 @@ contract PlatformFee__intergration is Setup, IPlatformFee {
         DummyFacet(address(app)).write{value: 0.1 ether}();
     }
 
+    function test_reverts_when_value_is_less_than_amount() public {
+        vm.expectRevert(Error_insufficientValue.selector);
+        DummyFacet(address(app)).write{value: 0.001 ether}();
+    }
+
     function test_reverts_when_no_value_is_sent() public {
-        vm.expectRevert("PlatformFee: insufficient balance");
+        vm.expectRevert(Error_insufficientValue.selector);
+        DummyFacet(address(app)).write();
+    }
+
+    function test_reverts_when_value_is_less_than_amount_and_contract_has_sufficiant_balance() public {
+        vm.deal(address(app), 1 ether);
+
+        vm.expectRevert(Error_insufficientValue.selector);
         DummyFacet(address(app)).write();
     }
 }
