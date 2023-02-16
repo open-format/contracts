@@ -25,7 +25,7 @@ jobs:
           version: nightly
 
       - name: Run Slither
-        uses: crytic/slither-action@v0.2.0
+        uses: crytic/slither-action@dev-git-safe-workspace
         id: slither
         with:
           sarif: results.sarif
