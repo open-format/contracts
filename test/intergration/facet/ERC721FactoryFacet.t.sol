@@ -52,8 +52,8 @@ contract Setup is Test, Helpers {
         // deploy contracts
         globals = new Globals();
         registry = new RegistryMock();
-        appTemplate = new  Proxy(true);
-        appFactory = new Factory(address(template), address(registry), address(globals));
+        appImplementation = new  Proxy(true);
+        appFactory = new Factory(address(appImplementation), address(registry), address(globals));
 
         erc721Implementation = new ERC721Base();
         erc721FactoryFacet = new ERC721FactoryFacet();
@@ -63,18 +63,35 @@ contract Setup is Test, Helpers {
 
         // setup globals
         globals.setPlatformFee(0, 0, socialConscious);
-        globals.setERC721Implementation(erc721Implementation);
+        globals.setERC721Implementation(address(erc721Implementation));
 
         // add facet to registry
         bytes4[] memory selectors = new bytes4[](2);
         selectors[0] = erc721FactoryFacet.createERC721.selector;
         selectors[1] = erc721FactoryFacet.getERC721FactoryImplementation.selector;
         registry.diamondCut(
-            prepareSingleFacetCut(address(facet), IDiamondWritableInternal.FacetCutAction.ADD, selectors),
+            prepareSingleFacetCut(address(erc721FactoryFacet), IDiamondWritableInternal.FacetCutAction.ADD, selectors),
             address(0),
             ""
         );
     }
 }
 
-contract ERC721FactoryFacet__intergration {}
+contract ERC721FactoryFacet__integration is Setup {
+    function test_can_create_erc721() public {
+        address erc721Address = ERC721FactoryFacet(address(app)).createERC721("name", "symbol", creator, 1000);
+        assertEq(ERC721Base(erc721Address).name(), "name");
+    }
+
+    function test_can_create_erc721_and_pay_plaform_fee() public {
+        // set platform base fee to 1 ether
+        globals.setPlatformFee(1 ether, 0, socialConscious);
+
+        // create nft and pay platform fee
+        address erc721Address =
+            ERC721FactoryFacet(address(app)).createERC721{value: 1 ether}("name", "symbol", creator, 1000);
+        assertEq(ERC721Base(erc721Address).name(), "name");
+        // check platform fee has been recieved
+        assertEq(socialConscious.balance, 1 ether);
+    }
+}
