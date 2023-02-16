@@ -19,6 +19,7 @@ import {ERC721FactoryInternal} from "./ERC721FactoryInternal.sol";
 abstract contract ERC721Factory is IERC721Factory, ERC721FactoryInternal, MinimalProxyFactory {
     function createERC721(string memory _name, string memory _symbol, address _royaltyRecipient, uint16 _royaltyBps)
         external
+        payable
         virtual
         returns (address id)
     {
