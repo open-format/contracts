@@ -27,7 +27,7 @@ contract Globals is Ownable {
     struct PlatformFee {
         uint256 base;
         uint16 percentageBPS;
-        address reciever;
+        address recpient;
     }
 
     PlatformFee platformFee;
@@ -44,12 +44,20 @@ contract Globals is Ownable {
         ERC20Implementation = _implementation;
     }
 
-    function setPlatformFee(uint256 _base, uint16 _percentage, address reciever) public onlyOwner {
-        platformFee = PlatformFee(_base, _percentage, reciever);
+    function setPlatformFee(uint256 _base, uint16 _percentageBPS, address recpient) public onlyOwner {
+        platformFee = PlatformFee(_base, _percentageBPS, recpient);
     }
 
-    function platformFeeInfo(uint256 _price) external view returns (address reciever, uint256 fee) {
-        reciever = platformFee.reciever;
+    function setPlatformBaseFee(uint256 _base) public onlyOwner {
+        platformFee.base = _base;
+    }
+
+    function setPlatformPercentageFee(uint16 _percentageBPS) public onlyOwner {
+        platformFee.percentageBPS = _percentageBPS;
+    }
+
+    function platformFeeInfo(uint256 _price) external view returns (address recpient, uint256 fee) {
+        recpient = platformFee.recpient;
         fee = (_price > 0) ? platformFee.base + (_price * platformFee.percentageBPS) / 10_000 : platformFee.base;
     }
 }
