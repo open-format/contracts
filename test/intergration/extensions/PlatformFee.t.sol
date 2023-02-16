@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.16;
 
-// The following tests that proxy and registry contracts work together as intended
+// The following tests that the platform fee extension works as intentended within the ecosystem
 
 import "forge-std/Test.sol";
 
