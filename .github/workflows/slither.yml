@@ -16,9 +16,6 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v3
 
-      - name: Temp Add safe directory
-        run: git config --global --add safe.directory /github/workspace
-
       - name: Install Foundry
         uses: onbjerg/foundry-toolchain@v1
         with:
