@@ -31,11 +31,11 @@ abstract contract PlatformFeeInternal is IPlatformFee, Global {
 
     /**
      * @dev     pays platform fee in ether, to be used in payable functions
-     * @param   _price used to calculate platfrom fee, can be set to 0 for none priced functions
+     * @param   _price used to calculate platform fee, can be set to 0 for none priced functions
      * @return  remaining is the remaining ether balance after the platform fee has been paid
      */
 
-    function _payPlatfromFee(uint256 _price) internal virtual returns (uint256 remaining) {
+    function _payPlatformFee(uint256 _price) internal virtual returns (uint256 remaining) {
         (address recipient, uint256 amount) = _platformFeeInfo(_price);
 
         // ensure the ether being sent was included in the transaction

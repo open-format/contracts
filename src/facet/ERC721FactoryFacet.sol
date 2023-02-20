@@ -20,10 +20,10 @@ contract ERC721FactoryFacet is ERC721Factory, PlatformFee, Ownable {
 
     /**
      * @dev override before create to add platform fee
-     *      requires msg.value to be equal or more than base platfrom fee
+     *      requires msg.value to be equal or more than base platform fee
      *      when calling createERC721
      */
     function _beforeCreate() internal override {
-        _payPlatfromFee(0);
+        _payPlatformFee(0);
     }
 }

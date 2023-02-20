@@ -22,11 +22,11 @@ contract DummyFacet is PlatformFee {
     string public message = "";
 
     function purchase(uint256 _price) external payable {
-        _payPlatfromFee(_price);
+        _payPlatformFee(_price);
     }
 
     function write() external payable {
-        _payPlatfromFee(0);
+        _payPlatformFee(0);
     }
 
     function read() external view returns (string memory) {
