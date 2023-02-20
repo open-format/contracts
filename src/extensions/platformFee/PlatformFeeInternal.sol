@@ -14,7 +14,7 @@ abstract contract PlatformFeeInternal is IPlatformFee, Global {
     }
 
     /**
-     * @dev sends ether to recpient
+     * @dev sends ether to recipient
      *      inspired by openzepplin Address.sendValue
      *      https://github.com/OpenZeppelin/openzeppelin-contracts/blob/master/contracts/utils/Address.sol
      */
