@@ -11,7 +11,7 @@ import {ERC20Factory} from "../extensions/ERC20Factory/ERC20Factory.sol";
 
 contract ERC20FactoryFacet is ERC20Factory, Ownable {
     /*
-    * @dev sets permmisions to create new nft to proxy app owner
+    * @dev sets permissions to create new nft to proxy app owner
     */
     function _canCreate() internal view override returns (bool) {
         return msg.sender == _owner();
