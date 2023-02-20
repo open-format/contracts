@@ -24,6 +24,8 @@ contract Globals is Ownable {
     address public ERC721Implementation;
     address public ERC20Implementation;
 
+    error ERROR_percentageFeeCannotExceed100();
+
     struct PlatformFee {
         uint256 base;
         uint16 percentageBPS;
@@ -45,6 +47,9 @@ contract Globals is Ownable {
     }
 
     function setPlatformFee(uint256 _base, uint16 _percentageBPS, address recipient) public onlyOwner {
+        if (_percentageBPS > 10_000) {
+            revert ERROR_percentageFeeCannotExceed100();
+        }
         platformFee = PlatformFee(_base, _percentageBPS, recipient);
     }
 
@@ -53,6 +58,9 @@ contract Globals is Ownable {
     }
 
     function setPlatformPercentageFee(uint16 _percentageBPS) public onlyOwner {
+        if (_percentageBPS > 10_000) {
+            revert ERROR_percentageFeeCannotExceed100();
+        }
         platformFee.percentageBPS = _percentageBPS;
     }
 
