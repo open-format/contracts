@@ -2,6 +2,7 @@
 pragma solidity ^0.8.16;
 
 import {MinimalProxyFactory} from "@solidstate/contracts/factory/MinimalProxyFactory.sol";
+import {ReentrancyGuard} from "@solidstate/contracts/utils/ReentrancyGuard.sol";
 import {ERC721Base} from "../../tokens/ERC721/ERC721Base.sol";
 
 import {IERC721Factory} from "./IERC721Factory.sol";
@@ -16,10 +17,12 @@ import {ERC721FactoryInternal} from "./ERC721FactoryInternal.sol";
  * @dev     inheriting contracts must override the internal _canCreate function
  */
 
-abstract contract ERC721Factory is IERC721Factory, ERC721FactoryInternal, MinimalProxyFactory {
+abstract contract ERC721Factory is IERC721Factory, ERC721FactoryInternal, MinimalProxyFactory, ReentrancyGuard {
     function createERC721(string memory _name, string memory _symbol, address _royaltyRecipient, uint16 _royaltyBps)
         external
+        payable
         virtual
+        nonReentrant
         returns (address id)
     {
         if (!_canCreate()) {
@@ -41,6 +44,9 @@ abstract contract ERC721Factory is IERC721Factory, ERC721FactoryInternal, Minima
 
         // saves deployment for checking later
         _setId(salt, id);
+
+        // hook to add functionalty before create
+        _beforeCreate();
 
         // deploys new proxy using CREATE2
         id = _deployMinimalProxy(implementation, salt);
