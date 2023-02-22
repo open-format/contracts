@@ -13,32 +13,23 @@ abstract contract ApplicationFeeInternal is IApplicationFee {
         ApplicationFeeStorage.Layout storage l = ApplicationFeeStorage.layout();
 
         recipient = l.recipient;
-        amount = (_price > 0) ? l.base + (_price * l.percentageBPS) / 10_000 : l.base;
+        amount = _price == 0 ? 0 : (_price * l.percentageBPS) / 10_000;
     }
 
-    function _setApplicationFee(uint256 _base, uint16 _percentBPS, address _recipient) internal virtual {
+    function _setApplicationFee(uint16 _percentBPS, address _recipient) internal virtual {
         ApplicationFeeStorage.Layout storage l = ApplicationFeeStorage.layout();
 
-        l.base = _base;
         l.percentageBPS = _percentBPS;
         l.recipient = _recipient;
     }
 
-    function _setFeeMethod(ApplicationFeeStorage.FeeMethod _method) internal virtual {
-        ApplicationFeeStorage.layout().feeMethod = _method;
-    }
-
-    function _setSpecificToken(address _token) internal virtual {
-        ApplicationFeeStorage.layout().specificToken = _token;
-    }
-
-    function _setAcceptedTokens(address[] memory _tokens, bool[] memory _approval) internal virtual {
+    function _setAcceptedTokens(address[] memory _tokens, bool[] memory _approvals) internal virtual {
         ApplicationFeeStorage.Layout storage l = ApplicationFeeStorage.layout();
         // TODO: change to error if this implementation is good enough
-        require(_tokens.length == _approval.length, "tokens and approvals must be the same length");
+        require(_tokens.length == _approvals.length, "tokens and approvals must be the same length");
 
         for (uint256 i = 0; i < _tokens.length; i++) {
-            l.acceptedTokens[_tokens[i]] = _approval[i];
+            l.acceptedTokens[_tokens[i]] = _approvals[i];
         }
     }
 
@@ -80,57 +71,25 @@ abstract contract ApplicationFeeInternal is IApplicationFee {
     function _payApplicationFee(address _currency, uint256 _price) internal virtual returns (uint256 remaining) {
         ApplicationFeeStorage.Layout storage l = ApplicationFeeStorage.layout();
 
-        // check fee accepted
-        if (l.feeMethod == ApplicationFeeStorage.FeeMethod.NONE) {
+        // check currency accepted
+        if (!l.acceptedTokens[_currency]) {
+            revert("currency not accepted");
+        }
+
+        (address recipient, uint256 amount) = _applicationFeeInfo(_price);
+
+        if (amount == 0) {
             return _price;
         }
 
-        // handle payment for specific token
-        if (l.feeMethod == ApplicationFeeStorage.FeeMethod.SPECIFIC) {
-            // check currency accepted
-            if (_currency != l.specificToken) {
-                revert("currency not accepted");
-            }
+        if (_currency == address(0)) {
+            _handleNativePayment(recipient, amount);
+            return _price - amount;
+        } else {
+            // TODO: handleERC20Payment
 
-            (address recipient, uint256 amount) = _applicationFeeInfo(_price);
-
-            if (amount == 0) {
-                return _price;
-            }
-
-            if (_currency == address(0)) {
-                _handleNativePayment(recipient, amount);
-                return _price - amount;
-            } else {
-                // TODO: handleERC20Payment
-
-                // just return price for now
-                return _price;
-            }
-        }
-
-        // handle payment for relative token
-        if (l.feeMethod == ApplicationFeeStorage.FeeMethod.RELATIVE) {
-            // check currency accepted
-            if (!l.acceptedTokens[_currency]) {
-                revert("currency not accepted");
-            }
-
-            (address recipient, uint256 amount) = _applicationFeeInfo(_price);
-
-            if (amount == 0) {
-                return _price;
-            }
-
-            if (_currency == address(0)) {
-                _handleNativePayment(recipient, amount);
-                return _price - amount;
-            } else {
-                // TODO: handleERC20Payment
-
-                // just return price for now
-                return _price;
-            }
+            // just return price for now
+            return _price;
         }
     }
 }
