@@ -6,6 +6,7 @@ interface IERC721Factory {
 
     function createERC721(string memory _name, string memory _symbol, address _royaltyRecipient, uint16 _royaltyBps)
         external
+        payable
         returns (address id);
 
     function getERC721FactoryImplementation() external view returns (address);
