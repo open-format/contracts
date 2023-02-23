@@ -12,12 +12,12 @@ import {Ownable} from "@solidstate/contracts/access/ownable/Ownable.sol";
  *
  *             contract Example is Global {
  *                 exampleFunction() {
- *                     address ERC721Iplementation = _getGlobals.ERC721Implementation();
+ *                     address ERC721Implementation = _getGlobals.ERC721Implementation();
  *                 }
  *
  *             }
  *         ```
- * @dev Note: if this is deployed behind an upgradable proxy the global variabls can be added to
+ * @dev Note: if this is deployed behind an upgradable proxy the global variables can be added to
  */
 
 contract Globals is Ownable {
