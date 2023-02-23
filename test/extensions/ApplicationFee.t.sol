@@ -4,6 +4,9 @@ pragma solidity ^0.8.16;
 import "forge-std/Test.sol";
 import {ApplicationFeeMock, IApplicationFee} from "src/extensions/applicationFee/ApplicationFeeMock.sol";
 
+import {ERC20BaseMock} from "src/tokens/ERC20/ERC20BaseMock.sol";
+import {IERC20} from "@solidstate/contracts/interfaces/IERC20.sol";
+
 contract Setup is Test {
     address recipient;
     uint16 tenPercentBPS;
@@ -72,17 +75,32 @@ contract ApplicationFee__internal_setAcceptedTokens is Setup {
 }
 
 contract ApplicationFee__internal_payApplicationFee is Setup, IApplicationFee {
+    ERC20BaseMock erc20;
+
     function _afterSetup() internal override {
         applicationFee.setApplicationFee(tenPercentBPS, recipient);
-        // accept native token
-        address[] memory tokens = new address[](1);
-        tokens[0] = address(0); // native token
-        //TODO: add dummy ERC20
 
-        bool[] memory approvals = new bool[](1);
+        // create Dummy ERC20 token
+        erc20 = new ERC20BaseMock("Dummy", "D", 18, 1000);
+
+        // accept native token
+        address[] memory tokens = new address[](2);
+        tokens[0] = address(0); // native token
+        tokens[1] = address(erc20);
+
+        bool[] memory approvals = new bool[](2);
         approvals[0] = true;
+        approvals[1] = true;
 
         applicationFee.setAcceptedTokens(tokens, approvals);
+    }
+
+    function test_pays_token() public {
+        erc20.approve(address(applicationFee), 100);
+
+        applicationFee.payApplicationFee(address(erc20), 100);
+
+        assertEq(erc20.balanceOf(recipient), 10);
     }
 
     function test_pays_native_token() public {
@@ -92,6 +110,13 @@ contract ApplicationFee__internal_payApplicationFee is Setup, IApplicationFee {
     }
 
     function test_returns_remaining_amount() public {
+        erc20.approve(address(applicationFee), 100);
+        uint256 remaining = applicationFee.payApplicationFee(address(erc20), 100);
+
+        assertEq(remaining, 90);
+    }
+
+    function test_returns_remaining_amount_for_native_token() public {
         uint256 remaining = applicationFee.payApplicationFee{value: 100 ether}(address(0), 100 ether);
 
         assertEq(remaining, 90 ether);
@@ -109,18 +134,21 @@ contract ApplicationFee__internal_payApplicationFee is Setup, IApplicationFee {
         applicationFee.payApplicationFee(address(0xabc), 100 ether);
     }
 
-    function test_emits_paidApplicationFee_event_paying_with_native_token() public {
+    function test_emits_paidApplicationFee_event() public {
+        erc20.approve(address(applicationFee), 100);
+        vm.expectEmit(true, true, true, true);
+        emit PaidApplicationFee(address(erc20), 10);
+        applicationFee.payApplicationFee(address(erc20), 100);
+    }
+
+    function test_emits_paidApplicationFee_event_with_native_token() public {
         vm.expectEmit(true, true, true, true);
         emit PaidApplicationFee(address(0), 10 ether);
         applicationFee.payApplicationFee{value: 100 ether}(address(0), 100 ether);
-
-        assertEq(recipient.balance, 10 ether);
     }
 
     function test_reverts_if_msg_value_less_than_native_token_fee() public {
         vm.expectRevert(IApplicationFee.Error_insufficientValue.selector);
         uint256 remaining = applicationFee.payApplicationFee{value: 9 ether}(address(0), 100 ether);
     }
-
-    // TODO: test_pays_token
 }
