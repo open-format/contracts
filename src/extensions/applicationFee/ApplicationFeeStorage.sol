@@ -5,7 +5,7 @@ library ApplicationFeeStorage {
     struct Layout {
         uint16 percentageBPS;
         address recipient;
-        mapping(address => bool) acceptedTokens;
+        mapping(address => bool) acceptedCurrencies;
     }
 
     bytes32 internal constant STORAGE_SLOT = keccak256("openformat.contracts.storage.ApplicationFee");

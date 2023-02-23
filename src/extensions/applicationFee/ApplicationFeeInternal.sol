@@ -25,13 +25,13 @@ abstract contract ApplicationFeeInternal is IApplicationFee {
         l.recipient = _recipient;
     }
 
-    function _setAcceptedTokens(address[] memory _tokens, bool[] memory _approvals) internal virtual {
+    function _setAcceptedCurrencies(address[] memory _currencies, bool[] memory _approvals) internal virtual {
         ApplicationFeeStorage.Layout storage l = ApplicationFeeStorage.layout();
         // TODO: change to error if this implementation is good enough
-        require(_tokens.length == _approvals.length, "tokens and approvals must be the same length");
+        require(_currencies.length == _approvals.length, "tokens and approvals must be the same length");
 
-        for (uint256 i = 0; i < _tokens.length; i++) {
-            l.acceptedTokens[_tokens[i]] = _approvals[i];
+        for (uint256 i = 0; i < _currencies.length; i++) {
+            l.acceptedCurrencies[_currencies[i]] = _approvals[i];
         }
     }
 
@@ -93,7 +93,7 @@ abstract contract ApplicationFeeInternal is IApplicationFee {
         ApplicationFeeStorage.Layout storage l = ApplicationFeeStorage.layout();
 
         // check currency accepted
-        if (!l.acceptedTokens[_currency]) {
+        if (!l.acceptedCurrencies[_currency]) {
             revert("currency not accepted");
         }
 

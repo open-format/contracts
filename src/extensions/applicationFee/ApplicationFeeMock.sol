@@ -11,8 +11,8 @@ contract ApplicationFeeMock is ApplicationFee {
         _setApplicationFee(_percentBPS, _recipient);
     }
 
-    function setAcceptedTokens(address[] memory _tokens, bool[] memory _approvals) external {
-        _setAcceptedTokens(_tokens, _approvals);
+    function setAcceptedCurrencies(address[] memory _currencies, bool[] memory _approvals) external {
+        _setAcceptedCurrencies(_currencies, _approvals);
     }
 
     function payApplicationFee(address _currency, uint256 _price) external payable returns (uint256 remaining) {
@@ -29,7 +29,7 @@ contract ApplicationFeeMock is ApplicationFee {
         return ApplicationFeeStorage.layout().recipient;
     }
 
-    function isTokenAccepted(address _token) external view returns (bool) {
-        return ApplicationFeeStorage.layout().acceptedTokens[_token];
+    function isCurrencyAccepted(address _currency) external view returns (bool) {
+        return ApplicationFeeStorage.layout().acceptedCurrencies[_currency];
     }
 }
