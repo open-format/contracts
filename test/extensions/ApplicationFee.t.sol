@@ -54,7 +54,7 @@ contract ApplicationFee__internal_setApplicationFee is Setup {
     }
 }
 
-contract ApplicationFee__internal_setAcceptedCurrencies is Setup, IApplicationFee {
+contract ApplicationFee__internal_setAcceptedCurrencies is Setup {
     function test_sets_accepted_currencies() public {
         address[] memory currencies = new address[](3);
         currencies[0] = address(0); // native token
@@ -86,8 +86,10 @@ contract ApplicationFee__internal_setAcceptedCurrencies is Setup, IApplicationFe
     }
 }
 
-contract ApplicationFee__internal_payApplicationFee is Setup, IApplicationFee {
+contract ApplicationFee__internal_payApplicationFee is Setup {
     ERC20BaseMock erc20;
+
+    event PaidApplicationFee(address currency, uint256 amount);
 
     function _afterSetup() internal override {
         applicationFee.setApplicationFee(tenPercentBPS, recipient);
@@ -170,6 +172,6 @@ contract ApplicationFee__internal_payApplicationFee is Setup, IApplicationFee {
 
     function test_reverts_if_msg_value_less_than_fee_with_native_token() public {
         vm.expectRevert(IApplicationFee.Error_insufficientValue.selector);
-        uint256 remaining = applicationFee.payApplicationFee{value: 9 ether}(address(0), 100 ether);
+        applicationFee.payApplicationFee{value: 9 ether}(address(0), 100 ether);
     }
 }
