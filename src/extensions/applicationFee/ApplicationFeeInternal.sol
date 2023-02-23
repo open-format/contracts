@@ -1,6 +1,8 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.16;
 
+import {IERC20, SafeERC20} from "@solidstate/contracts/utils/SafeERC20.sol";
+
 import {IApplicationFee} from "./IApplicationFee.sol";
 import {ApplicationFeeStorage} from "./ApplicationFeeStorage.sol";
 
@@ -34,7 +36,7 @@ abstract contract ApplicationFeeInternal is IApplicationFee {
     }
 
     /**
-     * @dev sends ether to recpient
+     * @dev sends ether to recipient
      *      inspired by openzepplin Address.sendValue
      *      https://github.com/OpenZeppelin/openzeppelin-contracts/blob/master/contracts/utils/Address.sol
      */
@@ -63,9 +65,28 @@ abstract contract ApplicationFeeInternal is IApplicationFee {
     }
 
     /**
-     * @dev              pays platform fee in ether, to be used in payable functions
-     * @param _price     used to calculate platfrom fee, can be set to 0 for none priced functions
-     * @return remaining is the remaining ether balance after the platform fee has been paid
+     * @dev derived from third web CurrencyTransferLib
+     *      https://github.com/thirdweb-dev/contracts/blob/51d459e3f00690db09bbb8f6b9f0fba3aa025b8d/contracts/lib/CurrencyTransferLib.sol#L64
+     */
+
+    function _handleTokenPayment(address _currency, address _from, address _to, uint256 _amount) internal virtual {
+        if (_from == _to) {
+            return;
+        }
+
+        if (_from == address(this)) {
+            SafeERC20.safeTransfer(IERC20(_currency), _to, _amount);
+        } else {
+            SafeERC20.safeTransferFrom(IERC20(_currency), _from, _to, _amount);
+        }
+
+        emit PaidApplicationFee(_currency, _amount);
+    }
+
+    /**
+     * @dev              pays application fee in ether or erc20 token, to be used in payable functions
+     * @param _price     used to calculate application fee, can be set to 0 for none priced functions
+     * @return remaining is the remaining balance after the application fee has been paid
      */
 
     function _payApplicationFee(address _currency, uint256 _price) internal virtual returns (uint256 remaining) {
@@ -86,10 +107,16 @@ abstract contract ApplicationFeeInternal is IApplicationFee {
             _handleNativePayment(recipient, amount);
             return _price - amount;
         } else {
-            // TODO: handleERC20Payment
-
-            // just return price for now
-            return _price;
+            _handleTokenPayment(_currency, _payer(), recipient, amount);
+            return _price - amount;
         }
+    }
+
+    /**
+     * @dev override to change which address makes the application fee payment
+     */
+
+    function _payer() internal virtual returns (address) {
+        return msg.sender;
     }
 }
