@@ -8,7 +8,7 @@ import {ApplicationFeeStorage} from "./ApplicationFeeStorage.sol";
 
 abstract contract ApplicationFeeInternal is IApplicationFee {
     /**
-     * @dev wrapper that calls platformFeeInfo from globals contract
+     * @dev gets applicationFeeInfo for a given price based on percentBPS
      *      inspired by eip-2981 NFT royalty standard
      */
     function _applicationFeeInfo(uint256 _price) internal view returns (address recipient, uint256 amount) {
@@ -27,8 +27,10 @@ abstract contract ApplicationFeeInternal is IApplicationFee {
 
     function _setAcceptedCurrencies(address[] memory _currencies, bool[] memory _approvals) internal virtual {
         ApplicationFeeStorage.Layout storage l = ApplicationFeeStorage.layout();
-        // TODO: change to error if this implementation is good enough
-        require(_currencies.length == _approvals.length, "tokens and approvals must be the same length");
+
+        if (_currencies.length != _approvals.length) {
+            revert Error_currencies_and_approvals_must_be_the_same_length();
+        }
 
         for (uint256 i = 0; i < _currencies.length; i++) {
             l.acceptedCurrencies[_currencies[i]] = _approvals[i];
@@ -94,7 +96,7 @@ abstract contract ApplicationFeeInternal is IApplicationFee {
 
         // check currency accepted
         if (!l.acceptedCurrencies[_currency]) {
-            revert("currency not accepted");
+            revert Error_currency_not_accepted();
         }
 
         (address recipient, uint256 amount) = _applicationFeeInfo(_price);

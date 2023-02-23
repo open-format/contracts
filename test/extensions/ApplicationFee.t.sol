@@ -54,7 +54,7 @@ contract ApplicationFee__internal_setApplicationFee is Setup {
     }
 }
 
-contract ApplicationFee__internal_setAcceptedCurrencies is Setup {
+contract ApplicationFee__internal_setAcceptedCurrencies is Setup, IApplicationFee {
     function test_sets_accepted_currencies() public {
         address[] memory currencies = new address[](3);
         currencies[0] = address(0); // native token
@@ -71,6 +71,18 @@ contract ApplicationFee__internal_setAcceptedCurrencies is Setup {
         assertTrue(applicationFee.isCurrencyAccepted(address(0)));
         assertTrue(applicationFee.isCurrencyAccepted(address(0xabc)));
         assertTrue(applicationFee.isCurrencyAccepted(address(0xdef)));
+    }
+
+    function test_reverts_when_currencies_and_approvals_are_different_length() public {
+        address[] memory currencies = new address[](1);
+        currencies[0] = address(0); // native token
+
+        bool[] memory approvals = new bool[](2);
+        approvals[0] = true;
+        approvals[1] = true;
+
+        vm.expectRevert(IApplicationFee.Error_currencies_and_approvals_must_be_the_same_length.selector);
+        applicationFee.setAcceptedCurrencies(currencies, approvals);
     }
 }
 
@@ -95,7 +107,7 @@ contract ApplicationFee__internal_payApplicationFee is Setup, IApplicationFee {
         applicationFee.setAcceptedCurrencies(currencies, approvals);
     }
 
-    function test_pays_token() public {
+    function test_pays_application_fee() public {
         erc20.approve(address(applicationFee), 100);
 
         applicationFee.payApplicationFee(address(erc20), 100);
@@ -103,7 +115,7 @@ contract ApplicationFee__internal_payApplicationFee is Setup, IApplicationFee {
         assertEq(erc20.balanceOf(recipient), 10);
     }
 
-    function test_pays_native_token() public {
+    function test_pays_application_fee_with_native_token() public {
         applicationFee.payApplicationFee{value: 100 ether}(address(0), 100 ether);
 
         assertEq(recipient.balance, 10 ether);
@@ -116,7 +128,7 @@ contract ApplicationFee__internal_payApplicationFee is Setup, IApplicationFee {
         assertEq(remaining, 90);
     }
 
-    function test_returns_remaining_amount_for_native_token() public {
+    function test_returns_remaining_amount_with_native_token() public {
         uint256 remaining = applicationFee.payApplicationFee{value: 100 ether}(address(0), 100 ether);
 
         assertEq(remaining, 90 ether);
@@ -124,14 +136,23 @@ contract ApplicationFee__internal_payApplicationFee is Setup, IApplicationFee {
 
     function test_returns_full_price_if_no_fee() public {
         applicationFee.setApplicationFee(0, recipient);
+
+        erc20.approve(address(applicationFee), 100);
+        uint256 remaining = applicationFee.payApplicationFee(address(erc20), 100);
+
+        assertEq(remaining, 100);
+    }
+
+    function test_returns_full_price_if_no_fee_with_native_token() public {
+        applicationFee.setApplicationFee(0, recipient);
         uint256 remaining = applicationFee.payApplicationFee{value: 100 ether}(address(0), 100 ether);
 
         assertEq(remaining, 100 ether);
     }
 
     function test_reverts_if_currency_not_accepted() public {
-        vm.expectRevert("currency not accepted");
-        applicationFee.payApplicationFee(address(0xabc), 100 ether);
+        vm.expectRevert(IApplicationFee.Error_currency_not_accepted.selector);
+        applicationFee.payApplicationFee(address(0xabc), 100);
     }
 
     function test_emits_paidApplicationFee_event() public {
