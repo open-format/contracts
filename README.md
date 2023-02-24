@@ -11,7 +11,7 @@ These instructions will give you a copy of the project up and running on your lo
 Install dependencies.
 
 ```
-forge install
+forge install & yarn install
 ```
 
 Setup your environment variables.
@@ -41,19 +41,21 @@ forge test
 ```
 
 ### Formatting (vscode only)
+
 To enable the built-in formatter that comes with Foundry to automatically format your code on save, you can add the following settings to your .vscode/settings.json:
 
 ```
 {
   "editor.formatOnSave": true,
   "[solidity]": {
-    "editor.defaultFormatter": "JuanBlanco.solidity" 
+    "editor.defaultFormatter": "JuanBlanco.solidity"
   },
   "solidity.formatter": "forge",
 }
 ```
 
 ### Static Analyzers
+
 [Slither](https://github.com/crytic/slither) is a Solidity static analysis framework written in Python 3. It runs a suite of vulnerability detectors, prints visual information about contract details, and provides an API to easily write custom analyses. Slither enables developers to find vulnerabilities, enhance their code comprehension, and quickly prototype custom analyses.
 
 ```
@@ -65,5 +67,3 @@ slither .
 ```
 myth analyze src/*
 ```
-
-
