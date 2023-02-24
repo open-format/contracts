@@ -4,7 +4,7 @@
 clean  :; forge clean
 
 # Clean dependencies
-install :; forge install
+install :; forge install & yarn install
 
 # Remap dependencies
 remappings :; forge remappings > remappings.txt
