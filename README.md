@@ -11,7 +11,7 @@ These instructions will give you a copy of the project up and running on your lo
 Install dependencies.
 
 ```
-forge install & yarn install
+make install
 ```
 
 Setup your environment variables.
