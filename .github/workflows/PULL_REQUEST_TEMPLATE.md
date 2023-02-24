@@ -28,7 +28,7 @@ Before creating a pull request:
 
 - [ ] Code complete
 - [ ] Branch name conforms to [these](https://dev.to/varbsan/a-simplified-convention-for-naming-branches-and-commits-in-git-il4) standards
-- [ ] Linting
+- [ ] Slither passing
 - [ ] Tests
 - [ ] Spelling mistakes and console.logs
 - [ ] Only necessary files changes committed <!-- Please check you haven't committed any unnecessary files. New folders and files may need to be added to .gitignore. -->
