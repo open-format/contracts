@@ -10,6 +10,8 @@ import {
     IDiamondWritableInternal
 } from "@solidstate/contracts/proxy/diamond/writable/IDiamondWritable.sol";
 
+import {CurrencyTransferLib} from "src/lib/CurrencyTransferLib.sol";
+
 import {Proxy} from "src/proxy/Proxy.sol";
 import {Upgradable} from "src/proxy/upgradable/Upgradable.sol";
 import {RegistryMock} from "src/registry/RegistryMock.sol";
@@ -29,8 +31,26 @@ contract DummyFacet is PlatformFee {
         _payPlatformFee(0);
     }
 
-    function read() external view returns (string memory) {
-        return message;
+    /**
+     * @dev dummy implementation of paying platform fee
+     */
+    function _payPlatformFee(uint256 _price) internal virtual returns (uint256 remaining) {
+        (address recipient, uint256 amount) = _platformFeeInfo(_price);
+
+        if (amount == 0) {
+            return _price;
+        }
+
+        // ensure the ether being sent was included in the transaction
+        if (msg.value < amount) {
+            revert Error_insufficientValue();
+        }
+
+        CurrencyTransferLib.transferCurrency(address(0), msg.sender, recipient, amount);
+
+        emit PaidPlatformFee(address(0), amount);
+
+        remaining = msg.value - amount;
     }
 }
 
@@ -85,7 +105,9 @@ contract Setup is Test, Helpers {
     }
 }
 
-contract PlatformFee__intergration is Setup, IPlatformFee {
+contract PlatformFee__intergration is Setup {
+    event PaidPlatformFee(address currency, uint256 amount);
+
     function test_platform_fee_is_paid() public {
         DummyFacet(address(app)).write{value: 0.1 ether}();
 
@@ -130,19 +152,19 @@ contract PlatformFee__intergration is Setup, IPlatformFee {
     }
 
     function test_reverts_when_value_is_less_than_amount() public {
-        vm.expectRevert(Error_insufficientValue.selector);
+        vm.expectRevert(IPlatformFee.Error_insufficientValue.selector);
         DummyFacet(address(app)).write{value: 0.001 ether}();
     }
 
     function test_reverts_when_no_value_is_sent() public {
-        vm.expectRevert(Error_insufficientValue.selector);
+        vm.expectRevert(IPlatformFee.Error_insufficientValue.selector);
         DummyFacet(address(app)).write();
     }
 
     function test_reverts_when_value_is_less_than_amount_and_contract_has_sufficiant_balance() public {
         vm.deal(address(app), 1 ether);
 
-        vm.expectRevert(Error_insufficientValue.selector);
+        vm.expectRevert(IPlatformFee.Error_insufficientValue.selector);
         DummyFacet(address(app)).write();
     }
 }
