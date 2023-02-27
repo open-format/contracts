@@ -18,6 +18,9 @@ abstract contract ApplicationFeeInternal is IApplicationFee {
         amount = _price == 0 ? 0 : (_price * l.percentageBPS) / 10_000;
     }
 
+    /**
+     * @dev sets applicationFeeInfo. reverts if percent exceeds 100% (10_000 BPS)
+     */
     function _setApplicationFee(uint16 _percentBPS, address _recipient) internal virtual {
         ApplicationFeeStorage.Layout storage l = ApplicationFeeStorage.layout();
 
