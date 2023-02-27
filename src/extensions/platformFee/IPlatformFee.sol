@@ -2,8 +2,6 @@
 pragma solidity ^0.8.16;
 
 interface IPlatformFee {
-    error Error_insufficientValue();
-
     event PaidPlatformFee(address currency, uint256 amount);
 
     /**

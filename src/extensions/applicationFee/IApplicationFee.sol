@@ -2,7 +2,6 @@
 pragma solidity ^0.8.16;
 
 interface IApplicationFee {
-    error Error_insufficientValue();
     error Error_currencies_and_approvals_must_be_the_same_length();
     error Error_currency_not_accepted();
 

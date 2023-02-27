@@ -43,7 +43,7 @@ contract DummyFacet is PlatformFee {
 
         // ensure the ether being sent was included in the transaction
         if (msg.value < amount) {
-            revert Error_insufficientValue();
+            revert CurrencyTransferLib.Error_insufficientValue();
         }
 
         CurrencyTransferLib.transferCurrency(address(0), msg.sender, recipient, amount);
@@ -152,19 +152,19 @@ contract PlatformFee__intergration is Setup {
     }
 
     function test_reverts_when_value_is_less_than_amount() public {
-        vm.expectRevert(IPlatformFee.Error_insufficientValue.selector);
+        vm.expectRevert(CurrencyTransferLib.Error_insufficientValue.selector);
         DummyFacet(address(app)).write{value: 0.001 ether}();
     }
 
     function test_reverts_when_no_value_is_sent() public {
-        vm.expectRevert(IPlatformFee.Error_insufficientValue.selector);
+        vm.expectRevert(CurrencyTransferLib.Error_insufficientValue.selector);
         DummyFacet(address(app)).write();
     }
 
     function test_reverts_when_value_is_less_than_amount_and_contract_has_sufficiant_balance() public {
         vm.deal(address(app), 1 ether);
 
-        vm.expectRevert(IPlatformFee.Error_insufficientValue.selector);
+        vm.expectRevert(CurrencyTransferLib.Error_insufficientValue.selector);
         DummyFacet(address(app)).write();
     }
 }

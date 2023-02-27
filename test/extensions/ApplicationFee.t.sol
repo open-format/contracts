@@ -3,6 +3,7 @@ pragma solidity ^0.8.16;
 
 import "forge-std/Test.sol";
 import {ApplicationFeeMock, IApplicationFee} from "src/extensions/applicationFee/ApplicationFeeMock.sol";
+import {CurrencyTransferLib} from "src/lib/CurrencyTransferLib.sol";
 
 import {ERC20BaseMock} from "src/tokens/ERC20/ERC20BaseMock.sol";
 import {IERC20} from "@solidstate/contracts/interfaces/IERC20.sol";
@@ -171,7 +172,7 @@ contract ApplicationFee__internal_payApplicationFee is Setup {
     }
 
     function test_reverts_if_msg_value_less_than_fee_with_native_token() public {
-        vm.expectRevert(IApplicationFee.Error_insufficientValue.selector);
+        vm.expectRevert(CurrencyTransferLib.Error_insufficientValue.selector);
         applicationFee.payApplicationFee{value: 9 ether}(address(0), 100 ether);
     }
 }

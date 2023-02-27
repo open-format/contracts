@@ -49,7 +49,7 @@ contract ApplicationFeeMock is ApplicationFee {
         (address to, uint256 amount) = _applicationFeeInfo(_price);
 
         if ((_currency == address(0)) && (amount > msg.value)) {
-            revert Error_insufficientValue();
+            revert CurrencyTransferLib.Error_insufficientValue();
         }
 
         CurrencyTransferLib.transferCurrency(_currency, msg.sender, to, amount);
