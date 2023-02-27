@@ -10,7 +10,7 @@ import {ERC20FactoryInternal} from "./ERC20FactoryInternal.sol";
 /**
  * @title   "ERC20Factory Extension"
  * @notice  (WIP) a factory contract for creating ECR20 contracts
- * @dev     deploys minimal proxys that point to ERC20Base implementation
+ * @dev     deploys minimal proxies that point to ERC20Base implementation
  *          compatible to be inherited by facet contract
  *          there is an internal dependency on the globals extension.
  * @dev     inheriting contracts must override the internal _canCreate function
@@ -31,7 +31,7 @@ abstract contract ERC20Factory is IERC20Factory, ERC20FactoryInternal, MinimalPr
             revert("no implementation found");
         }
 
-        // TODO: WIP need to see other examples of factorys and handerling salt
+        // TODO: WIP need to see other examples of factories and handling salt
         bytes32 salt = keccak256(abi.encode(_name));
         // check proxy has not deployed erc20 with the same name
         // deploying with the same salt would override that ERC20
@@ -41,6 +41,9 @@ abstract contract ERC20Factory is IERC20Factory, ERC20FactoryInternal, MinimalPr
 
         // saves deployment for checking later
         _setId(salt, id);
+
+        // hook to add functionality before create
+        _beforeCreate();
 
         // deploys new proxy using CREATE2
         id = _deployMinimalProxy(implementation, salt);

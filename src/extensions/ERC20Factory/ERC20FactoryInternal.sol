@@ -18,4 +18,9 @@ abstract contract ERC20FactoryInternal is Global {
     }
 
     function _canCreate() internal view virtual returns (bool);
+
+    /**
+     * @dev override to add functionality before create
+     */
+    function _beforeCreate() internal virtual {}
 }
