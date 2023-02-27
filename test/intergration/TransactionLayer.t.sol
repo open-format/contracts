@@ -41,7 +41,7 @@ contract DummyDonateFacet is PlatformFee, ApplicationFee, ReentrancyGuard {
         (address platformFeeRecipient, uint256 platformFee) = _platformFeeInfo(price);
         (address applicationFeeRecipient, uint256 applicationFee) = _applicationFeeInfo(price);
 
-        if (currency == address(0)) {
+        if (currency == CurrencyTransferLib.NATIVE_TOKEN) {
             uint256 fees = platformFee + applicationFee;
             if (fees > msg.value) {
                 revert CurrencyTransferLib.Error_insufficientValue();
@@ -49,9 +49,11 @@ contract DummyDonateFacet is PlatformFee, ApplicationFee, ReentrancyGuard {
 
             // pay platform fee
             CurrencyTransferLib.safeTransferNativeToken(platformFeeRecipient, platformFee);
+            emit PaidPlatformFee(currency, platformFee);
 
             // pay application fee
             CurrencyTransferLib.safeTransferNativeToken(applicationFeeRecipient, applicationFee);
+            emit PaidApplicationFee(currency, applicationFee);
 
             // send remaining
             CurrencyTransferLib.safeTransferNativeToken(to, msg.value - fees);
@@ -62,9 +64,11 @@ contract DummyDonateFacet is PlatformFee, ApplicationFee, ReentrancyGuard {
 
             // pay platform fee
             CurrencyTransferLib.safeTransferNativeToken(platformFeeRecipient, platformFee);
+            emit PaidPlatformFee(CurrencyTransferLib.NATIVE_TOKEN, platformFee);
 
             // pay application fee
             CurrencyTransferLib.safeTransferERC20(currency, msg.sender, applicationFeeRecipient, applicationFee);
+            emit PaidApplicationFee(currency, applicationFee);
 
             // Send remaining
             // shouldn't overflow because applicationFee cannot be more than 100%
@@ -162,6 +166,9 @@ contract Setup is Test, Helpers {
 }
 
 contract TransactionLayer__integration is Setup {
+    event PaidPlatformFee(address currency, uint256 amount);
+    event PaidApplicationFee(address currency, uint256 amount);
+
     function test_pays_correct_fees() public {
         erc20.approve(address(app), 100);
         DummyDonateFacet(address(app)).donate{value: 0.1 ether}(address(erc20), 100, other);
@@ -177,5 +184,27 @@ contract TransactionLayer__integration is Setup {
         assertEq(socialConscious.balance, 0.1 ether);
         assertEq(appOwner.balance, 0.1 ether);
         assertEq(other.balance, 0.9 ether);
+    }
+
+    function test_emits_paid_events() public {
+        erc20.approve(address(app), 100);
+
+        vm.expectEmit(true, true, true, true);
+        emit PaidPlatformFee(address(0), 0.1 ether);
+
+        vm.expectEmit(true, true, true, true);
+        emit PaidApplicationFee(address(erc20), 10);
+
+        DummyDonateFacet(address(app)).donate{value: 0.1 ether}(address(erc20), 100, other);
+    }
+
+    function test_emits_paid_events_with_naitive_token() public {
+        vm.expectEmit(true, true, true, true);
+        emit PaidPlatformFee(address(0), 0.1 ether);
+
+        vm.expectEmit(true, true, true, true);
+        emit PaidApplicationFee(address(0), 0.1 ether);
+
+        DummyDonateFacet(address(app)).donate{value: 1.1 ether}(address(0), 1 ether, other);
     }
 }
