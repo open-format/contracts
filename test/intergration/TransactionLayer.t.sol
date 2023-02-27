@@ -1,9 +1,11 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.16;
 
-// The following tests the integration of the "transaction layer" of an application
-// Using a DummyFacet contract inherits the platformFee and applicationFee extensions
-// and demonstrates a simple use case of donation via the app.
+// The following tests the integration of the "transaction layer" of an application.
+// The DummyDonateFacet contract inherits the platformFee and applicationFee extensions
+// and demonstrates a simple implementation of a donation via the app.
+// The settings facet is used to set application fee
+// The globals contract is used to set the platform fee
 
 import "forge-std/Test.sol";
 
@@ -20,9 +22,8 @@ import {Upgradable} from "src/proxy/upgradable/Upgradable.sol";
 import {RegistryMock} from "src/registry/RegistryMock.sol";
 import {Factory} from "src/factory/Factory.sol";
 import {Globals} from "src/globals/Globals.sol";
-import {ERC20BaseMock} from "src/tokens/ERC20/ERC20BaseMock.sol";
 import {SettingsFacet} from "src/facet/SettingsFacet.sol";
-
+import {ERC20BaseMock} from "src/tokens/ERC20/ERC20BaseMock.sol";
 import {CurrencyTransferLib} from "src/lib/CurrencyTransferLib.sol";
 
 import {PlatformFee, IPlatformFee, PlatformFeeInternal} from "src/extensions/platformFee/PlatformFee.sol";
@@ -30,7 +31,7 @@ import {
     ApplicationFee, IApplicationFee, ApplicationFeeInternal
 } from "src/extensions/applicationFee/ApplicationFee.sol";
 
-contract DummyFacet is PlatformFee, ApplicationFee, ReentrancyGuard {
+contract DummyDonateFacet is PlatformFee, ApplicationFee, ReentrancyGuard {
     function donate(address currency, uint256 price, address to)
         external
         payable
@@ -97,7 +98,7 @@ contract Setup is Test, Helpers {
     ERC20BaseMock erc20;
 
     SettingsFacet settingsFacet;
-    DummyFacet facet;
+    DummyDonateFacet facet;
 
     uint16 tenPercentBPS = 1_000;
 
@@ -111,6 +112,8 @@ contract Setup is Test, Helpers {
         template = new  Proxy(true);
         appFactory = new Factory(address(template), address(registry), address(globals));
         erc20 = new ERC20BaseMock("Dummy", "D", 18, 1000);
+
+        // Add Facets
         {
             settingsFacet = new SettingsFacet();
             bytes4[] memory selectors = new bytes4[](2);
@@ -123,9 +126,9 @@ contract Setup is Test, Helpers {
             );
         }
         {
-            facet = new DummyFacet();
+            facet = new DummyDonateFacet();
             bytes4[] memory selectors = new bytes4[](1);
-            selectors[0] = DummyFacet.donate.selector;
+            selectors[0] = DummyDonateFacet.donate.selector;
             registry.diamondCut(
                 prepareSingleFacetCut(address(facet), IDiamondWritableInternal.FacetCutAction.ADD, selectors),
                 address(0),
@@ -161,7 +164,7 @@ contract Setup is Test, Helpers {
 contract TransactionLayer__integration is Setup {
     function test_pays_correct_fees() public {
         erc20.approve(address(app), 100);
-        DummyFacet(address(app)).donate{value: 0.1 ether}(address(erc20), 100, other);
+        DummyDonateFacet(address(app)).donate{value: 0.1 ether}(address(erc20), 100, other);
 
         assertEq(socialConscious.balance, 0.1 ether);
         assertEq(erc20.balanceOf(appOwner), 10);
@@ -169,7 +172,7 @@ contract TransactionLayer__integration is Setup {
     }
 
     function test_pays_correct_fees_with_native_token() public {
-        DummyFacet(address(app)).donate{value: 1.1 ether}(address(0), 1 ether, other);
+        DummyDonateFacet(address(app)).donate{value: 1.1 ether}(address(0), 1 ether, other);
 
         assertEq(socialConscious.balance, 0.1 ether);
         assertEq(appOwner.balance, 0.1 ether);
