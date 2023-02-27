@@ -2,6 +2,7 @@
 pragma solidity ^0.8.16;
 
 import {Ownable} from "@solidstate/contracts/access/ownable/Ownable.sol";
+import {CurrencyTransferLib} from "src/lib/CurrencyTransferLib.sol";
 import {ERC721Factory} from "../extensions/ERC721Factory/ERC721Factory.sol";
 import {PlatformFee} from "../extensions/platformFee/PlatformFee.sol";
 
@@ -24,6 +25,19 @@ contract ERC721FactoryFacet is ERC721Factory, PlatformFee, Ownable {
      *      when calling createERC721
      */
     function _beforeCreate() internal override {
-        _payPlatformFee(0);
+        (address recipient, uint256 amount) = _platformFeeInfo(0);
+
+        if (amount == 0) {
+            return;
+        }
+
+        // ensure the ether being sent was included in the transaction
+        if (msg.value < amount) {
+            revert Error_insufficientValue();
+        }
+
+        CurrencyTransferLib.transferCurrency(address(0), msg.sender, recipient, amount);
+
+        emit PaidPlatformFee(address(0), amount);
     }
 }
