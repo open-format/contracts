@@ -1,5 +1,11 @@
 # @openformat/contracts
 
+## 0.0.3
+
+### Patch Changes
+
+- [#46](https://github.com/open-format/contracts/pull/46) [`af608cc`](https://github.com/open-format/contracts/commit/af608cccf0fd9b8a91fbf91cea894447f0d402c5) Thanks [@george-e-d-g-e](https://github.com/george-e-d-g-e)! - adds check for max percent when setting application fee
+
 ## 0.0.2
 
 ### Patch Changes
