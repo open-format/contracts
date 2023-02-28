@@ -53,6 +53,11 @@ contract ApplicationFee__internal_setApplicationFee is Setup {
         assertEq(applicationFee.percentBPS(), tenPercentBPS);
         assertEq(applicationFee.recipient(), recipient);
     }
+
+    function test_reverts_if_percent_exceeds_100() public {
+        vm.expectRevert(IApplicationFee.Error_exceeds_max_percentBPS.selector);
+        applicationFee.setApplicationFee(10_001, recipient);
+    }
 }
 
 contract ApplicationFee__internal_setAcceptedCurrencies is Setup {
