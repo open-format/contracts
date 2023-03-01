@@ -19,6 +19,7 @@ import {
     DefaultOperatorFilterer,
     DEFAULT_SUBSCRIPTION
 } from "@extensions/defaultOperatorFilterer/DefaultOperatorFilterer.sol";
+import {LazyMint} from "@extensions/lazyMint/LazyMint.sol";
 
 contract ERC721LazyMint is
     ERC721AUpgradeable,
@@ -29,7 +30,8 @@ contract ERC721LazyMint is
     ContractMetadata,
     DefaultOperatorFilterer,
     Royalty,
-    Multicall
+    Multicall,
+    LazyMint
 {
     event Minted(address to, string tokenURI);
     event BatchMinted(address to, uint256 quantity, string baseURI);
@@ -106,14 +108,16 @@ contract ERC721LazyMint is
      *  @dev             The logic in the `_canMint` function determines whether the caller is authorized to mint NFTs.
      *
      *  @param _to       The recipient of the NFT to mint.
-     *  @param _tokenURI The full metadata URI for the NFT minted.
      */
-    function mintTo(address _to, string memory _tokenURI) public virtual {
+
+    function mintTo(address _to) public virtual {
         require(_canMint(), "Not authorized to mint.");
-        _mintMetadata(_nextTokenId(), _tokenURI);
+        uint256 tokenId = _nextTokenId();
+        require(tokenId < _getNextTokenIdToLazyMint(), "Not enough lazy minted tokens");
+
         _safeMint(_to, 1);
 
-        emit Minted(_to, _tokenURI);
+        emit Minted(_to, string.concat(_getBaseURI(tokenId), UintUtils.toString(tokenId)));
     }
 
     /**
@@ -122,12 +126,13 @@ contract ERC721LazyMint is
      *
      *  @param _to       The recipient of the NFT to mint.
      *  @param _quantity The number of NFTs to mint.
-     *  @param _baseURI  The baseURI for the `n` number of NFTs minted. The metadata for each NFT is `baseURI/tokenId`
      */
 
-    function batchMintTo(address _to, uint256 _quantity, string memory _baseURI) public virtual {
+    function batchMintTo(address _to, uint256 _quantity) public virtual {
         require(_canMint(), "Not authorized to mint.");
-        _batchMintMetadata(_nextTokenId(), _quantity, _baseURI);
+        require((_nextTokenId() + _quantity) - 1 < _getNextTokenIdToLazyMint(), "Not enough lazy minted tokens");
+
+        string memory _baseURI = _getBaseURI(_nextTokenId());
         _safeMint(_to, _quantity);
 
         emit BatchMinted(_to, _quantity, _baseURI);
@@ -239,6 +244,10 @@ contract ERC721LazyMint is
 
     /// @dev Returns whether contract metadata can be set in the given execution context.
     function _canSetContractURI() internal view virtual override returns (bool) {
+        return _hasRole(ADMIN_ROLE, msg.sender);
+    }
+
+    function _canLazyMint() internal view virtual override returns (bool) {
         return _hasRole(ADMIN_ROLE, msg.sender);
     }
 }
