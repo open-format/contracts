@@ -89,10 +89,10 @@ contract Setup is Test, Helpers {
     function _afterSetUp() internal virtual {}
 }
 
-contract ERC721MinterBiz is Setup {
-    bytes32 MINTER_ROLE = bytes32(uint256(1));
+/* peace of mind test for access control */
 
-    /* peace of mind test for access control */
+contract ERC721LazyMint_grantRole is Setup {
+    bytes32 MINTER_ROLE = bytes32(uint256(1));
 
     function test_can_grant_minter_role() public {
         vm.prank(nftOwner);
@@ -105,5 +105,46 @@ contract ERC721MinterBiz is Setup {
         vm.expectRevert();
         vm.prank(other);
         erc721.grantRole(MINTER_ROLE, other);
+    }
+}
+
+contract ERC721LazyMint_lazyMint is Setup {
+    function test_can_lazy_mint() public {
+        vm.prank(nftOwner);
+        erc721.lazyMint(3, "ipfs://lalala/", "");
+
+        vm.prank(nftOwner);
+        erc721.mintTo(other);
+
+        vm.prank(nftOwner);
+        erc721.batchMintTo(other, 2);
+
+        assertEq(erc721.ownerOf(0), other);
+        assertEq(erc721.ownerOf(1), other);
+        assertEq(erc721.ownerOf(2), other);
+    }
+
+    function test_reverts_if_not_lazy_minted() public {
+        vm.prank(nftOwner);
+        erc721.lazyMint(1, "ipfs://lalala/", "");
+
+        vm.prank(nftOwner);
+        erc721.mintTo(other);
+
+        vm.expectRevert("Not enough lazy minted tokens");
+        vm.prank(nftOwner);
+        erc721.mintTo(other);
+    }
+
+    function test_reverts_if_not_lazy_minted_batch() public {
+        vm.prank(nftOwner);
+        erc721.lazyMint(2, "ipfs://lalala/", "");
+
+        vm.prank(nftOwner);
+        erc721.batchMintTo(other, 2);
+
+        vm.expectRevert("Not enough lazy minted tokens");
+        vm.prank(nftOwner);
+        erc721.batchMintTo(other, 1);
     }
 }
