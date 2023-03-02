@@ -17,6 +17,7 @@ import {Factory} from "src/factory/Factory.sol";
 import {Globals} from "src/globals/Globals.sol";
 
 import {ERC721LazyMint} from "src/tokens/ERC721/ERC721LazyMint.sol";
+import {ERC721DropFacet} from "src/facet/ERC721DropFacet/ERC721DropFacet.sol";
 
 import {SettingsFacet} from "src/facet/SettingsFacet.sol";
 
@@ -46,6 +47,7 @@ contract Setup is Test, Helpers {
     Globals globals;
 
     SettingsFacet settingsFacet;
+    ERC721DropFacet dropFacet;
 
     ERC721LazyMint erc721;
 
@@ -61,19 +63,35 @@ contract Setup is Test, Helpers {
         appImplementation = new  Proxy(true);
         appFactory = new Factory(address(appImplementation), address(registry), address(globals));
 
-        settingsFacet = new SettingsFacet();
+        {
+            settingsFacet = new SettingsFacet();
+            // add facet to registry
+            bytes4[] memory selectors = new bytes4[](3);
+            selectors[0] = settingsFacet.setApplicationFee.selector;
+            selectors[1] = settingsFacet.setAcceptedCurrencies.selector;
+            selectors[2] = settingsFacet.applicationFeeInfo.selector;
 
-        // add facet to registry
-        bytes4[] memory selectors = new bytes4[](3);
-        selectors[0] = settingsFacet.setApplicationFee.selector;
-        selectors[1] = settingsFacet.setAcceptedCurrencies.selector;
-        selectors[2] = settingsFacet.applicationFeeInfo.selector;
+            registry.diamondCut(
+                prepareSingleFacetCut(address(settingsFacet), IDiamondWritableInternal.FacetCutAction.ADD, selectors),
+                address(0),
+                ""
+            );
+        }
 
-        registry.diamondCut(
-            prepareSingleFacetCut(address(settingsFacet), IDiamondWritableInternal.FacetCutAction.ADD, selectors),
-            address(0),
-            ""
-        );
+        {
+            dropFacet = new ERC721DropFacet();
+
+            // add facet to registry
+            bytes4[] memory selectors = new bytes4[](3);
+            selectors[0] = dropFacet.setClaimCondition.selector;
+            selectors[1] = dropFacet.claim.selector;
+
+            registry.diamondCut(
+                prepareSingleFacetCut(address(dropFacet), IDiamondWritableInternal.FacetCutAction.ADD, selectors),
+                address(0),
+                ""
+            );
+        }
 
         // create app
         vm.prank(appOwner);
