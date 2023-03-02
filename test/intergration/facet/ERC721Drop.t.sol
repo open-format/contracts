@@ -238,3 +238,74 @@ contract ERC721DropFacet_setClaimCondition is Setup {
         ERC721DropFacet(address(app)).setClaimCondition(address(erc721), testClaimCondition, false);
     }
 }
+
+contract ERC721DropFacet_claim is Setup {
+    bytes32 MINTER_ROLE = bytes32(uint256(1));
+    ERC721DropFacetStorage.ClaimCondition testClaimCondition;
+
+    event TokensClaimed(address tokenContract, address claimer, address receiver, uint256 quantityClaimed);
+
+    function _afterSetUp() internal override {
+        testClaimCondition = ERC721DropFacetStorage.ClaimCondition({
+            startTimestamp: 0,
+            maxClaimableSupply: 10,
+            supplyClaimed: 0,
+            quantityLimitPerWallet: 2,
+            pricePerToken: 0,
+            currency: address(0)
+        });
+
+        vm.prank(nftOwner);
+        erc721.lazyMint(100, "ipfs://lalala/", "");
+
+        vm.prank(nftOwner);
+        erc721.grantRole(MINTER_ROLE, address(app));
+
+        vm.prank(nftOwner);
+        ERC721DropFacet(address(app)).setClaimCondition(address(erc721), testClaimCondition, false);
+    }
+
+    function test_can_claim_a_token() public {
+        vm.prank(other);
+        ERC721DropFacet(address(app)).claim(
+            address(erc721), other, 1, testClaimCondition.currency, testClaimCondition.pricePerToken
+        );
+
+        assertEq(erc721.ownerOf(0), other);
+    }
+
+    function test_can_batch_claim_a_token() public {
+        vm.prank(other);
+        ERC721DropFacet(address(app)).claim(
+            address(erc721), other, 2, testClaimCondition.currency, testClaimCondition.pricePerToken
+        );
+
+        assertEq(erc721.ownerOf(0), other);
+        assertEq(erc721.ownerOf(1), other);
+    }
+
+    function test_reverts_when_quantity_per_wallet_limit_exceeded() public {
+        vm.prank(other);
+        ERC721DropFacet(address(app)).claim(
+            address(erc721), other, 2, testClaimCondition.currency, testClaimCondition.pricePerToken
+        );
+
+        // TODO: replace expectRevert() with vm.expectRevert("!Qty") currently causing compiler error.
+        vm.expectRevert();
+        vm.prank(other);
+        ERC721DropFacet(address(app)).claim(
+            address(erc721), other, 1, testClaimCondition.currency, testClaimCondition.pricePerToken
+        );
+    }
+
+    function test_reverts_when_app_not_approved_minter() public {
+        vm.prank(nftOwner);
+        erc721.revokeRole(MINTER_ROLE, address(app));
+
+        vm.expectRevert("Not authorized to mint.");
+        vm.prank(other);
+        ERC721DropFacet(address(app)).claim(
+            address(erc721), other, 1, testClaimCondition.currency, testClaimCondition.pricePerToken
+        );
+    }
+}
