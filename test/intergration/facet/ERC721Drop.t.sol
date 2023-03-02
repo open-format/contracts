@@ -17,7 +17,7 @@ import {Factory} from "src/factory/Factory.sol";
 import {Globals} from "src/globals/Globals.sol";
 
 import {ERC721LazyMint} from "src/tokens/ERC721/ERC721LazyMint.sol";
-import {ERC721DropFacet} from "src/facet/ERC721DropFacet/ERC721DropFacet.sol";
+import {ERC721DropFacet, ERC721DropFacetStorage} from "src/facet/ERC721DropFacet/ERC721DropFacet.sol";
 
 import {SettingsFacet} from "src/facet/SettingsFacet.sol";
 
@@ -84,7 +84,8 @@ contract Setup is Test, Helpers {
             // add facet to registry
             bytes4[] memory selectors = new bytes4[](3);
             selectors[0] = dropFacet.setClaimCondition.selector;
-            selectors[1] = dropFacet.claim.selector;
+            selectors[1] = dropFacet.getClaimCondition.selector;
+            selectors[2] = dropFacet.claim.selector;
 
             registry.diamondCut(
                 prepareSingleFacetCut(address(dropFacet), IDiamondWritableInternal.FacetCutAction.ADD, selectors),
@@ -164,5 +165,76 @@ contract ERC721LazyMint_lazyMint is Setup {
         vm.expectRevert("Not enough lazy minted tokens");
         vm.prank(nftOwner);
         erc721.batchMintTo(other, 1);
+    }
+}
+
+contract ERC721DropFacet_setClaimCondition is Setup {
+    ERC721DropFacetStorage.ClaimCondition testClaimCondition;
+
+    event ClaimConditionUpdated(ERC721DropFacetStorage.ClaimCondition condition, bool resetEligibility);
+
+    function _afterSetUp() internal override {
+        testClaimCondition = ERC721DropFacetStorage.ClaimCondition({
+            startTimestamp: 0,
+            maxClaimableSupply: 10,
+            supplyClaimed: 0,
+            quantityLimitPerWallet: 1,
+            pricePerToken: 0,
+            currency: address(0)
+        });
+    }
+
+    function assertEqClaimCondition(
+        ERC721DropFacetStorage.ClaimCondition memory _A,
+        ERC721DropFacetStorage.ClaimCondition memory _B
+    ) public {
+        assertEq(_A.startTimestamp, _B.startTimestamp);
+        assertEq(_A.supplyClaimed, _B.supplyClaimed);
+        assertEq(_A.maxClaimableSupply, _B.maxClaimableSupply);
+        assertEq(_A.quantityLimitPerWallet, _B.quantityLimitPerWallet);
+        assertEq(_A.pricePerToken, _B.pricePerToken);
+        assertEq(_A.currency, _B.currency);
+    }
+
+    function test_can_set_claim_condition() public {
+        vm.prank(nftOwner);
+        ERC721DropFacet(address(app)).setClaimCondition(address(erc721), testClaimCondition, false);
+
+        ERC721DropFacetStorage.ClaimCondition memory claimCondition =
+            ERC721DropFacet(address(app)).getClaimCondition(address(erc721));
+
+        assertEqClaimCondition(claimCondition, testClaimCondition);
+    }
+
+    function test_only_token_contract_owner_can_set_claim_condition() public {
+        vm.expectRevert("must be contract owner");
+        vm.prank(other);
+        ERC721DropFacet(address(app)).setClaimCondition(address(erc721), testClaimCondition, false);
+    }
+
+    function test_update_claim_condition() public {
+        // set claim condition
+        vm.prank(nftOwner);
+        ERC721DropFacet(address(app)).setClaimCondition(address(erc721), testClaimCondition, false);
+
+        // create a new claim condition with updated startTimestamp and pricePerToken
+        ERC721DropFacetStorage.ClaimCondition memory newClaimCondition = testClaimCondition;
+        newClaimCondition.startTimestamp = 1000;
+        newClaimCondition.pricePerToken = 1 ether;
+
+        // update
+        vm.prank(nftOwner);
+        ERC721DropFacet(address(app)).setClaimCondition(address(erc721), newClaimCondition, true);
+
+        ERC721DropFacetStorage.ClaimCondition memory claimCondition =
+            ERC721DropFacet(address(app)).getClaimCondition(address(erc721));
+        assertEqClaimCondition(claimCondition, newClaimCondition);
+    }
+
+    function test_emits_ClaimConditionUpdated() public {
+        vm.expectEmit(true, true, true, true);
+        emit ClaimConditionUpdated(testClaimCondition, false);
+        vm.prank(nftOwner);
+        ERC721DropFacet(address(app)).setClaimCondition(address(erc721), testClaimCondition, false);
     }
 }
