@@ -12,7 +12,6 @@ import {UintUtils} from "@solidstate/contracts/utils/UintUtils.sol";
 import {ERC721AUpgradeable} from "@erc721a-upgradeable/contracts/ERC721AUpgradeable.sol";
 
 import {Royalty} from "@extensions/royalty/Royalty.sol";
-import {MintMetadata} from "@extensions/mintMetadata/MintMetadata.sol";
 import {BatchMintMetadata} from "@extensions/batchMintMetadata/BatchMintMetadata.sol";
 import {ContractMetadata, IContractMetadata} from "@extensions/contractMetadata/ContractMetadata.sol";
 import {
@@ -25,7 +24,6 @@ contract ERC721LazyMint is
     ERC721AUpgradeable,
     AccessControl,
     ERC165BaseInternal,
-    MintMetadata,
     BatchMintMetadata,
     ContractMetadata,
     DefaultOperatorFilterer,
@@ -88,15 +86,9 @@ contract ERC721LazyMint is
      *  @param _tokenId The tokenId of an NFT.
      */
     function tokenURI(uint256 _tokenId) public view virtual override returns (string memory) {
-        // tokenURI was stored using mintTo
-        string memory fullTokenURI = _getTokenURI(_tokenId);
-        if (bytes(fullTokenURI).length > 0) {
-            return fullTokenURI;
-        }
-
         // tokenURI was stored using batchMintTo
         string memory batchUri = _getBaseURI(_tokenId);
-        return string.concat(batchUri, UintUtils.toString(_tokenId));
+        return batchUri;
     }
 
     /*//////////////////////////////////////////////////////////////
@@ -117,7 +109,7 @@ contract ERC721LazyMint is
 
         _safeMint(_to, 1);
 
-        emit Minted(_to, string.concat(_getBaseURI(tokenId), UintUtils.toString(tokenId)));
+        emit Minted(_to, _getBaseURI(tokenId));
     }
 
     /**
