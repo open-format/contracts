@@ -26,6 +26,9 @@ interface CompatibleERC721 {
     function owner() external returns (address);
     function mintTo(address _to) external;
     function batchMintTo(address _to, uint256 _quantity) external;
+
+    // if `owner()` is not implemented checks for DEFAULT_ADMIN_ROLE from access control `hasRole(0x00, msg.sender);`
+    function hasRole(bytes32 role, address account) external returns (bool);
 }
 
 contract ERC721DropFacet is PlatformFee, ApplicationFee, Ownable {
@@ -168,7 +171,12 @@ contract ERC721DropFacet is PlatformFee, ApplicationFee, Ownable {
     }
 
     function _isTokenContractOwner(address _tokenContract) internal virtual returns (bool) {
-        return CompatibleERC721(_tokenContract).owner() == msg.sender;
+        try CompatibleERC721(_tokenContract).owner() returns (address _owner) {
+            return _owner == msg.sender;
+        } catch {
+            // owner not implemented, try access control DEFAULT_ADMIN_ROLE
+            return CompatibleERC721(_tokenContract).hasRole(0x00, msg.sender);
+        }
     }
 
     function _dropMsgSender() internal virtual returns (address) {
