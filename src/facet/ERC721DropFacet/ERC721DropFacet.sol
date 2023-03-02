@@ -36,6 +36,15 @@ contract ERC721DropFacet is PlatformFee, ApplicationFee, Ownable {
     event ClaimConditionUpdated(ERC721DropFacetStorage.ClaimCondition condition, bool resetEligibility);
     event TokensClaimed(address tokenContract, address claimer, address receiver, uint256 quantityClaimed);
 
+    function getClaimCondition(address _tokenContract)
+        external
+        view
+        returns (ERC721DropFacetStorage.ClaimCondition memory)
+    {
+        ERC721DropFacetStorage.Layout storage l = ERC721DropFacetStorage.layout();
+        return l.activeClaimConditions[_tokenContract];
+    }
+
     function claim(
         address _tokenContract,
         address _receiver,
