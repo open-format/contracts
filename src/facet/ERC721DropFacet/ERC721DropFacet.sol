@@ -31,21 +31,49 @@ interface CompatibleERC721 {
 contract ERC721DropFacet is PlatformFee, ApplicationFee, Ownable {
     // TODO: refactor to IERC721DropFacet
     event ClaimConditionUpdated(ERC721DropFacetStorage.ClaimCondition condition, bool resetEligibility);
+    event TokensClaimed(
+        address tokenContract, address claimer, address receiver, uint256 startTokenId, uint256 quantityClaimed
+    );
+
+    function claim(
+        address _tokenContract,
+        address _receiver,
+        uint256 _quantity,
+        address _currency,
+        uint256 _pricePerToken
+    ) external {
+        ERC721DropFacetStorage.Layout storage l = ERC721DropFacetStorage.layout();
+        bytes32 activeConditionId = l.activeConditionIds[_tokenContract];
+
+        _verifyClaim(_tokenContract, _dropMsgSender(), _quantity, _currency, _pricePerToken);
+
+        // Update contract state.
+        l.activeClaimConditions[_tokenContract].supplyClaimed += _quantity;
+        l.supplyClaimedByWallet[activeConditionId][_dropMsgSender()] += _quantity;
+
+        // If there's a price, collect price.
+        _collectPriceOnClaim(address(0), _quantity, _currency, _pricePerToken);
+
+        // Mint the relevant NFTs to claimer.
+        uint256 startTokenId = _transferTokensOnClaim(_tokenContract, _receiver, _quantity);
+
+        emit TokensClaimed(_tokenContract, _dropMsgSender(), _receiver, startTokenId, _quantity);
+    }
 
     // TODO: add fee payments
     function setClaimCondition(
-        address tokenContract,
+        address _tokenContract,
         ERC721DropFacetStorage.ClaimCondition calldata _condition,
         bool _resetClaimEligibility
     ) external {
-        if (!_isTokenContractOwner(tokenContract)) {
+        if (!_isTokenContractOwner(_tokenContract)) {
             revert("must be contract owner");
         }
 
         ERC721DropFacetStorage.Layout storage l = ERC721DropFacetStorage.layout();
 
-        bytes32 targetConditionId = l.activeConditionIds[tokenContract];
-        uint256 supplyClaimedAlready = l.activeClaimConditions[tokenContract].supplyClaimed;
+        bytes32 targetConditionId = l.activeConditionIds[_tokenContract];
+        uint256 supplyClaimedAlready = l.activeClaimConditions[_tokenContract].supplyClaimed;
 
         if (_resetClaimEligibility) {
             supplyClaimedAlready = 0;
@@ -56,7 +84,7 @@ contract ERC721DropFacet is PlatformFee, ApplicationFee, Ownable {
             revert("max supply claimed");
         }
 
-        l.activeClaimConditions[tokenContract] = ERC721DropFacetStorage.ClaimCondition({
+        l.activeClaimConditions[_tokenContract] = ERC721DropFacetStorage.ClaimCondition({
             startTimestamp: _condition.startTimestamp,
             maxClaimableSupply: _condition.maxClaimableSupply,
             supplyClaimed: supplyClaimedAlready,
@@ -65,7 +93,7 @@ contract ERC721DropFacet is PlatformFee, ApplicationFee, Ownable {
             currency: _condition.currency
         });
 
-        l.activeConditionIds[tokenContract] = targetConditionId;
+        l.activeConditionIds[_tokenContract] = targetConditionId;
 
         emit ClaimConditionUpdated(_condition, _resetClaimEligibility);
     }
@@ -76,12 +104,63 @@ contract ERC721DropFacet is PlatformFee, ApplicationFee, Ownable {
         }
     }
 
-    function claim(address tokenContract, address receiver, uint256 quantity, address currency, uint256 pricePerToken)
-        external
-    {}
-
     // INTERNAL FUNCTIONS
     // TODO: refactor to ERC721DropFacetInternal.sol
+
+    /// @dev Checks a request to claim NFTs against the active claim condition's criteria.
+    function _verifyClaim(
+        address _tokenContract,
+        address _claimer,
+        uint256 _quantity,
+        address _currency,
+        uint256 _pricePerToken
+    ) internal view {
+        ERC721DropFacetStorage.Layout storage l = ERC721DropFacetStorage.layout();
+
+        ERC721DropFacetStorage.ClaimCondition memory currentClaimPhase = l.activeClaimConditions[_tokenContract];
+        bytes32 activeConditionId = l.activeConditionIds[_tokenContract];
+
+        uint256 claimLimit = currentClaimPhase.quantityLimitPerWallet;
+        uint256 claimPrice = currentClaimPhase.pricePerToken;
+        address claimCurrency = currentClaimPhase.currency;
+
+        uint256 _supplyClaimedByWallet = l.supplyClaimedByWallet[activeConditionId][_claimer];
+
+        if (_currency != claimCurrency || _pricePerToken != claimPrice) {
+            revert("!PriceOrCurrency");
+        }
+
+        if (_quantity == 0 || (_quantity + _supplyClaimedByWallet > claimLimit)) {
+            revert("!Qty");
+        }
+
+        if (currentClaimPhase.supplyClaimed + _quantity > currentClaimPhase.maxClaimableSupply) {
+            revert("!MaxSupply");
+        }
+
+        if (currentClaimPhase.startTimestamp > block.timestamp) {
+            revert("cant claim yet");
+        }
+    }
+
+    function _collectPriceOnClaim(
+        address _primarySaleRecipient,
+        uint256 _quantityToClaim,
+        address _currency,
+        uint256 _pricePerToken
+    ) internal virtual {
+        // TODO: add fee payments
+        // TODO: add payments - possibly use royalty interface?
+    }
+
+    /// @dev Transfers the NFTs being claimed.
+    function _transferTokensOnClaim(address _tokenContract, address _to, uint256 _quantityBeingClaimed)
+        internal
+        virtual
+        returns (uint256 startTokenId)
+    {
+        // TODO: mintTo, batchMintTo
+    }
 
     function _isTokenContractOwner(address _tokenContract) internal virtual returns (bool) {
         return CompatibleERC721(_tokenContract).owner() == msg.sender;
