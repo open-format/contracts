@@ -143,6 +143,22 @@ contract ERC721LazyMint_lazyMint is Setup {
         assertEq(erc721.ownerOf(2), other);
     }
 
+    function test_lazy_minted_tokens_have_a_tokenURI() public {
+        vm.prank(nftOwner);
+        erc721.lazyMint(1, "ipfs://1", "");
+        assertEq(erc721.tokenURI(0), "ipfs://1");
+    }
+
+    function test_can_lazy_mint_batches() public {
+        vm.prank(nftOwner);
+        erc721.lazyMint(1, "ipfs://1", "");
+        vm.prank(nftOwner);
+        erc721.lazyMint(1, "ipfs://2", "");
+
+        assertEq(erc721.tokenURI(0), "ipfs://1");
+        assertEq(erc721.tokenURI(1), "ipfs://2");
+    }
+
     function test_reverts_if_not_lazy_minted() public {
         vm.prank(nftOwner);
         erc721.lazyMint(1, "ipfs://lalala/", "");
