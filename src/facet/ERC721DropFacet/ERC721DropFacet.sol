@@ -24,16 +24,14 @@ import {ApplicationFee} from "@extensions/applicationFee/ApplicationFee.sol";
 
 interface CompatibleERC721 {
     function owner() external returns (address);
-    function mintTo(address) external;
-    function batchMintTo(address) external;
+    function mintTo(address _to) external;
+    function batchMintTo(address _to, uint256 _quantity) external;
 }
 
 contract ERC721DropFacet is PlatformFee, ApplicationFee, Ownable {
     // TODO: refactor to IERC721DropFacet
     event ClaimConditionUpdated(ERC721DropFacetStorage.ClaimCondition condition, bool resetEligibility);
-    event TokensClaimed(
-        address tokenContract, address claimer, address receiver, uint256 startTokenId, uint256 quantityClaimed
-    );
+    event TokensClaimed(address tokenContract, address claimer, address receiver, uint256 quantityClaimed);
 
     function claim(
         address _tokenContract,
@@ -52,12 +50,15 @@ contract ERC721DropFacet is PlatformFee, ApplicationFee, Ownable {
         l.supplyClaimedByWallet[activeConditionId][_dropMsgSender()] += _quantity;
 
         // If there's a price, collect price.
-        _collectPriceOnClaim(address(0), _quantity, _currency, _pricePerToken);
+        _collectPriceOnClaim(_tokenContract, _quantity, _currency, _pricePerToken);
 
         // Mint the relevant NFTs to claimer.
-        uint256 startTokenId = _transferTokensOnClaim(_tokenContract, _receiver, _quantity);
 
-        emit TokensClaimed(_tokenContract, _dropMsgSender(), _receiver, startTokenId, _quantity);
+        // NOTE: web three's implementation returns startTokenId and adds it to tokenClaimed event
+        // have removed for now to limit ERC721 compatibility requirements
+        _transferTokensOnClaim(_tokenContract, _receiver, _quantity);
+
+        emit TokensClaimed(_tokenContract, _dropMsgSender(), _receiver, _quantity);
     }
 
     // TODO: add fee payments
@@ -144,7 +145,7 @@ contract ERC721DropFacet is PlatformFee, ApplicationFee, Ownable {
     }
 
     function _collectPriceOnClaim(
-        address _primarySaleRecipient,
+        address _tokenContract,
         uint256 _quantityToClaim,
         address _currency,
         uint256 _pricePerToken
@@ -157,9 +158,13 @@ contract ERC721DropFacet is PlatformFee, ApplicationFee, Ownable {
     function _transferTokensOnClaim(address _tokenContract, address _to, uint256 _quantityBeingClaimed)
         internal
         virtual
-        returns (uint256 startTokenId)
     {
-        // TODO: mintTo, batchMintTo
+        // TODO: mintTo
+        if (_quantityBeingClaimed > 1) {
+            CompatibleERC721(_tokenContract).batchMintTo(_to, _quantityBeingClaimed);
+        } else {
+            CompatibleERC721(_tokenContract).mintTo(_to);
+        }
     }
 
     function _isTokenContractOwner(address _tokenContract) internal virtual returns (bool) {
