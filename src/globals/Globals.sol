@@ -21,7 +21,7 @@ import {Ownable} from "@solidstate/contracts/access/ownable/Ownable.sol";
  */
 
 contract Globals is Ownable {
-    address public ERC721Implementation;
+    mapping(bytes32 => address) ERC721Implementations;
     address public ERC20Implementation;
 
     error ERROR_percentageFeeCannotExceed100();
@@ -38,8 +38,13 @@ contract Globals is Ownable {
         _setOwner(msg.sender);
     }
 
-    function setERC721Implementation(address _implementation) public onlyOwner {
-        ERC721Implementation = _implementation;
+    function setERC721Implementation(bytes32 _implementationId, address _implementation) public onlyOwner {
+        ERC721Implementations[_implementationId] = _implementation;
+        // TODO: add an event so can be tracked on subgraph
+    }
+
+    function getERC721Implementation(bytes32 _implementationId) public view returns (address) {
+        return ERC721Implementations[_implementationId];
     }
 
     function setERC20Implementation(address _implementation) public onlyOwner {
