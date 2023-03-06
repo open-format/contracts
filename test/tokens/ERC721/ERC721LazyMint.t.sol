@@ -4,7 +4,8 @@ pragma solidity ^0.8.16;
 import "forge-std/Test.sol";
 import {IERC2981} from "@solidstate/contracts/interfaces/IERC2981.sol";
 import {IERC721} from "@solidstate/contracts/interfaces/IERC721.sol";
-import {ERC721LazyMintMock} from "src/tokens/ERC721/ERC721LazyMintMock.sol";
+import {ERC721LazyMintMock, ERC721LazyMint} from "src/tokens/ERC721/ERC721LazyMintMock.sol";
+import {ILazyMint} from "@extensions/lazyMint/LazyMint.sol";
 
 contract Setup is Test {
     address creator = address(0x10);
@@ -12,6 +13,8 @@ contract Setup is Test {
     ERC721LazyMintMock erc721LazyMint;
 
     uint16 tenPercentBPS = 1000;
+    bytes32 constant ADMIN_ROLE = bytes32(uint256(0));
+    bytes32 constant MINTER_ROLE = bytes32(uint256(1));
 
     // ipfs uri taken from https://docs.ipfs.tech/how-to/best-practices-for-nft-data/#types-of-ipfs-links-and-when-to-use-them
     string baseURI = "ipfs://bafybeibnsoufr2renqzsh347nrx54wcubt5lgkeivez63xvivplfwhtpym/";
@@ -77,6 +80,62 @@ contract ERC721LazyMint__lazyMint is Setup {
 
         assertEq(baseURI, erc721LazyMint.tokenURI(0));
         assertEq(baseURI, erc721LazyMint.tokenURI(1));
+    }
+
+    function test_reverts_when_access_is_invalid() public {
+        vm.expectRevert(ILazyMint.Error_not_authorized_to_lazy_mint.selector);
+        vm.prank(other);
+        erc721LazyMint.lazyMint(2, baseURI, "");
+    }
+}
+
+contract ERC721LazyMint__grantRole is Setup {
+    function afterSetup() public override {
+        vm.prank(creator);
+        erc721LazyMint.lazyMint(1, baseURI, "");
+    }
+
+    function test_can_grant_admin_role() public {
+        vm.prank(creator);
+        erc721LazyMint.grantRole(ADMIN_ROLE, other);
+
+        vm.prank(other);
+        erc721LazyMint.mintTo(other);
+        assertEq(erc721LazyMint.ownerOf(0), other);
+    }
+
+    function test_can_grant_minter_role() public {
+        vm.prank(creator);
+        erc721LazyMint.grantRole(MINTER_ROLE, other);
+
+        vm.prank(other);
+        erc721LazyMint.mintTo(other);
+        assertEq(erc721LazyMint.ownerOf(0), other);
+    }
+}
+
+contract ERC721LazyMint__revokeRole is Setup {
+    function afterSetup() public override {
+        vm.prank(creator);
+        erc721LazyMint.lazyMint(1, baseURI, "");
+
+        vm.prank(creator);
+        erc721LazyMint.grantRole(MINTER_ROLE, other);
+    }
+
+    function test_can_revoke_role() public {
+        vm.prank(creator);
+        erc721LazyMint.revokeRole(MINTER_ROLE, other);
+
+        vm.expectRevert("Not authorized to mint.");
+        vm.prank(other);
+        erc721LazyMint.mintTo(other);
+    }
+
+    function test_reverts_if_not_admin() public {
+        vm.expectRevert();
+        vm.prank(other);
+        erc721LazyMint.revokeRole(MINTER_ROLE, other);
     }
 }
 
