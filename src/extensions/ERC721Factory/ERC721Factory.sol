@@ -18,18 +18,18 @@ import {ERC721FactoryInternal} from "./ERC721FactoryInternal.sol";
  */
 
 abstract contract ERC721Factory is IERC721Factory, ERC721FactoryInternal, MinimalProxyFactory, ReentrancyGuard {
-    function createERC721(string memory _name, string memory _symbol, address _royaltyRecipient, uint16 _royaltyBps)
-        external
-        payable
-        virtual
-        nonReentrant
-        returns (address id)
-    {
+    function createERC721(
+        string memory _name,
+        string memory _symbol,
+        address _royaltyRecipient,
+        uint16 _royaltyBps,
+        bytes32 _implementationId
+    ) external payable virtual nonReentrant returns (address id) {
         if (!_canCreate()) {
             revert("do not have permission to create");
         }
 
-        address implementation = _getImplementation();
+        address implementation = _getImplementation(_implementationId);
         if (implementation == address(0)) {
             revert("no implementation found");
         }
@@ -52,10 +52,10 @@ abstract contract ERC721Factory is IERC721Factory, ERC721FactoryInternal, Minima
         id = _deployMinimalProxy(implementation, salt);
         ERC721Base(payable(id)).initialize(msg.sender, _name, _symbol, _royaltyRecipient, _royaltyBps);
 
-        emit Created(id, msg.sender, _name, _symbol, _royaltyRecipient, _royaltyBps);
+        emit Created(id, msg.sender, _name, _symbol, _royaltyRecipient, _royaltyBps, _implementationId);
     }
 
-    function getERC721FactoryImplementation() external view returns (address) {
-        return _getImplementation();
+    function getERC721FactoryImplementation(bytes32 _implementationId) external view returns (address) {
+        return _getImplementation(_implementationId);
     }
 }
