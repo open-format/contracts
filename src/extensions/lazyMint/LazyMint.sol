@@ -27,7 +27,7 @@ abstract contract LazyMint is ILazyMint, LazyMintInternal, BatchMintMetadata {
     function lazyMint(uint256 _amount, string calldata _baseURIForTokens, bytes calldata _data)
         public
         virtual
-        returns (uint256 batchId)
+        returns (uint256)
     {
         if (!_canLazyMint()) {
             revert Error_not_authorized_to_lazy_mint();
