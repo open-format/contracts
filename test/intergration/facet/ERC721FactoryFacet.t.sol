@@ -42,6 +42,7 @@ contract Setup is Test, Helpers {
     Globals globals;
 
     ERC721Base erc721Implementation;
+    bytes32 erc721ImplementationId;
     ERC721FactoryFacet erc721FactoryFacet;
 
     function setUp() public {
@@ -56,6 +57,7 @@ contract Setup is Test, Helpers {
         appFactory = new Factory(address(appImplementation), address(registry), address(globals));
 
         erc721Implementation = new ERC721Base();
+        erc721ImplementationId = bytes32("base");
         erc721FactoryFacet = new ERC721FactoryFacet();
 
         // create app
@@ -63,7 +65,7 @@ contract Setup is Test, Helpers {
 
         // setup globals
         globals.setPlatformFee(0, 0, socialConscious);
-        globals.setERC721Implementation(address(erc721Implementation));
+        globals.setERC721Implementation(erc721ImplementationId, address(erc721Implementation));
 
         // add facet to registry
         bytes4[] memory selectors = new bytes4[](2);
@@ -79,7 +81,8 @@ contract Setup is Test, Helpers {
 
 contract ERC721FactoryFacet__integration is Setup {
     function test_can_create_erc721() public {
-        address erc721Address = ERC721FactoryFacet(address(app)).createERC721("name", "symbol", creator, 1000);
+        address erc721Address =
+            ERC721FactoryFacet(address(app)).createERC721("name", "symbol", creator, 1000, erc721ImplementationId);
         assertEq(ERC721Base(erc721Address).name(), "name");
     }
 
@@ -88,8 +91,9 @@ contract ERC721FactoryFacet__integration is Setup {
         globals.setPlatformFee(1 ether, 0, socialConscious);
 
         // create nft and pay platform fee
-        address erc721Address =
-            ERC721FactoryFacet(address(app)).createERC721{value: 1 ether}("name", "symbol", creator, 1000);
+        address erc721Address = ERC721FactoryFacet(address(app)).createERC721{value: 1 ether}(
+            "name", "symbol", creator, 1000, erc721ImplementationId
+        );
         assertEq(ERC721Base(erc721Address).name(), "name");
         // check platform fee has been recieved
         assertEq(socialConscious.balance, 1 ether);
