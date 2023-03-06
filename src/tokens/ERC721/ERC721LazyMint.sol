@@ -9,6 +9,8 @@ import {Multicall} from "@solidstate/contracts/utils/Multicall.sol";
 import {ERC165BaseInternal} from "@solidstate/contracts/introspection/ERC165/base/ERC165BaseInternal.sol";
 import {UintUtils} from "@solidstate/contracts/utils/UintUtils.sol";
 
+import {ERC721AUpgradeable} from "@erc721a-upgradeable/contracts/ERC721AUpgradeable.sol";
+
 import {Royalty} from "@extensions/royalty/Royalty.sol";
 import {LazyMint} from "@extensions/lazyMint/LazyMint.sol";
 import {ContractMetadata, IContractMetadata} from "@extensions/contractMetadata/ContractMetadata.sol";
