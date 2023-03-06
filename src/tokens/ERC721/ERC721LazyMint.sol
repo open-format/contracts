@@ -9,8 +9,6 @@ import {Multicall} from "@solidstate/contracts/utils/Multicall.sol";
 import {ERC165BaseInternal} from "@solidstate/contracts/introspection/ERC165/base/ERC165BaseInternal.sol";
 import {UintUtils} from "@solidstate/contracts/utils/UintUtils.sol";
 
-import {ERC721AUpgradeable} from "@erc721a-upgradeable/contracts/ERC721AUpgradeable.sol";
-
 import {Royalty} from "@extensions/royalty/Royalty.sol";
 import {LazyMint} from "@extensions/lazyMint/LazyMint.sol";
 import {ContractMetadata, IContractMetadata} from "@extensions/contractMetadata/ContractMetadata.sol";
@@ -38,9 +36,12 @@ contract ERC721LazyMint is
     /**
      * @dev this contract is meant to be an implementation for a factory contract
      *      calling initialize in constructor prevents the implementation from being used by third party
+     * @param _isTest used to prevent the initialisation. Set to true in unit tests and false in production
      */
-    constructor() {
-        initialize(address(0), "", "", address(0), 0);
+    constructor(bool _isTest) {
+        if (!_isTest) {
+            initialize(address(0), "", "", address(0), 0);
+        }
     }
 
     function initialize(
