@@ -88,8 +88,7 @@ contract ERC721LazyMint is
      */
     function tokenURI(uint256 _tokenId) public view virtual override returns (string memory) {
         // tokenURI was stored using batchMintTo
-        string memory batchUri = _getBaseURI(_tokenId);
-        return batchUri;
+        return _getBaseURI(_tokenId);
     }
 
     /*//////////////////////////////////////////////////////////////

@@ -244,7 +244,7 @@ contract ERC721LazyMint__multicall is Setup {
         erc721LazyMint.batchMintTo(creator, 2);
     }
 
-    function test_can_perfom_multiple_calls_in_one_transaction() public {
+    function test_can_perform_multiple_calls_in_one_transaction() public {
         bytes[] memory calls = new bytes[](2);
         calls[0] = abi.encodeCall(erc721LazyMint.transferFrom, (creator, other, 0));
         calls[1] = abi.encodeCall(erc721LazyMint.transferFrom, (creator, other, 1));
