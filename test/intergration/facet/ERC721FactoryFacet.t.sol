@@ -50,6 +50,8 @@ contract Setup is Test, Helpers {
         creator = address(0x10);
         socialConscious = address(0x11);
 
+        vm.deal(creator, 1 ether);
+
         // deploy contracts
         globals = new Globals();
         registry = new RegistryMock();
@@ -61,6 +63,7 @@ contract Setup is Test, Helpers {
         erc721FactoryFacet = new ERC721FactoryFacet();
 
         // create app
+        vm.prank(creator);
         app = Proxy(payable(appFactory.create("platformFeeTest")));
 
         // setup globals
@@ -81,21 +84,28 @@ contract Setup is Test, Helpers {
 
 contract ERC721FactoryFacet__integration is Setup {
     function test_can_create_erc721() public {
+        vm.prank(creator);
         address erc721Address =
             ERC721FactoryFacet(address(app)).createERC721("name", "symbol", creator, 1000, erc721ImplementationId);
+
         assertEq(ERC721Base(erc721Address).name(), "name");
+        assertEq(ERC721Base(erc721Address).symbol(), "symbol");
+        (address receiver, uint256 royaltyAmount) = ERC721Base(erc721Address).royaltyInfo(0, 1 ether);
+        assertEq(receiver, creator);
+        assertEq(royaltyAmount, 0.1 ether);
+        assertEq(ERC721Base(erc721Address).owner(), creator);
     }
 
-    function test_can_create_erc721_and_pay_plaform_fee() public {
+    function test_can_create_erc721_and_pay_platform_fee() public {
         // set platform base fee to 1 ether
         globals.setPlatformFee(1 ether, 0, socialConscious);
 
         // create nft and pay platform fee
+        vm.prank(creator);
         address erc721Address = ERC721FactoryFacet(address(app)).createERC721{value: 1 ether}(
             "name", "symbol", creator, 1000, erc721ImplementationId
         );
-        assertEq(ERC721Base(erc721Address).name(), "name");
-        // check platform fee has been recieved
+        // check platform fee has been received
         assertEq(socialConscious.balance, 1 ether);
     }
 }
