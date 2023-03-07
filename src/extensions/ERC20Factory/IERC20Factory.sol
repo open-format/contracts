@@ -6,6 +6,7 @@ interface IERC20Factory {
 
     function createERC20(string memory _name, string memory _symbol, uint8 _decimals, uint256 _supply)
         external
+        payable
         returns (address id);
 
     function getERC20FactoryImplementation() external view returns (address);

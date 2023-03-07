@@ -19,6 +19,7 @@ import {ERC20FactoryInternal} from "./ERC20FactoryInternal.sol";
 abstract contract ERC20Factory is IERC20Factory, ERC20FactoryInternal, MinimalProxyFactory {
     function createERC20(string memory _name, string memory _symbol, uint8 _decimals, uint256 _supply)
         external
+        payable
         virtual
         returns (address id)
     {
