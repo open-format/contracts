@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.16;
 
-// The following tests that the platform fee extension works as intentended within the ecosystem
+// The following tests that the platform fee extension works as intended within the ecosystem
 
 import "forge-std/Test.sol";
 
@@ -77,9 +77,10 @@ contract Setup is Test, Helpers {
         globals.setERC721Implementation(erc721ImplementationId, address(erc721Implementation));
 
         // add facet to registry
-        bytes4[] memory selectors = new bytes4[](2);
+        bytes4[] memory selectors = new bytes4[](3);
         selectors[0] = erc721FactoryFacet.createERC721.selector;
         selectors[1] = erc721FactoryFacet.getERC721FactoryImplementation.selector;
+        selectors[2] = erc721FactoryFacet.calculateERC721FactoryDeploymentAddress.selector;
         registry.diamondCut(
             prepareSingleFacetCut(address(erc721FactoryFacet), IDiamondWritableInternal.FacetCutAction.ADD, selectors),
             address(0),
@@ -89,6 +90,16 @@ contract Setup is Test, Helpers {
 }
 
 contract ERC721FactoryFacet__integration_createERC721 is Setup {
+    event Created(
+        address id,
+        address creator,
+        string name,
+        string symbol,
+        address royaltyRecipient,
+        uint16 royaltyBps,
+        bytes32 implementationId
+    );
+
     function test_can_create_erc721() public {
         vm.prank(creator);
         address erc721Address =
@@ -113,6 +124,21 @@ contract ERC721FactoryFacet__integration_createERC721 is Setup {
         );
         // check platform fee has been received
         assertEq(socialConscious.balance, 1 ether);
+    }
+
+    function test_emits_Created_event() public {
+        /**
+         * @dev id is deterministic see `calculateERC721FactoryDeploymentAddress()`
+         *      any change to setup may result in different deployment address
+         */
+        address expectedAddress = 0xBeE8089f8d352dd3642CfCb6e1C15410C54C8376;
+
+        vm.expectEmit(false, true, true, true);
+        emit Created(expectedAddress, creator, "name", "symbol", creator, 1000, erc721ImplementationId);
+
+        // create nft and pay platform fee
+        vm.prank(creator);
+        ERC721FactoryFacet(address(app)).createERC721("name", "symbol", creator, 1000, erc721ImplementationId);
     }
 
     function test_reverts_when_do_not_have_permission() public {
@@ -162,5 +188,32 @@ contract ERC721FactoryFacet__integration_getERC721FactoryImplementation is Setup
     function test_returns_zero_address_if_no_implementation_found() public {
         address implementation = ERC721FactoryFacet(address(app)).getERC721FactoryImplementation("");
         assertEq(implementation, address(0));
+    }
+}
+
+contract ERC721FactoryFacet__integration_calculateERC721DeploymentAddress is Setup {
+    function test_returns_correct_deployment_address() public {
+        address deploymentAddress =
+            ERC721FactoryFacet(address(app)).calculateERC721FactoryDeploymentAddress("name", erc721ImplementationId);
+
+        vm.prank(creator);
+        address actualDeploymentAddress =
+            ERC721FactoryFacet(address(app)).createERC721("name", "symbol", creator, 1000, erc721ImplementationId);
+        assertEq(deploymentAddress, actualDeploymentAddress);
+    }
+
+    function test_reverts_if_name_already_used() public {
+        vm.prank(creator);
+        address actualDeploymentAddress =
+            ERC721FactoryFacet(address(app)).createERC721("name", "symbol", creator, 1000, erc721ImplementationId);
+
+        vm.expectRevert(IERC721Factory.Error_name_already_used.selector);
+        vm.prank(creator);
+        ERC721FactoryFacet(address(app)).calculateERC721FactoryDeploymentAddress("name", erc721ImplementationId);
+    }
+
+    function test_reverts_if_no_implementation_found() public {
+        vm.expectRevert(IERC721Factory.Error_no_implementation_found.selector);
+        address implementation = ERC721FactoryFacet(address(app)).calculateERC721FactoryDeploymentAddress("name", "");
     }
 }

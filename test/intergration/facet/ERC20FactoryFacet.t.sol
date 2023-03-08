@@ -77,9 +77,10 @@ contract Setup is Test, Helpers {
         globals.setERC20Implementation(erc20ImplementationId, address(erc20Implementation));
 
         // add facet to registry
-        bytes4[] memory selectors = new bytes4[](2);
+        bytes4[] memory selectors = new bytes4[](3);
         selectors[0] = erc20FactoryFacet.createERC20.selector;
         selectors[1] = erc20FactoryFacet.getERC20FactoryImplementation.selector;
+        selectors[2] = erc20FactoryFacet.calculateERC20FactoryDeploymentAddress.selector;
         registry.diamondCut(
             prepareSingleFacetCut(address(erc20FactoryFacet), IDiamondWritableInternal.FacetCutAction.ADD, selectors),
             address(0),
@@ -89,6 +90,16 @@ contract Setup is Test, Helpers {
 }
 
 contract ERC20FactoryFacet__integration_createERC20 is Setup {
+    event Created(
+        address id,
+        address creator,
+        string name,
+        string symbol,
+        uint8 decimals,
+        uint256 supply,
+        bytes32 implementationId
+    );
+
     function test_can_create_erc20() public {
         vm.prank(creator);
         address erc20Address =
@@ -112,6 +123,21 @@ contract ERC20FactoryFacet__integration_createERC20 is Setup {
         );
         // check platform fee has been received
         assertEq(socialConscious.balance, 1 ether);
+    }
+
+    function test_emits_Created_event() public {
+        /**
+         * @dev id is deterministic see `calculateERC20FactoryDeploymentAddress()`
+         *      any change to setup may result in different deployment address
+         */
+        address expectedAddress = 0xBeE8089f8d352dd3642CfCb6e1C15410C54C8376;
+
+        vm.expectEmit(false, true, true, true);
+        emit Created(expectedAddress, creator, "name", "symbol", 18, 1000, erc20ImplementationId);
+
+        // create nft and pay platform fee
+        vm.prank(creator);
+        ERC20FactoryFacet(address(app)).createERC20("name", "symbol", 18, 1000, erc20ImplementationId);
     }
 
     function test_reverts_when_do_not_have_permission() public {
@@ -157,5 +183,32 @@ contract ERC20FactoryFacet__integration_getERC20FactoryImplementation is Setup {
     function test_returns_zero_address_if_no_implementation_found() public {
         address implementation = ERC20FactoryFacet(address(app)).getERC20FactoryImplementation("");
         assertEq(implementation, address(0));
+    }
+}
+
+contract ERC20FactoryFacet__integration_calculateERC20DeploymentAddress is Setup {
+    function test_returns_correct_deployment_address() public {
+        address deploymentAddress =
+            ERC20FactoryFacet(address(app)).calculateERC20FactoryDeploymentAddress("name", erc20ImplementationId);
+
+        vm.prank(creator);
+        address actualDeploymentAddress =
+            ERC20FactoryFacet(address(app)).createERC20("name", "symbol", 18, 1000, erc20ImplementationId);
+        assertEq(deploymentAddress, actualDeploymentAddress);
+    }
+
+    function test_reverts_if_name_already_used() public {
+        vm.prank(creator);
+        address actualDeploymentAddress =
+            ERC20FactoryFacet(address(app)).createERC20("name", "symbol", 18, 1000, erc20ImplementationId);
+
+        vm.expectRevert(IERC20Factory.Error_name_already_used.selector);
+        vm.prank(creator);
+        ERC20FactoryFacet(address(app)).calculateERC20FactoryDeploymentAddress("name", erc20ImplementationId);
+    }
+
+    function test_reverts_if_no_implementation_found() public {
+        vm.expectRevert(IERC20Factory.Error_no_implementation_found.selector);
+        address implementation = ERC20FactoryFacet(address(app)).calculateERC20FactoryDeploymentAddress("name", "");
     }
 }
