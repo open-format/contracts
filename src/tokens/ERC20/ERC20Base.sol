@@ -43,7 +43,7 @@ contract ERC20Base is SolidStateERC20, Ownable, Multicall, ContractMetadata, Ini
         _setSymbol(_symbol);
         _setDecimals(_decimals);
 
-        _mint(msg.sender, supply);
+        _mint(_owner, supply);
 
         _setSupportsInterface(type(IERC165).interfaceId, true);
         _setSupportsInterface(type(IERC20).interfaceId, true);

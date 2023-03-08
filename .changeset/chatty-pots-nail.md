@@ -2,4 +2,4 @@
 "@openformat/contracts": patch
 ---
 
-add lazy mint extension
+erc20 factory bug fixes

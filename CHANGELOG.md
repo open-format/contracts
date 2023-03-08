@@ -1,5 +1,13 @@
 # @openformat/contracts
 
+## 0.0.4
+
+### Patch Changes
+
+- [#54](https://github.com/open-format/contracts/pull/54) [`6f83869`](https://github.com/open-format/contracts/commit/6f83869fcd7fdab0f9acd3a515613f23c697ad02) Thanks [@george-e-d-g-e](https://github.com/george-e-d-g-e)! - add lazy mint extension
+
+- [#56](https://github.com/open-format/contracts/pull/56) [`39cdae1`](https://github.com/open-format/contracts/commit/39cdae1c7ac661db0f8707d1c6594d39b9aacb42) Thanks [@george-e-d-g-e](https://github.com/george-e-d-g-e)! - add erc721 lazy mint contract
+
 ## 0.0.3
 
 ### Patch Changes
