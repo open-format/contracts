@@ -12,9 +12,9 @@ import {PlatformFee} from "../extensions/platformFee/PlatformFee.sol";
  */
 
 contract ERC20FactoryFacet is ERC20Factory, Ownable, PlatformFee {
-    /*
-    * @dev sets permissions to create new nft to proxy app owner
-    */
+    /**
+     * @dev sets permissions to create new erc20
+     */
     function _canCreate() internal view override returns (bool) {
         return msg.sender == _owner();
     }
@@ -22,7 +22,7 @@ contract ERC20FactoryFacet is ERC20Factory, Ownable, PlatformFee {
     /**
      * @dev override before create to add platform fee
      *      requires msg.value to be equal or more than base platform fee
-     *      when calling createERC721
+     *      when calling createERC20
      */
     function _beforeCreate() internal override {
         (address recipient, uint256 amount) = _platformFeeInfo(0);
