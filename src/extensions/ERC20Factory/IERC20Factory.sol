@@ -10,11 +10,11 @@ interface IERC20Factory {
     event Created(
         address id,
         address creator,
-        string _name,
-        string _symbol,
-        uint8 _decimals,
-        uint256 _supply,
-        bytes32 _implementationId
+        string name,
+        string symbol,
+        uint8 decimals,
+        uint256 supply,
+        bytes32 implementationId
     );
 
     function createERC20(
