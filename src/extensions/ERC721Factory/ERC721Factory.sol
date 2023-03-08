@@ -48,12 +48,12 @@ abstract contract ERC721Factory is IERC721Factory, ERC721FactoryInternal, Minima
         bytes32 _implementationId
     ) external payable virtual nonReentrant returns (address id) {
         if (!_canCreate()) {
-            revert("do not have permission to create");
+            revert Error_do_not_have_permission();
         }
 
         address implementation = _getImplementation(_implementationId);
         if (implementation == address(0)) {
-            revert("no implementation found");
+            revert Error_no_implementation_found();
         }
 
         // creating a salt based of the name enforces no name is the same on each app
@@ -62,7 +62,7 @@ abstract contract ERC721Factory is IERC721Factory, ERC721FactoryInternal, Minima
         // check proxy has not deployed erc721 with the same name
         // deploying with the same salt would override that ERC721
         if (_getId(salt) != address(0)) {
-            revert("name already used");
+            revert Error_name_already_used();
         }
 
         // saves deployment for checking later
@@ -80,7 +80,7 @@ abstract contract ERC721Factory is IERC721Factory, ERC721FactoryInternal, Minima
         ) {
             emit Created(id, msg.sender, _name, _symbol, _royaltyRecipient, _royaltyBps, _implementationId);
         } catch {
-            revert("failed to initialize");
+            revert Error_failed_to_initialize();
         }
     }
 
