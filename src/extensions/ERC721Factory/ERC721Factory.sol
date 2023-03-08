@@ -65,14 +65,14 @@ abstract contract ERC721Factory is IERC721Factory, ERC721FactoryInternal, Minima
             revert Error_name_already_used();
         }
 
-        // saves deployment for checking later
-        _setId(salt, id);
-
         // hook to add functionality before create
         _beforeCreate();
 
         // deploys new proxy using CREATE2
         id = _deployMinimalProxy(implementation, salt);
+
+        // saves deployment for checking later
+        _setId(salt, id);
 
         // initialize ERC721 contract
         try CompatibleERC721Implementation(payable(id)).initialize(
