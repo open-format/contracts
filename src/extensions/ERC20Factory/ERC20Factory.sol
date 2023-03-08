@@ -42,12 +42,12 @@ abstract contract ERC20Factory is IERC20Factory, ERC20FactoryInternal, MinimalPr
      * @param _implementationId the chosen implementation of erc20 contract
      */
     function createERC20(
-        string memory _name,
-        string memory _symbol,
+        string calldata _name,
+        string calldata _symbol,
         uint8 _decimals,
         uint256 _supply,
         bytes32 _implementationId
-    ) external virtual nonReentrant returns (address id) {
+    ) external payable virtual nonReentrant returns (address id) {
         if (!_canCreate()) {
             revert Error_do_not_have_permission();
         }
@@ -76,7 +76,7 @@ abstract contract ERC20Factory is IERC20Factory, ERC20FactoryInternal, MinimalPr
 
         // initialize ERC20 contract
         try CompatibleERC20Implementation(payable(id)).initialize(msg.sender, _name, _symbol, _decimals, _supply) {
-            emit Created(id, msg.sender, _name, _symbol, _decimals, _supply);
+            emit Created(id, msg.sender, _name, _symbol, _decimals, _supply, _implementationId);
         } catch {
             revert Error_failed_to_initialize();
         }
