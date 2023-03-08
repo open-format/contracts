@@ -13,8 +13,8 @@ abstract contract ERC20FactoryInternal is Global {
         ERC20FactoryStorage.layout().ERC20Contracts[_salt] = _id;
     }
 
-    function _getImplementation() internal view returns (address) {
-        return _getGlobals().ERC20Implementation();
+    function _getImplementation(bytes32 _implementationId) internal view returns (address) {
+        return _getGlobals().getERC20Implementation(_implementationId);
     }
 
     function _canCreate() internal view virtual returns (bool);
