@@ -85,4 +85,29 @@ abstract contract ERC20Factory is IERC20Factory, ERC20FactoryInternal, MinimalPr
     function getERC20FactoryImplementation(bytes32 _implementationId) external view returns (address) {
         return _getImplementation(_implementationId);
     }
+
+    /**
+     * @notice returns the deterministic deployment address of ERC20 contract based on the name an implementation chosen
+     * @dev    The contract deployed is a minimal proxy pointing to the implementation
+     * @return deploymentAddress the address the erc20 contract will be deployed to,
+     *         the zero address is returned when the deployment will fail
+     */
+    function calculateERC20FactoryDeploymentAddress(string calldata _name, bytes32 _implementationId)
+        external
+        view
+        returns (address)
+    {
+        address implementation = _getImplementation(_implementationId);
+        if (implementation == address(0)) {
+            revert Error_no_implementation_found();
+        }
+
+        bytes32 salt = keccak256(abi.encode(_name));
+        // check app has not deployed erc20 with the same name
+        if (_getId(salt) != address(0)) {
+            revert Error_name_already_used();
+        }
+
+        return _calculateMinimalProxyDeploymentAddress(implementation, salt);
+    }
 }

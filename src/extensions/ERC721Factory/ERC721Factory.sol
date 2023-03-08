@@ -87,4 +87,29 @@ abstract contract ERC721Factory is IERC721Factory, ERC721FactoryInternal, Minima
     function getERC721FactoryImplementation(bytes32 _implementationId) external view returns (address) {
         return _getImplementation(_implementationId);
     }
+
+    /**
+     * @notice returns the deterministic deployment address for ERC721 contracts based on the name an implementation chosen
+     * @dev    The contract deployed is a minimal proxy pointing to the implementation
+     * @return deploymentAddress the address the erc20 contract will be deployed to,
+     *         the zero address is returned when the deployment will fail
+     */
+    function calculateERC721FactoryDeploymentAddress(string calldata _name, bytes32 _implementationId)
+        external
+        view
+        returns (address)
+    {
+        address implementation = _getImplementation(_implementationId);
+        if (implementation == address(0)) {
+            revert Error_no_implementation_found();
+        }
+
+        bytes32 salt = keccak256(abi.encode(_name));
+        // check app has not deployed erc721 with the same name
+        if (_getId(salt) != address(0)) {
+            revert Error_name_already_used();
+        }
+
+        return _calculateMinimalProxyDeploymentAddress(implementation, salt);
+    }
 }
