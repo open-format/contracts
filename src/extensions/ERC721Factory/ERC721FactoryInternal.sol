@@ -19,7 +19,7 @@ abstract contract ERC721FactoryInternal is Global {
 
     function _canCreate() internal view virtual returns (bool);
     /**
-     * @dev hook can be overriden to add functionalty before create
+     * @dev hook can be overridden to add functionality before create
      */
     function _beforeCreate() internal virtual {}
 }
