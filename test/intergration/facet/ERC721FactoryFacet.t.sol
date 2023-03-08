@@ -16,8 +16,12 @@ import {RegistryMock} from "src/registry/RegistryMock.sol";
 import {Factory} from "src/factory/Factory.sol";
 import {Globals} from "src/globals/Globals.sol";
 
+import {IERC721Factory} from "@extensions/ERC721Factory/IERC721Factory.sol";
 import {ERC721Base} from "src/tokens/ERC721/ERC721Base.sol";
 import {ERC721FactoryFacet} from "src/facet/ERC721FactoryFacet.sol";
+
+// bad erc721 implementation without an initialize function
+contract BadERC721 {}
 
 abstract contract Helpers {
     function prepareSingleFacetCut(
@@ -33,6 +37,7 @@ abstract contract Helpers {
 
 contract Setup is Test, Helpers {
     address creator;
+    address other;
     address socialConscious;
 
     Factory appFactory;
@@ -48,7 +53,8 @@ contract Setup is Test, Helpers {
     function setUp() public {
         // assign addresses
         creator = address(0x10);
-        socialConscious = address(0x11);
+        creator = address(0x11);
+        socialConscious = address(0x12);
 
         vm.deal(creator, 1 ether);
 
@@ -82,7 +88,7 @@ contract Setup is Test, Helpers {
     }
 }
 
-contract ERC721FactoryFacet__integration is Setup {
+contract ERC721FactoryFacet__integration_createERC721 is Setup {
     function test_can_create_erc721() public {
         vm.prank(creator);
         address erc721Address =
@@ -107,5 +113,54 @@ contract ERC721FactoryFacet__integration is Setup {
         );
         // check platform fee has been received
         assertEq(socialConscious.balance, 1 ether);
+    }
+
+    function test_reverts_when_do_not_have_permission() public {
+        vm.expectRevert(IERC721Factory.Error_do_not_have_permission.selector);
+        vm.prank(other);
+        ERC721FactoryFacet(address(app)).createERC721("name", "symbol", creator, 1000, erc721ImplementationId);
+    }
+
+    function test_reverts_when_no_implementation_is_found() public {
+        vm.expectRevert(IERC721Factory.Error_no_implementation_found.selector);
+        vm.prank(creator);
+        ERC721FactoryFacet(address(app)).createERC721(
+            "name", "symbol", creator, 1000, bytes32("wrong implementation id")
+        );
+    }
+
+    function test_reverts_when_name_is_already_used() public {
+        // create first erc721
+        vm.prank(creator);
+        ERC721FactoryFacet(address(app)).createERC721("name", "symbol", creator, 1000, erc721ImplementationId);
+
+        vm.expectRevert(IERC721Factory.Error_name_already_used.selector);
+        vm.prank(creator);
+        ERC721FactoryFacet(address(app)).createERC721("name", "symbol", creator, 1000, erc721ImplementationId);
+    }
+
+    function test_reverts_when_erc721_implementation_is_incompatible() public {
+        BadERC721 badErc721Implementation = new BadERC721();
+        bytes32 badErc721ImplementationId = bytes32("bad");
+
+        globals.setERC721Implementation(badErc721ImplementationId, address(badErc721Implementation));
+
+        vm.expectRevert(IERC721Factory.Error_failed_to_initialize.selector);
+        vm.prank(creator);
+        ERC721FactoryFacet(address(app)).createERC721{value: 1 ether}(
+            "name", "symbol", creator, 1000, badErc721ImplementationId
+        );
+    }
+}
+
+contract ERC721FactoryFacet__integration_getERC721FactoryImplementation is Setup {
+    function test_returns_implementation_address() public {
+        address implementation = ERC721FactoryFacet(address(app)).getERC721FactoryImplementation(erc721ImplementationId);
+        assertEq(implementation, address(erc721Implementation));
+    }
+
+    function test_returns_zero_address_if_no_implementation_found() public {
+        address implementation = ERC721FactoryFacet(address(app)).getERC721FactoryImplementation("");
+        assertEq(implementation, address(0));
     }
 }
