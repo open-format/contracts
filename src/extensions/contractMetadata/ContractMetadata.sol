@@ -29,7 +29,7 @@ abstract contract ContractMetadata is IContractMetadata, ContractMetadataInterna
 
     function setContractURI(string memory _uri) external {
         if (!_canSetContractURI()) {
-            revert("Not authorized");
+            revert ContractMetadata_notAuthorized();
         }
 
         _setContractURI(_uri);
