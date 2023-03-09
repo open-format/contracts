@@ -16,7 +16,7 @@ import {ApplicationFeeInternal} from "./ApplicationFeeInternal.sol";
 abstract contract ApplicationFee is IApplicationFee, ApplicationFeeInternal {
     modifier onlyAcceptedCurrencies(address _currency) {
         if (!_isCurrencyAccepted(_currency)) {
-            revert Error_currency_not_accepted();
+            revert ApplicationFee_currencyNotAccepted();
         }
         _;
     }
