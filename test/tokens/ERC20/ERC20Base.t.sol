@@ -7,7 +7,9 @@ import {ERC20BaseMock} from "../../../src/tokens/ERC20/ERC20BaseMock.sol";
 import {IERC165} from "@solidstate/contracts/interfaces/IERC165.sol";
 import {IERC20} from "@solidstate/contracts/interfaces/IERC20.sol";
 import {IERC2612} from "@solidstate/contracts/token/ERC20/permit/IERC2612.sol";
+
 import {IContractMetadata} from "@extensions/contractMetadata/ContractMetadata.sol";
+import {IInitializable} from "@extensions/initializable/IInitializable.sol";
 
 contract Setup is Test {
     address creator = address(0x10);
@@ -71,7 +73,7 @@ contract ERC20__initialize is Setup {
     }
 
     function test_cannot_be_initialized_again() public {
-        vm.expectRevert("Initializable: contract is already initialized");
+        vm.expectRevert(IInitializable.Initializable_contractIsAlreadyInitialized.selector);
         erc20Base.initialize(other, "Name", "Symbol", 18, 10_000);
     }
 }

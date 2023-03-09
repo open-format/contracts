@@ -70,11 +70,14 @@ abstract contract Initializable is IInitializable, InitializableInternal {
      */
     modifier initializer() {
         bool isTopLevelCall = !_isInitializing();
-        require(
-            (isTopLevelCall && _getInitializedVersion() < 1)
-                || (!(address(this).code.length > 0) && _getInitializedVersion() == 1),
-            "Initializable: contract is already initialized"
-        );
+        if (
+            !(
+                (isTopLevelCall && _getInitializedVersion() < 1)
+                    || (!(address(this).code.length > 0) && _getInitializedVersion() == 1)
+            )
+        ) {
+            revert Initializable_contractIsAlreadyInitialized();
+        }
         _setInitialized(1);
         if (isTopLevelCall) {
             _setInitializing(true);
@@ -105,9 +108,9 @@ abstract contract Initializable is IInitializable, InitializableInternal {
      * Emits an {Initialized} event.
      */
     modifier reinitializer(uint8 version) {
-        require(
-            !_isInitializing() && _getInitializedVersion() < version, "Initializable: contract is already initialized"
-        );
+        if (!(!_isInitializing() && _getInitializedVersion() < version)) {
+            revert Initializable_contractIsAlreadyInitialized();
+        }
         _setInitialized(version);
         _setInitializing(true);
         _;
@@ -120,7 +123,9 @@ abstract contract Initializable is IInitializable, InitializableInternal {
      * {initializer} and {reinitializer} modifiers, directly or indirectly.
      */
     modifier onlyInitializing() {
-        require(_isInitializing(), "Initializable: contract is not initializing");
+        if (!_isInitializing()) {
+            revert Initializable_contractIsNotInitializing();
+        }
         _;
     }
 }
