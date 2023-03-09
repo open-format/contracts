@@ -83,9 +83,16 @@ contract ERC721LazyMint__lazyMint is Setup {
     }
 
     function test_reverts_when_access_is_invalid() public {
-        vm.expectRevert(ILazyMint.Error_not_authorized_to_lazy_mint.selector);
+        vm.expectRevert(ILazyMint.LazyMint_notAuthorizedToLazyMint.selector);
         vm.prank(other);
         erc721LazyMint.lazyMint(2, baseURI, "");
+    }
+
+    function test_reverts_when_amount_is_zero() public {
+        vm.expectRevert(ILazyMint.LazyMint_zeroAmount.selector);
+
+        vm.prank(creator);
+        erc721LazyMint.lazyMint(0, baseURI, "");
     }
 }
 
