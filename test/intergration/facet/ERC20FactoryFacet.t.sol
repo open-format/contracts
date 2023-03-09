@@ -141,13 +141,13 @@ contract ERC20FactoryFacet__integration_createERC20 is Setup {
     }
 
     function test_reverts_when_do_not_have_permission() public {
-        vm.expectRevert(IERC20Factory.Error_do_not_have_permission.selector);
+        vm.expectRevert(IERC20Factory.ERC20Factory_doNotHavePermission.selector);
         vm.prank(other);
         ERC20FactoryFacet(address(app)).createERC20("name", "symbol", 18, 1000, erc20ImplementationId);
     }
 
     function test_reverts_when_no_implementation_is_found() public {
-        vm.expectRevert(IERC20Factory.Error_no_implementation_found.selector);
+        vm.expectRevert(IERC20Factory.ERC20Factory_noImplementationFound.selector);
         vm.prank(creator);
         ERC20FactoryFacet(address(app)).createERC20("name", "symbol", 18, 1000, bytes32("wrong implementation id"));
     }
@@ -157,7 +157,7 @@ contract ERC20FactoryFacet__integration_createERC20 is Setup {
         vm.prank(creator);
         ERC20FactoryFacet(address(app)).createERC20("name", "symbol", 18, 1000, erc20ImplementationId);
 
-        vm.expectRevert(IERC20Factory.Error_name_already_used.selector);
+        vm.expectRevert(IERC20Factory.ERC20Factory_nameAlreadyUsed.selector);
         vm.prank(creator);
         ERC20FactoryFacet(address(app)).createERC20("name", "symbol", 18, 1000, erc20ImplementationId);
     }
@@ -168,7 +168,7 @@ contract ERC20FactoryFacet__integration_createERC20 is Setup {
 
         globals.setERC20Implementation(badErc20ImplementationId, address(badErc20Implementation));
 
-        vm.expectRevert(IERC20Factory.Error_failed_to_initialize.selector);
+        vm.expectRevert(IERC20Factory.ERC20Factory_failedToInitialize.selector);
         vm.prank(creator);
         ERC20FactoryFacet(address(app)).createERC20("name", "symbol", 18, 1000, badErc20ImplementationId);
     }
@@ -202,13 +202,13 @@ contract ERC20FactoryFacet__integration_calculateERC20DeploymentAddress is Setup
         address actualDeploymentAddress =
             ERC20FactoryFacet(address(app)).createERC20("name", "symbol", 18, 1000, erc20ImplementationId);
 
-        vm.expectRevert(IERC20Factory.Error_name_already_used.selector);
+        vm.expectRevert(IERC20Factory.ERC20Factory_nameAlreadyUsed.selector);
         vm.prank(creator);
         ERC20FactoryFacet(address(app)).calculateERC20FactoryDeploymentAddress("name", erc20ImplementationId);
     }
 
     function test_reverts_if_no_implementation_found() public {
-        vm.expectRevert(IERC20Factory.Error_no_implementation_found.selector);
+        vm.expectRevert(IERC20Factory.ERC20Factory_noImplementationFound.selector);
         address implementation = ERC20FactoryFacet(address(app)).calculateERC20FactoryDeploymentAddress("name", "");
     }
 }
