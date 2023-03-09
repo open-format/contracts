@@ -18,7 +18,8 @@ contract Registry__fallback is Test {
 
         // not sure if this is actually readable off-chain
         bytes32 respHash = (keccak256(resp));
-        bytes32 errorHash = (keccak256(abi.encodePacked(IRegistry.Error_CannotInteractWithRegistryDirectly.selector)));
+        bytes32 errorHash =
+            (keccak256(abi.encodePacked(IRegistry.Registry_cannotInteractWithRegistryDirectly.selector)));
         assertEq(respHash, errorHash);
     }
 }
