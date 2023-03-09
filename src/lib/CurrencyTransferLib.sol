@@ -13,8 +13,8 @@ import {IERC20, SafeERC20} from "@solidstate/contracts/utils/SafeERC20.sol";
 library CurrencyTransferLib {
     using SafeERC20 for IERC20;
 
-    error Error_insufficientValue();
-    error Error_native_token_transfer_failed();
+    error CurrencyTransferLib_insufficientValue();
+    error CurrencyTransferLib_nativeTokenTransferFailed();
 
     /// @dev The address interpreted as native token of the chain.
     address public constant NATIVE_TOKEN = address(0);
@@ -79,7 +79,7 @@ library CurrencyTransferLib {
         // slither-disable-next-line low-level-calls
         (bool success,) = to.call{value: value}("");
         if (!success) {
-            revert Error_native_token_transfer_failed();
+            revert CurrencyTransferLib_nativeTokenTransferFailed();
         }
     }
 

@@ -44,7 +44,7 @@ contract DummyDonateFacet is PlatformFee, ApplicationFee, ReentrancyGuard {
         if (currency == CurrencyTransferLib.NATIVE_TOKEN) {
             uint256 fees = platformFee + applicationFee;
             if (fees > msg.value) {
-                revert CurrencyTransferLib.Error_insufficientValue();
+                revert CurrencyTransferLib.CurrencyTransferLib_insufficientValue();
             }
 
             // pay platform fee
@@ -59,7 +59,7 @@ contract DummyDonateFacet is PlatformFee, ApplicationFee, ReentrancyGuard {
             CurrencyTransferLib.safeTransferNativeToken(to, msg.value - fees);
         } else {
             if (platformFee > msg.value) {
-                revert CurrencyTransferLib.Error_insufficientValue();
+                revert CurrencyTransferLib.CurrencyTransferLib_insufficientValue();
             }
 
             // pay platform fee
