@@ -40,7 +40,7 @@ contract Factory__create is Setup, IFactory {
 
     function test_emits_created_event() public {
         /**
-         * @dev id is determinastic and derived from factory address and name
+         * @dev id is deterministic and derived from factory address and name
          */
         address id = 0x2bC632E15Eb74471E9C40D3915c7Dfae878D681c;
 
@@ -61,7 +61,7 @@ contract Factory__create is Setup, IFactory {
     function test_reverts_if_name_already_used() public {
         factory.create("app_name");
 
-        vm.expectRevert("name already used");
+        vm.expectRevert(IFactory.Factory_nameAlreadyUsed.selector);
         factory.create("app_name");
     }
 }
