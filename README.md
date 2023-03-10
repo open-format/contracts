@@ -67,3 +67,20 @@ slither .
 ```
 myth analyze src/*
 ```
+
+### Code Style Guide
+
+#### Errors
+Errors should be defined using [custom error syntax](https://blog.soliditylang.org/2021/04/21/custom-errors/) and follow the naming convention of `ContractName_errorDescriptionInCamelCase`.
+
+for example:
+
+```solidity
+error ERC721LazyMint_insufficientLazyMintedTokens();
+```
+
+When testing the error, it's selector can be used:
+
+```solidity
+vm.expectRevert(ERC721LazyMint.ERC721LazyMint_insufficientLazyMintedTokens.selector);
+```
