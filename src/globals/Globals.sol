@@ -21,10 +21,10 @@ import {Ownable} from "@solidstate/contracts/access/ownable/Ownable.sol";
  */
 
 contract Globals is Ownable {
-    address public ERC721Implementation;
-    address public ERC20Implementation;
-
     error ERROR_percentageFeeCannotExceed100();
+
+    event ERC721ImplementationUpdated(bytes32 _implementationId, address _implementation);
+    event ERC20ImplementationUpdated(bytes32 _implementationId, address _implementation);
 
     struct PlatformFee {
         uint256 base;
@@ -32,18 +32,31 @@ contract Globals is Ownable {
         address recipient;
     }
 
+    mapping(bytes32 => address) ERC721Implementations;
+    mapping(bytes32 => address) ERC20Implementations;
+
     PlatformFee platformFee;
 
     constructor() {
         _setOwner(msg.sender);
     }
 
-    function setERC721Implementation(address _implementation) public onlyOwner {
-        ERC721Implementation = _implementation;
+    function setERC721Implementation(bytes32 _implementationId, address _implementation) public onlyOwner {
+        ERC721Implementations[_implementationId] = _implementation;
+        emit ERC721ImplementationUpdated(_implementationId, _implementation);
     }
 
-    function setERC20Implementation(address _implementation) public onlyOwner {
-        ERC20Implementation = _implementation;
+    function getERC721Implementation(bytes32 _implementationId) public view returns (address) {
+        return ERC721Implementations[_implementationId];
+    }
+
+    function setERC20Implementation(bytes32 _implementationId, address _implementation) public onlyOwner {
+        ERC20Implementations[_implementationId] = _implementation;
+        emit ERC20ImplementationUpdated(_implementationId, _implementation);
+    }
+
+    function getERC20Implementation(bytes32 _implementationId) public view returns (address) {
+        return ERC20Implementations[_implementationId];
     }
 
     function setPlatformFee(uint256 _base, uint16 _percentageBPS, address recipient) public onlyOwner {

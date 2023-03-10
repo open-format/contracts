@@ -13,13 +13,13 @@ abstract contract ERC721FactoryInternal is Global {
         ERC721FactoryStorage.layout().ERC721Contracts[_salt] = _id;
     }
 
-    function _getImplementation() internal view returns (address) {
-        return _getGlobals().ERC721Implementation();
+    function _getImplementation(bytes32 _implementationId) internal view returns (address) {
+        return _getGlobals().getERC721Implementation(_implementationId);
     }
 
     function _canCreate() internal view virtual returns (bool);
     /**
-     * @dev hook can be overriden to add functionalty before create
+     * @dev hook can be overridden to add functionality before create
      */
     function _beforeCreate() internal virtual {}
 }

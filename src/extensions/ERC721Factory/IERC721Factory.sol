@@ -2,12 +2,28 @@
 pragma solidity ^0.8.16;
 
 interface IERC721Factory {
-    event Created(address id, address creator, string name, string symbol, address royaltyRecipient, uint16 royaltyBps);
+    error Error_do_not_have_permission();
+    error Error_no_implementation_found();
+    error Error_name_already_used();
+    error Error_failed_to_initialize();
 
-    function createERC721(string memory _name, string memory _symbol, address _royaltyRecipient, uint16 _royaltyBps)
-        external
-        payable
-        returns (address id);
+    event Created(
+        address id,
+        address creator,
+        string name,
+        string symbol,
+        address royaltyRecipient,
+        uint16 royaltyBps,
+        bytes32 implementationId
+    );
 
-    function getERC721FactoryImplementation() external view returns (address);
+    function createERC721(
+        string memory _name,
+        string memory _symbol,
+        address _royaltyRecipient,
+        uint16 _royaltyBps,
+        bytes32 _implementationId
+    ) external payable returns (address id);
+
+    function getERC721FactoryImplementation(bytes32 _implementationId) external view returns (address);
 }
