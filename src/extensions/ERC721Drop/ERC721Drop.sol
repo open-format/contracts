@@ -84,16 +84,19 @@ abstract contract ERC721Drop is IERC721Drop, ERC721DropInternal {
         // TODO: _beforeSetClaimCondition hook
         // This will be used to pay fees and add functionally without needing to override logic
 
-        l.claimConditions[_tokenContract] = ERC721DropStorage.ClaimCondition({
-            startTimestamp: _condition.startTimestamp,
-            maxClaimableSupply: _condition.maxClaimableSupply,
-            supplyClaimed: supplyClaimedAlready,
-            quantityLimitPerWallet: _condition.quantityLimitPerWallet,
-            pricePerToken: _condition.pricePerToken,
-            currency: _condition.currency
-        });
+        _setClaimCondition(
+            _tokenContract,
+            ERC721DropStorage.ClaimCondition({
+                startTimestamp: _condition.startTimestamp,
+                maxClaimableSupply: _condition.maxClaimableSupply,
+                supplyClaimed: supplyClaimedAlready,
+                quantityLimitPerWallet: _condition.quantityLimitPerWallet,
+                pricePerToken: _condition.pricePerToken,
+                currency: _condition.currency
+            })
+        );
 
-        l.claimConditionIds[_tokenContract] = targetConditionId;
+        _setClaimConditionId(_tokenContract, targetConditionId);
 
         emit ClaimConditionUpdated(_condition, _resetClaimEligibility);
     }
@@ -105,7 +108,5 @@ abstract contract ERC721Drop is IERC721Drop, ERC721DropInternal {
         }
 
         // TODO: remove claim condition from storage
-
-        // TODO: emit event
     }
 }
