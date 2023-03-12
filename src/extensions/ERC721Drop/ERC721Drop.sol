@@ -69,20 +69,22 @@ abstract contract ERC721Drop is IERC721Drop, ERC721DropInternal {
             revert("must be contract owner");
         }
 
+        // TODO: _beforeSetClaimCondition hook
+        // This will be used to pay fees and add functionally without needing to override logic
+
         bytes32 targetConditionId = _getClaimConditionId(_tokenContract);
         uint256 supplyClaimedAlready = _getClaimCondition(_tokenContract).supplyClaimed;
 
         if (_resetClaimEligibility) {
             supplyClaimedAlready = 0;
-            targetConditionId = keccak256(abi.encodePacked(_dropMsgSender(), block.number));
+            // create new claimConditionId to reset supply claimed by wallets
+            // abi.encode vs abi.encodePacked is used to mitigate collisions
+            targetConditionId = keccak256(abi.encode(_tokenContract, block.number));
         }
 
         if (supplyClaimedAlready > _condition.maxClaimableSupply) {
             revert("max supply claimed");
         }
-
-        // TODO: _beforeSetClaimCondition hook
-        // This will be used to pay fees and add functionally without needing to override logic
 
         _setClaimCondition(
             _tokenContract,
