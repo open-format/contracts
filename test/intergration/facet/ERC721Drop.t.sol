@@ -255,6 +255,18 @@ contract ERC721DropFacet_setClaimCondition is Setup {
         assertEqClaimCondition(claimCondition, testClaimCondition);
     }
 
+    function test_pays_platform_fee() public {
+        // set platform fee
+        globals.setPlatformFee(0.1 ether, 0, socialConscienceLayer);
+
+        vm.deal(nftOwner, 0.1 ether);
+
+        vm.prank(nftOwner);
+        ERC721DropFacet(address(app)).setClaimCondition{value: 0.1 ether}(address(erc721), testClaimCondition, false);
+
+        assertEq(socialConscienceLayer.balance, 0.1 ether);
+    }
+
     function test_only_token_contract_owner_can_set_claim_condition() public {
         vm.expectRevert("must be contract owner");
         vm.prank(other);
