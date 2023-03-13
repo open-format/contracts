@@ -37,8 +37,6 @@ abstract contract ERC721Drop is IERC721Drop, ERC721DropInternal {
         address _currency,
         uint256 _pricePerToken
     ) external payable {
-        _beforeClaim(_tokenContract, _quantity, _currency, _pricePerToken);
-
         _verifyClaim(_tokenContract, _dropMsgSender(), _quantity, _currency, _pricePerToken);
 
         // Update contract state.
@@ -51,8 +49,6 @@ abstract contract ERC721Drop is IERC721Drop, ERC721DropInternal {
         // NOTE: web three's implementation returns startTokenId and adds it to tokenClaimed event
         // have removed for now to limit ERC721 compatibility requirements
         _transferTokensOnClaim(_tokenContract, _receiver, _quantity);
-
-        _afterClaim(_tokenContract, _quantity, _currency, _pricePerToken);
 
         emit TokensClaimed(_tokenContract, _dropMsgSender(), _receiver, _quantity);
     }
