@@ -16,9 +16,10 @@ import {RegistryMock} from "src/registry/RegistryMock.sol";
 import {Factory} from "src/factory/Factory.sol";
 import {Globals} from "src/globals/Globals.sol";
 
+import {ERC20BaseMock} from "src/tokens/ERC20/ERC20BaseMock.sol";
 import {ERC721LazyMint} from "src/tokens/ERC721/ERC721LazyMint.sol";
-import {ERC721DropFacet, ERC721DropStorage} from "src/facet/ERC721DropFacet.sol";
 
+import {ERC721DropFacet, ERC721DropStorage} from "src/facet/ERC721DropFacet.sol";
 import {SettingsFacet} from "src/facet/SettingsFacet.sol";
 
 abstract contract Helpers {
@@ -51,6 +52,7 @@ contract Setup is Test, Helpers {
     ERC721DropFacet dropFacet;
 
     ERC721LazyMint erc721;
+    ERC20BaseMock erc20;
 
     function setUp() public {
         // assign addresses
@@ -98,21 +100,28 @@ contract Setup is Test, Helpers {
             );
         }
 
+        // create erc20 token
+        erc20 = new ERC20BaseMock("name", "symbol", 18, 100 ether);
+        erc20.transfer(other, 1 ether);
+
         // create app
         vm.prank(appOwner);
         app = Proxy(payable(appFactory.create("App Name")));
 
-        // Add NATIVE_TOKEN to accepted currencies
+        // Add NATIVE_TOKEN and ERC20 to accepted currencies
         {
-            address[] memory currencies = new address[](1);
+            address[] memory currencies = new address[](2);
             currencies[0] = address(0);
-            bool[] memory approvals = new bool[](1);
+            currencies[1] = address(erc20);
+            bool[] memory approvals = new bool[](2);
             approvals[0] = true;
+            approvals[1] = true;
             vm.prank(appOwner);
             SettingsFacet(address(app)).setAcceptedCurrencies(currencies, approvals);
         }
 
         // Note: just deploy a erc721 for testing no need to do factory facet biz yet
+        // TODO: deploy from factory
         vm.prank(nftOwner);
         erc721 = new ERC721LazyMint(true);
         erc721.initialize(nftOwner, "name", "symbol", nftOwner, 1_000);
@@ -303,6 +312,10 @@ contract ERC721DropFacet_claim is Setup {
 
         vm.prank(nftOwner);
         ERC721DropFacet(address(app)).setClaimCondition(address(erc721), testClaimCondition, false);
+
+        // approve spending allowance for app
+        vm.prank(other);
+        erc20.approve(address(app), 1 ether);
     }
 
     function test_can_claim_a_token() public {
@@ -399,6 +412,88 @@ contract ERC721DropFacet_claim is Setup {
 
         assertEq(nftOwner.balance, 0.9 ether);
         assertEq(appOwner.balance, 0.1 ether);
+        assertEq(socialConscienceLayer.balance, 0.1 ether);
+    }
+
+    function test_pays_price_to_recipient() public {
+        // update claim condition price per token and currency
+        testClaimCondition.pricePerToken = 1 ether;
+        testClaimCondition.currency = address(erc20);
+        vm.prank(nftOwner);
+        ERC721DropFacet(address(app)).setClaimCondition(address(erc721), testClaimCondition, false);
+
+        // make claim with erc20
+        vm.prank(other);
+        ERC721DropFacet(address(app)).claim(
+            address(erc721), other, 1, testClaimCondition.currency, testClaimCondition.pricePerToken
+        );
+
+        assertEq(erc20.balanceOf(nftOwner), 1 ether);
+    }
+
+    function test_pays_application_fee() public {
+        // set application fee
+        vm.prank(appOwner);
+        SettingsFacet(address(app)).setApplicationFee(tenPercentBPS, appOwner);
+
+        /// update claim condition price per token and currency
+        testClaimCondition.pricePerToken = 1 ether;
+        testClaimCondition.currency = address(erc20);
+        vm.prank(nftOwner);
+        ERC721DropFacet(address(app)).setClaimCondition(address(erc721), testClaimCondition, false);
+
+        // make claim with erc20
+        vm.prank(other);
+        ERC721DropFacet(address(app)).claim(
+            address(erc721), other, 1, testClaimCondition.currency, testClaimCondition.pricePerToken
+        );
+
+        assertEq(erc20.balanceOf(nftOwner), 0.9 ether);
+        assertEq(erc20.balanceOf(appOwner), 0.1 ether);
+    }
+
+    function test_pays_platform_fee() public {
+        // update claim condition price per token
+        testClaimCondition.pricePerToken = 1 ether;
+        testClaimCondition.currency = address(erc20);
+        vm.prank(nftOwner);
+        ERC721DropFacet(address(app)).setClaimCondition(address(erc721), testClaimCondition, false);
+
+        // set platform fee
+        globals.setPlatformFee(0.1 ether, 0, socialConscienceLayer);
+
+        // make claim with platform fee
+        vm.prank(other);
+        ERC721DropFacet(address(app)).claim{value: 0.1 ether}(
+            address(erc721), other, 1, testClaimCondition.currency, testClaimCondition.pricePerToken
+        );
+
+        assertEq(erc20.balanceOf(nftOwner), 1 ether);
+        assertEq(socialConscienceLayer.balance, 0.1 ether);
+    }
+
+    function test_pays_platform_and_application_fee() public {
+        // update claim condition price per token
+        testClaimCondition.pricePerToken = 1 ether;
+        testClaimCondition.currency = address(erc20);
+        vm.prank(nftOwner);
+        ERC721DropFacet(address(app)).setClaimCondition(address(erc721), testClaimCondition, false);
+
+        // set platform fee
+        globals.setPlatformFee(0.1 ether, 0, socialConscienceLayer);
+
+        // set application fee
+        vm.prank(appOwner);
+        SettingsFacet(address(app)).setApplicationFee(tenPercentBPS, appOwner);
+
+        // make claim with ether
+        vm.prank(other);
+        ERC721DropFacet(address(app)).claim{value: 0.1 ether}(
+            address(erc721), other, 1, testClaimCondition.currency, testClaimCondition.pricePerToken
+        );
+
+        assertEq(erc20.balanceOf(nftOwner), 0.9 ether);
+        assertEq(erc20.balanceOf(appOwner), 0.1 ether);
         assertEq(socialConscienceLayer.balance, 0.1 ether);
     }
 
