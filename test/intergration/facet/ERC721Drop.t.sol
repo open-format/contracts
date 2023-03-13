@@ -37,6 +37,7 @@ contract Setup is Test, Helpers {
     address appOwner;
     address nftOwner;
     address other;
+    address socialConscienceLayer;
 
     uint16 tenPercentBPS = 1000;
 
@@ -56,6 +57,9 @@ contract Setup is Test, Helpers {
         appOwner = address(0x10);
         nftOwner = address(0x11);
         other = address(0x12);
+        socialConscienceLayer = address(0x13);
+
+        vm.deal(other, 1.1 ether);
 
         // deploy contracts
         globals = new Globals();
@@ -96,7 +100,17 @@ contract Setup is Test, Helpers {
 
         // create app
         vm.prank(appOwner);
-        app = Proxy(payable(appFactory.create("SettingsTest")));
+        app = Proxy(payable(appFactory.create("App Name")));
+
+        // Add NATIVE_TOKEN to accepted currencies
+        {
+            address[] memory currencies = new address[](1);
+            currencies[0] = address(0);
+            bool[] memory approvals = new bool[](1);
+            approvals[0] = true;
+            vm.prank(appOwner);
+            SettingsFacet(address(app)).setAcceptedCurrencies(currencies, approvals);
+        }
 
         // Note: just deploy a erc721 for testing no need to do factory facet biz yet
         vm.prank(nftOwner);
@@ -125,6 +139,15 @@ contract ERC721LazyMint_grantRole is Setup {
         vm.expectRevert();
         vm.prank(other);
         erc721.grantRole(MINTER_ROLE, other);
+    }
+}
+
+contract ERC721LazyMint_royaltyInfo is Setup {
+    function test_can_lazy_mint() public {
+        (address recipient, uint256 amount) = erc721.royaltyInfo(0, 10);
+
+        assertEq(recipient, nftOwner);
+        assertEq(amount, 1);
     }
 }
 
@@ -299,6 +322,84 @@ contract ERC721DropFacet_claim is Setup {
 
         assertEq(erc721.ownerOf(0), other);
         assertEq(erc721.ownerOf(1), other);
+    }
+
+    function test_pays_price_to_recipient_with_native_token() public {
+        // update claim condition price per token
+        testClaimCondition.pricePerToken = 1 ether;
+        vm.prank(nftOwner);
+        ERC721DropFacet(address(app)).setClaimCondition(address(erc721), testClaimCondition, false);
+
+        // make claim with ether
+        vm.prank(other);
+        ERC721DropFacet(address(app)).claim{value: 1 ether}(
+            address(erc721), other, 1, testClaimCondition.currency, testClaimCondition.pricePerToken
+        );
+
+        assertEq(nftOwner.balance, 1 ether);
+    }
+
+    function test_pays_application_fee_with_native_token() public {
+        // set application fee
+        vm.prank(appOwner);
+        SettingsFacet(address(app)).setApplicationFee(tenPercentBPS, appOwner);
+
+        // update claim condition price per token
+        testClaimCondition.pricePerToken = 1 ether;
+        vm.prank(nftOwner);
+        ERC721DropFacet(address(app)).setClaimCondition(address(erc721), testClaimCondition, false);
+
+        // make claim with ether
+        vm.prank(other);
+        ERC721DropFacet(address(app)).claim{value: 1 ether}(
+            address(erc721), other, 1, testClaimCondition.currency, testClaimCondition.pricePerToken
+        );
+
+        assertEq(nftOwner.balance, 0.9 ether);
+        assertEq(appOwner.balance, 0.1 ether);
+    }
+
+    function test_pays_platform_fee_with_native_token() public {
+        // update claim condition price per token
+        testClaimCondition.pricePerToken = 1 ether;
+        vm.prank(nftOwner);
+        ERC721DropFacet(address(app)).setClaimCondition(address(erc721), testClaimCondition, false);
+
+        // set platform fee
+        globals.setPlatformFee(0.1 ether, 0, socialConscienceLayer);
+
+        // make claim with ether
+        vm.prank(other);
+        ERC721DropFacet(address(app)).claim{value: 1.1 ether}(
+            address(erc721), other, 1, testClaimCondition.currency, testClaimCondition.pricePerToken
+        );
+
+        assertEq(nftOwner.balance, 1 ether);
+        assertEq(socialConscienceLayer.balance, 0.1 ether);
+    }
+
+    function test_pays_platform_and_application_fee_with_native_token() public {
+        // update claim condition price per token
+        testClaimCondition.pricePerToken = 1 ether;
+        vm.prank(nftOwner);
+        ERC721DropFacet(address(app)).setClaimCondition(address(erc721), testClaimCondition, false);
+
+        // set platform fee
+        globals.setPlatformFee(0.1 ether, 0, socialConscienceLayer);
+
+        // set application fee
+        vm.prank(appOwner);
+        SettingsFacet(address(app)).setApplicationFee(tenPercentBPS, appOwner);
+
+        // make claim with ether
+        vm.prank(other);
+        ERC721DropFacet(address(app)).claim{value: 1.1 ether}(
+            address(erc721), other, 1, testClaimCondition.currency, testClaimCondition.pricePerToken
+        );
+
+        assertEq(nftOwner.balance, 0.9 ether);
+        assertEq(appOwner.balance, 0.1 ether);
+        assertEq(socialConscienceLayer.balance, 0.1 ether);
     }
 
     function test_reverts_when_quantity_per_wallet_limit_exceeded() public {
