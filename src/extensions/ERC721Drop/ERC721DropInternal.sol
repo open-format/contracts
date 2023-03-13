@@ -120,4 +120,18 @@ abstract contract ERC721DropInternal {
     function _dropMsgSender() internal virtual returns (address) {
         return msg.sender;
     }
+
+    function _beforeClaim(address _tokenContract, uint256 _quantity, address _currency, uint256 _pricePerToken)
+        internal
+        virtual
+    {}
+
+    function _afterClaim(address _tokenContract, uint256 _quantity, address _currency, uint256 _pricePerToken)
+        internal
+        virtual
+    {}
+
+    function _beforeSetClaimCondition(ERC721DropStorage.ClaimCondition calldata _condition) internal virtual {}
+
+    function _afterSetClaimCondition(ERC721DropStorage.ClaimCondition calldata _condition) internal virtual {}
 }

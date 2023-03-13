@@ -37,7 +37,7 @@ abstract contract ERC721Drop is IERC721Drop, ERC721DropInternal {
         address _currency,
         uint256 _pricePerToken
     ) external payable {
-        // TODO: _beforeClaim hook
+        _beforeClaim(_tokenContract, _quantity, _currency, _pricePerToken);
 
         _verifyClaim(_tokenContract, _dropMsgSender(), _quantity, _currency, _pricePerToken);
 
@@ -48,12 +48,11 @@ abstract contract ERC721Drop is IERC721Drop, ERC721DropInternal {
         _collectPriceOnClaim(_tokenContract, _quantity, _currency, _pricePerToken);
 
         // Mint the relevant NFTs to claimer.
-
         // NOTE: web three's implementation returns startTokenId and adds it to tokenClaimed event
         // have removed for now to limit ERC721 compatibility requirements
         _transferTokensOnClaim(_tokenContract, _receiver, _quantity);
 
-        // TODO: afterClaim hook
+        _afterClaim(_tokenContract, _quantity, _currency, _pricePerToken);
 
         emit TokensClaimed(_tokenContract, _dropMsgSender(), _receiver, _quantity);
     }
@@ -69,8 +68,8 @@ abstract contract ERC721Drop is IERC721Drop, ERC721DropInternal {
             revert("must be contract owner");
         }
 
-        // TODO: _beforeSetClaimCondition hook
-        // This will be used to pay fees and add functionally without needing to override logic
+        // perform any extra checks
+        _beforeSetClaimCondition(_condition);
 
         bytes32 targetConditionId = _getClaimConditionId(_tokenContract);
         uint256 supplyClaimedAlready = _getClaimCondition(_tokenContract).supplyClaimed;
@@ -100,6 +99,9 @@ abstract contract ERC721Drop is IERC721Drop, ERC721DropInternal {
 
         _setClaimConditionId(_tokenContract, targetConditionId);
 
+        // perform any extra logic
+        _afterSetClaimCondition(_condition);
+
         emit ClaimConditionUpdated(_condition, _resetClaimEligibility);
     }
 
@@ -109,6 +111,6 @@ abstract contract ERC721Drop is IERC721Drop, ERC721DropInternal {
             revert("must be contract owner");
         }
 
-        // TODO: remove claim condition from storage
+        // TODO: remove claim condition from storage?
     }
 }
