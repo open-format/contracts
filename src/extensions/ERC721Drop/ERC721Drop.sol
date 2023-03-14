@@ -113,12 +113,11 @@ abstract contract ERC721Drop is IERC721Drop, ERC721DropInternal, ReentrancyGuard
         emit ClaimConditionUpdated(_condition, _resetClaimEligibility);
     }
 
-    function removeClaimCondition(address tokenContract) external {
-        // TODO: possibly only address that created the claim?
-        if (!_canSetClaimCondition(tokenContract)) {
+    function removeClaimCondition(address _tokenContract) external {
+        if (!_canSetClaimCondition(_tokenContract)) {
             revert ERC721Drop_notAuthorised();
         }
 
-        // TODO: remove claim condition from storage?
+        _removeClaimCondition(_tokenContract);
     }
 }

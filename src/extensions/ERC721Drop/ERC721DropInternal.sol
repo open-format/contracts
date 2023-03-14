@@ -33,6 +33,10 @@ abstract contract ERC721DropInternal is IERC721Drop {
         ERC721DropStorage.layout().claimConditions[_tokenContract] = _claimCondition;
     }
 
+    function _removeClaimCondition(address _tokenContract) internal {
+        delete ERC721DropStorage.layout().claimConditions[_tokenContract];
+    }
+
     function _getClaimConditionId(address _tokenContract) internal view returns (bytes32) {
         return ERC721DropStorage.layout().claimConditionIds[_tokenContract];
     }
