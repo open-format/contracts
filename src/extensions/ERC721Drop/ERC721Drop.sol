@@ -29,6 +29,17 @@ abstract contract ERC721Drop is IERC721Drop, ERC721DropInternal, ReentrancyGuard
         return _getClaimCondition(_tokenContract);
     }
 
+    function verifyClaim(
+        address _tokenContract,
+        address _claimer,
+        uint256 _quantity,
+        address _currency,
+        uint256 _pricePerToken
+    ) external view returns (bool) {
+        _verifyClaim(_tokenContract, _claimer, _quantity, _currency, _pricePerToken);
+        return true;
+    }
+
     // TODO: consider renaming to ERC721Drop_claim to avoid facet function clashes, could also make it internal/public
     // TODO: consider making this ERC agnostic ... param currency -> priceCurrency
 
