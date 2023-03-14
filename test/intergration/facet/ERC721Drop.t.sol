@@ -22,6 +22,8 @@ import {ERC721LazyMint} from "src/tokens/ERC721/ERC721LazyMint.sol";
 import {ERC721DropFacet, ERC721DropStorage} from "src/facet/ERC721DropFacet.sol";
 import {SettingsFacet} from "src/facet/SettingsFacet.sol";
 
+import {IERC721Drop} from "src/extensions/ERC721Drop/ERC721Drop.sol";
+
 abstract contract Helpers {
     function prepareSingleFacetCut(
         address cutAddress,
@@ -268,7 +270,7 @@ contract ERC721DropFacet_setClaimCondition is Setup {
     }
 
     function test_only_token_contract_owner_can_set_claim_condition() public {
-        vm.expectRevert("must be contract owner");
+        vm.expectRevert(IERC721Drop.ERC721Drop_notAuthorised.selector);
         vm.prank(other);
         ERC721DropFacet(address(app)).setClaimCondition(address(erc721), testClaimCondition, false);
     }
