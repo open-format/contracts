@@ -1,6 +1,8 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.16;
 
+import {ReentrancyGuard} from "@solidstate/contracts/utils/ReentrancyGuard.sol";
+
 import {IERC721Drop} from "./IERC721Drop.sol";
 import {ERC721DropStorage} from "./ERC721DropStorage.sol";
 import {ERC721DropInternal} from "./ERC721DropInternal.sol";
@@ -18,7 +20,7 @@ import {ERC721DropInternal} from "./ERC721DropInternal.sol";
  *          Some logic has been removed but may be added in again (merkle tree, metadata)
  */
 
-abstract contract ERC721Drop is IERC721Drop, ERC721DropInternal {
+abstract contract ERC721Drop is IERC721Drop, ERC721DropInternal, ReentrancyGuard {
     function getClaimCondition(address _tokenContract)
         external
         view
@@ -36,7 +38,7 @@ abstract contract ERC721Drop is IERC721Drop, ERC721DropInternal {
         uint256 _quantity,
         address _currency,
         uint256 _pricePerToken
-    ) external payable {
+    ) external payable nonReentrant {
         _verifyClaim(_tokenContract, _dropMsgSender(), _quantity, _currency, _pricePerToken);
 
         // Update contract state.
@@ -58,7 +60,7 @@ abstract contract ERC721Drop is IERC721Drop, ERC721DropInternal {
         address _tokenContract,
         ERC721DropStorage.ClaimCondition calldata _condition,
         bool _resetClaimEligibility
-    ) external payable {
+    ) external payable nonReentrant {
         if (!_isTokenContractOwner(_tokenContract)) {
             revert("must be contract owner");
         }
