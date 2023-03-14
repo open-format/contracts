@@ -61,8 +61,8 @@ abstract contract ERC721Drop is IERC721Drop, ERC721DropInternal, ReentrancyGuard
         ERC721DropStorage.ClaimCondition calldata _condition,
         bool _resetClaimEligibility
     ) external payable nonReentrant {
-        if (!_isTokenContractOwner(_tokenContract)) {
-            revert("must be contract owner");
+        if (!_canSetClaimCondition(_tokenContract)) {
+            revert ERC721Drop_notAuthorised();
         }
 
         // perform any extra checks
@@ -79,7 +79,7 @@ abstract contract ERC721Drop is IERC721Drop, ERC721DropInternal, ReentrancyGuard
         }
 
         if (supplyClaimedAlready > _condition.maxClaimableSupply) {
-            revert("max supply claimed");
+            revert ERC721Drop_maxSupplyClaimed();
         }
 
         _setClaimCondition(
@@ -104,8 +104,8 @@ abstract contract ERC721Drop is IERC721Drop, ERC721DropInternal, ReentrancyGuard
 
     function removeClaimCondition(address tokenContract) external {
         // TODO: possibly only address that created the claim?
-        if (!_isTokenContractOwner(tokenContract)) {
-            revert("must be contract owner");
+        if (!_canSetClaimCondition(tokenContract)) {
+            revert ERC721Drop_notAuthorised();
         }
 
         // TODO: remove claim condition from storage?

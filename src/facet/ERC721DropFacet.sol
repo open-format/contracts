@@ -12,11 +12,14 @@ import {CurrencyTransferLib} from "src/lib/CurrencyTransferLib.sol";
 import {IERC2981} from "@solidstate/contracts/interfaces/IERC2981.sol";
 
 contract ERC721DropFacet is ERC721Drop, PlatformFee, ApplicationFee {
+    error ERC721DropFacet_EIP2981NotSupported();
+    error ERC721DropFacet_royaltyRecipientNotFound();
     /**
      * @dev override before setClaimCondition to add platform fee
      *      requires msg.value to be equal or more than base platform fee
      *      when calling setClaimCondition
      */
+
     function _beforeSetClaimCondition(address _tokenContract, ERC721DropStorage.ClaimCondition calldata _condition)
         internal
         override
@@ -24,7 +27,7 @@ contract ERC721DropFacet is ERC721Drop, PlatformFee, ApplicationFee {
         // token contracts must support the royalty standard
         bool supportsERC281 = ICompatibleERC721(_tokenContract).supportsInterface(0x2a55205a);
         if (!supportsERC281) {
-            revert("must support nft royalty standard");
+            revert ERC721DropFacet_EIP2981NotSupported();
         }
 
         (address recipient, uint256 amount) = _platformFeeInfo(0);
@@ -64,7 +67,7 @@ contract ERC721DropFacet is ERC721Drop, PlatformFee, ApplicationFee {
         (address royaltyRecipient,) = IERC2981(_tokenContract).royaltyInfo(0, 0);
 
         if (royaltyRecipient == address(0)) {
-            revert("No recipient setup");
+            revert ERC721DropFacet_royaltyRecipientNotFound();
         }
 
         uint256 totalPrice = _quantity * _pricePerToken;

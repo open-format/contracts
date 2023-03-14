@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.16;
 
+import {IERC721Drop} from "./IERC721Drop.sol";
 import {ERC721DropStorage} from "./ERC721DropStorage.sol";
 import {ICompatibleERC721} from "./ICompatibleERC721.sol";
 
@@ -17,7 +18,7 @@ import {ICompatibleERC721} from "./ICompatibleERC721.sol";
  *          Some logic has been removed but may be added in again (merkle tree, metadata)
  */
 
-abstract contract ERC721DropInternal {
+abstract contract ERC721DropInternal is IERC721Drop {
     function _getClaimCondition(address _tokenContract)
         internal
         view
@@ -69,19 +70,19 @@ abstract contract ERC721DropInternal {
         uint256 supplyClaimedByWallet = _getSupplyClaimedByWallet(_tokenContract, _claimer);
 
         if (_currency != claimCondition.currency || _pricePerToken != claimCondition.pricePerToken) {
-            revert("!PriceOrCurrency");
+            revert ERC721Drop_invalidPriceOrCurrency();
         }
 
         if (_quantity == 0 || (_quantity + supplyClaimedByWallet > claimCondition.quantityLimitPerWallet)) {
-            revert("!Qty");
+            revert ERC721Drop_quantityZeroOrExceededWalletLimit();
         }
 
         if (claimCondition.supplyClaimed + _quantity > claimCondition.maxClaimableSupply) {
-            revert("!MaxSupply");
+            revert ERC721Drop_exceededMaxSupply();
         }
 
         if (claimCondition.startTimestamp > block.timestamp) {
-            revert("cant claim yet");
+            revert ERC721Drop_cantClaimYet();
         }
     }
 
@@ -98,8 +99,7 @@ abstract contract ERC721DropInternal {
         internal
         virtual;
 
-    // NOTE maybe have this defualt to a simpler function or _canSetERC721DropClaimCondition
-    function _isTokenContractOwner(address _tokenContract) internal virtual returns (bool) {
+    function _canSetClaimCondition(address _tokenContract) internal virtual returns (bool) {
         try ICompatibleERC721(_tokenContract).owner() returns (address _owner) {
             return _owner == msg.sender;
         } catch {
