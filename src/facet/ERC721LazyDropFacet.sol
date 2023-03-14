@@ -1,9 +1,9 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.16;
 
-import {ERC721Drop, IERC721Drop} from "src/extensions/ERC721Drop/ERC721Drop.sol";
-import {ICompatibleERC721} from "src/extensions/ERC721Drop/ICompatibleERC721.sol";
-import {ERC721DropStorage} from "src/extensions/ERC721Drop/ERC721DropStorage.sol";
+import {ERC721LazyDrop, IERC721LazyDrop} from "src/extensions/ERC721LazyDrop/ERC721LazyDrop.sol";
+import {ICompatibleERC721} from "src/extensions/ERC721LazyDrop/ICompatibleERC721.sol";
+import {ERC721LazyDropStorage} from "src/extensions/ERC721LazyDrop/ERC721LazyDropStorage.sol";
 
 import {PlatformFee} from "src/extensions/platformFee/PlatformFee.sol";
 import {ApplicationFee} from "src/extensions/applicationFee/ApplicationFee.sol";
@@ -11,23 +11,23 @@ import {CurrencyTransferLib} from "src/lib/CurrencyTransferLib.sol";
 
 import {IERC2981} from "@solidstate/contracts/interfaces/IERC2981.sol";
 
-contract ERC721DropFacet is ERC721Drop, PlatformFee, ApplicationFee {
-    error ERC721DropFacet_EIP2981NotSupported();
-    error ERC721DropFacet_royaltyRecipientNotFound();
+contract ERC721LazyDropFacet is ERC721LazyDrop, PlatformFee, ApplicationFee {
+    error ERC721LazyDropFacet_EIP2981NotSupported();
+    error ERC721LazyDropFacet_royaltyRecipientNotFound();
     /**
      * @dev override before setClaimCondition to add platform fee
      *      requires msg.value to be equal or more than base platform fee
      *      when calling setClaimCondition
      */
 
-    function _beforeSetClaimCondition(address _tokenContract, ERC721DropStorage.ClaimCondition calldata _condition)
+    function _beforeSetClaimCondition(address _tokenContract, ERC721LazyDropStorage.ClaimCondition calldata _condition)
         internal
         override
     {
         // token contracts must support the royalty standard
         bool supportsERC281 = ICompatibleERC721(_tokenContract).supportsInterface(0x2a55205a);
         if (!supportsERC281) {
-            revert ERC721DropFacet_EIP2981NotSupported();
+            revert ERC721LazyDropFacet_EIP2981NotSupported();
         }
 
         (address recipient, uint256 amount) = _platformFeeInfo(0);
@@ -67,7 +67,7 @@ contract ERC721DropFacet is ERC721Drop, PlatformFee, ApplicationFee {
         (address royaltyRecipient,) = IERC2981(_tokenContract).royaltyInfo(0, 0);
 
         if (royaltyRecipient == address(0)) {
-            revert ERC721DropFacet_royaltyRecipientNotFound();
+            revert ERC721LazyDropFacet_royaltyRecipientNotFound();
         }
 
         uint256 totalPrice = _quantity * _pricePerToken;

@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.16;
 
-library ERC721DropStorage {
+library ERC721LazyDropStorage {
     struct ClaimCondition {
         uint256 startTimestamp;
         uint256 supplyClaimed;
@@ -20,7 +20,7 @@ library ERC721DropStorage {
         mapping(bytes32 => mapping(address => uint256)) supplyClaimedByWallet;
     }
 
-    bytes32 internal constant STORAGE_SLOT = keccak256("openformat.contracts.storage.ERC721Drop");
+    bytes32 internal constant STORAGE_SLOT = keccak256("openformat.contracts.storage.ERC721LazyDrop");
 
     function layout() internal pure returns (Layout storage l) {
         bytes32 slot = STORAGE_SLOT;

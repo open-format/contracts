@@ -1,12 +1,12 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.16;
 
-import {IERC721Drop} from "./IERC721Drop.sol";
-import {ERC721DropStorage} from "./ERC721DropStorage.sol";
+import {IERC721LazyDrop} from "./IERC721LazyDrop.sol";
+import {ERC721LazyDropStorage} from "./ERC721LazyDropStorage.sol";
 import {ICompatibleERC721} from "./ICompatibleERC721.sol";
 
 /**
- * @title   "ERC721Drop Facet"
+ * @title   "ERC721LazyDrop Facet"
  * @notice  (WIP) Allows nft contract owners to setup a drop on an app
  *          For an nft to contract to be compatible:
  *          erc721 contract must have `owner() returns (address)`, `mintTo(address)` and `batchMintTo(address,uint256)`
@@ -18,35 +18,35 @@ import {ICompatibleERC721} from "./ICompatibleERC721.sol";
  *          Some logic has been removed but may be added in again (merkle tree, metadata)
  */
 
-abstract contract ERC721DropInternal is IERC721Drop {
+abstract contract ERC721LazyDropInternal is IERC721LazyDrop {
     function _getClaimCondition(address _tokenContract)
         internal
         view
-        returns (ERC721DropStorage.ClaimCondition storage)
+        returns (ERC721LazyDropStorage.ClaimCondition storage)
     {
-        return ERC721DropStorage.layout().claimConditions[_tokenContract];
+        return ERC721LazyDropStorage.layout().claimConditions[_tokenContract];
     }
 
-    function _setClaimCondition(address _tokenContract, ERC721DropStorage.ClaimCondition memory _claimCondition)
+    function _setClaimCondition(address _tokenContract, ERC721LazyDropStorage.ClaimCondition memory _claimCondition)
         internal
     {
-        ERC721DropStorage.layout().claimConditions[_tokenContract] = _claimCondition;
+        ERC721LazyDropStorage.layout().claimConditions[_tokenContract] = _claimCondition;
     }
 
     function _removeClaimCondition(address _tokenContract) internal {
-        delete ERC721DropStorage.layout().claimConditions[_tokenContract];
+        delete ERC721LazyDropStorage.layout().claimConditions[_tokenContract];
     }
 
     function _getClaimConditionId(address _tokenContract) internal view returns (bytes32) {
-        return ERC721DropStorage.layout().claimConditionIds[_tokenContract];
+        return ERC721LazyDropStorage.layout().claimConditionIds[_tokenContract];
     }
 
     function _setClaimConditionId(address _tokenContract, bytes32 _id) internal {
-        ERC721DropStorage.layout().claimConditionIds[_tokenContract] = _id;
+        ERC721LazyDropStorage.layout().claimConditionIds[_tokenContract] = _id;
     }
 
     function _getSupplyClaimedByWallet(address _tokenContract, address _claimer) internal view returns (uint256) {
-        ERC721DropStorage.Layout storage l = ERC721DropStorage.layout();
+        ERC721LazyDropStorage.Layout storage l = ERC721LazyDropStorage.layout();
         bytes32 activeConditionId = l.claimConditionIds[_tokenContract];
         return l.supplyClaimedByWallet[activeConditionId][_claimer];
     }
@@ -55,7 +55,7 @@ abstract contract ERC721DropInternal is IERC721Drop {
         internal
         virtual
     {
-        ERC721DropStorage.Layout storage l = ERC721DropStorage.layout();
+        ERC721LazyDropStorage.Layout storage l = ERC721LazyDropStorage.layout();
 
         bytes32 claimConditionId = l.claimConditionIds[_tokenContract];
         l.claimConditions[_tokenContract].supplyClaimed += _quantity;
@@ -70,23 +70,23 @@ abstract contract ERC721DropInternal is IERC721Drop {
         address _currency,
         uint256 _pricePerToken
     ) internal view virtual {
-        ERC721DropStorage.ClaimCondition memory claimCondition = _getClaimCondition(_tokenContract);
+        ERC721LazyDropStorage.ClaimCondition memory claimCondition = _getClaimCondition(_tokenContract);
         uint256 supplyClaimedByWallet = _getSupplyClaimedByWallet(_tokenContract, _claimer);
 
         if (_currency != claimCondition.currency || _pricePerToken != claimCondition.pricePerToken) {
-            revert ERC721Drop_invalidPriceOrCurrency();
+            revert ERC721LazyDrop_invalidPriceOrCurrency();
         }
 
         if (_quantity == 0 || (_quantity + supplyClaimedByWallet > claimCondition.quantityLimitPerWallet)) {
-            revert ERC721Drop_quantityZeroOrExceededWalletLimit();
+            revert ERC721LazyDrop_quantityZeroOrExceededWalletLimit();
         }
 
         if (claimCondition.supplyClaimed + _quantity > claimCondition.maxClaimableSupply) {
-            revert ERC721Drop_exceededMaxSupply();
+            revert ERC721LazyDrop_exceededMaxSupply();
         }
 
         if (claimCondition.startTimestamp > block.timestamp) {
-            revert ERC721Drop_cantClaimYet();
+            revert ERC721LazyDrop_cantClaimYet();
         }
     }
 
@@ -116,12 +116,12 @@ abstract contract ERC721DropInternal is IERC721Drop {
         return msg.sender;
     }
 
-    function _beforeSetClaimCondition(address _tokenContract, ERC721DropStorage.ClaimCondition calldata _condition)
+    function _beforeSetClaimCondition(address _tokenContract, ERC721LazyDropStorage.ClaimCondition calldata _condition)
         internal
         virtual
     {}
 
-    function _afterSetClaimCondition(address _tokenContract, ERC721DropStorage.ClaimCondition calldata _condition)
+    function _afterSetClaimCondition(address _tokenContract, ERC721LazyDropStorage.ClaimCondition calldata _condition)
         internal
         virtual
     {}

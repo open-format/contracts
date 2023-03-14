@@ -19,10 +19,10 @@ import {Globals} from "src/globals/Globals.sol";
 import {ERC20BaseMock} from "src/tokens/ERC20/ERC20BaseMock.sol";
 import {ERC721LazyMint} from "src/tokens/ERC721/ERC721LazyMint.sol";
 
-import {ERC721DropFacet, ERC721DropStorage} from "src/facet/ERC721DropFacet.sol";
+import {ERC721LazyDropFacet, ERC721LazyDropStorage} from "src/facet/ERC721LazyDropFacet.sol";
 import {SettingsFacet} from "src/facet/SettingsFacet.sol";
 
-import {IERC721Drop} from "src/extensions/ERC721Drop/ERC721Drop.sol";
+import {IERC721LazyDrop} from "src/extensions/ERC721LazyDrop/ERC721LazyDrop.sol";
 
 abstract contract Helpers is Test {
     function prepareSingleFacetCut(
@@ -36,8 +36,8 @@ abstract contract Helpers is Test {
     }
 
     function assertEqClaimCondition(
-        ERC721DropStorage.ClaimCondition memory _A,
-        ERC721DropStorage.ClaimCondition memory _B
+        ERC721LazyDropStorage.ClaimCondition memory _A,
+        ERC721LazyDropStorage.ClaimCondition memory _B
     ) public {
         assertEq(_A.startTimestamp, _B.startTimestamp);
         assertEq(_A.supplyClaimed, _B.supplyClaimed);
@@ -63,7 +63,7 @@ contract Setup is Test, Helpers {
     Globals globals;
 
     SettingsFacet settingsFacet;
-    ERC721DropFacet dropFacet;
+    ERC721LazyDropFacet dropFacet;
 
     ERC721LazyMint erc721;
     ERC20BaseMock erc20;
@@ -99,15 +99,15 @@ contract Setup is Test, Helpers {
         }
 
         {
-            dropFacet = new ERC721DropFacet();
+            dropFacet = new ERC721LazyDropFacet();
 
             // add facet to registry
             bytes4[] memory selectors = new bytes4[](5);
-            selectors[0] = dropFacet.setClaimCondition.selector;
-            selectors[1] = dropFacet.getClaimCondition.selector;
-            selectors[2] = dropFacet.claim.selector;
-            selectors[3] = dropFacet.verifyClaim.selector;
-            selectors[4] = dropFacet.removeClaimCondition.selector;
+            selectors[0] = dropFacet.ERC721LazyDrop_setClaimCondition.selector;
+            selectors[1] = dropFacet.ERC721LazyDrop_getClaimCondition.selector;
+            selectors[2] = dropFacet.ERC721LazyDrop_claim.selector;
+            selectors[3] = dropFacet.ERC721LazyDrop_verifyClaim.selector;
+            selectors[4] = dropFacet.ERC721LazyDrop_removeClaimCondition.selector;
 
             registry.diamondCut(
                 prepareSingleFacetCut(address(dropFacet), IDiamondWritableInternal.FacetCutAction.ADD, selectors),
@@ -148,11 +148,11 @@ contract Setup is Test, Helpers {
     function _afterSetUp() internal virtual {}
 }
 
-contract ERC721DropFacet_getClaimCondition is Setup {
-    ERC721DropStorage.ClaimCondition testClaimCondition;
+contract ERC721LazyDropFacet_ERC721LazyDrop_ERC721LazyDrop_getClaimCondition is Setup {
+    ERC721LazyDropStorage.ClaimCondition testClaimCondition;
 
     function _afterSetUp() internal override {
-        testClaimCondition = ERC721DropStorage.ClaimCondition({
+        testClaimCondition = ERC721LazyDropStorage.ClaimCondition({
             startTimestamp: 100,
             maxClaimableSupply: 100,
             supplyClaimed: 0,
@@ -162,17 +162,19 @@ contract ERC721DropFacet_getClaimCondition is Setup {
         });
 
         vm.prank(nftOwner);
-        ERC721DropFacet(address(app)).setClaimCondition(address(erc721), testClaimCondition, false);
+        ERC721LazyDropFacet(address(app)).ERC721LazyDrop_setClaimCondition(address(erc721), testClaimCondition, false);
     }
 
     function test_gets_claim_condition() public {
-        assertEqClaimCondition(ERC721DropFacet(address(app)).getClaimCondition(address(erc721)), testClaimCondition);
+        assertEqClaimCondition(
+            ERC721LazyDropFacet(address(app)).ERC721LazyDrop_getClaimCondition(address(erc721)), testClaimCondition
+        );
     }
 
     function test_returns_empty_claim_condition_if_not_set() public {
         assertEqClaimCondition(
-            ERC721DropFacet(address(app)).getClaimCondition(address(0)),
-            ERC721DropStorage.ClaimCondition({
+            ERC721LazyDropFacet(address(app)).ERC721LazyDrop_getClaimCondition(address(0)),
+            ERC721LazyDropStorage.ClaimCondition({
                 startTimestamp: 0,
                 maxClaimableSupply: 0,
                 supplyClaimed: 0,
@@ -184,11 +186,11 @@ contract ERC721DropFacet_getClaimCondition is Setup {
     }
 }
 
-contract ERC721DropFacet_verifyClaim is Setup {
-    ERC721DropStorage.ClaimCondition testClaimCondition;
+contract ERC721LazyDropFacet_ERC721LazyDrop_verifyClaim is Setup {
+    ERC721LazyDropStorage.ClaimCondition testClaimCondition;
 
     function _afterSetUp() internal override {
-        testClaimCondition = ERC721DropStorage.ClaimCondition({
+        testClaimCondition = ERC721LazyDropStorage.ClaimCondition({
             startTimestamp: 0,
             maxClaimableSupply: 100,
             supplyClaimed: 0,
@@ -198,58 +200,68 @@ contract ERC721DropFacet_verifyClaim is Setup {
         });
 
         vm.prank(nftOwner);
-        ERC721DropFacet(address(app)).setClaimCondition(address(erc721), testClaimCondition, false);
+        ERC721LazyDropFacet(address(app)).ERC721LazyDrop_setClaimCondition(address(erc721), testClaimCondition, false);
     }
 
     function test_can_verify_claim() public {
-        assertTrue(ERC721DropFacet(address(app)).verifyClaim(address(erc721), other, 1, address(erc20), 1 ether));
+        assertTrue(
+            ERC721LazyDropFacet(address(app)).ERC721LazyDrop_verifyClaim(
+                address(erc721), other, 1, address(erc20), 1 ether
+            )
+        );
     }
 
     function test_reverts_when_price_is_invalid() public {
-        vm.expectRevert(IERC721Drop.ERC721Drop_invalidPriceOrCurrency.selector);
-        ERC721DropFacet(address(app)).verifyClaim(address(erc721), other, 1, address(erc20), 0);
+        vm.expectRevert(IERC721LazyDrop.ERC721LazyDrop_invalidPriceOrCurrency.selector);
+        ERC721LazyDropFacet(address(app)).ERC721LazyDrop_verifyClaim(address(erc721), other, 1, address(erc20), 0);
     }
 
     function test_reverts_when_currency_is_invalid() public {
-        vm.expectRevert(IERC721Drop.ERC721Drop_invalidPriceOrCurrency.selector);
-        ERC721DropFacet(address(app)).verifyClaim(address(erc721), other, 1, address(0), 1 ether);
+        vm.expectRevert(IERC721LazyDrop.ERC721LazyDrop_invalidPriceOrCurrency.selector);
+        ERC721LazyDropFacet(address(app)).ERC721LazyDrop_verifyClaim(address(erc721), other, 1, address(0), 1 ether);
     }
 
     function test_reverts_when_quantity_is_zero() public {
-        vm.expectRevert(IERC721Drop.ERC721Drop_quantityZeroOrExceededWalletLimit.selector);
-        ERC721DropFacet(address(app)).verifyClaim(address(erc721), other, 0, address(erc20), 1 ether);
+        vm.expectRevert(IERC721LazyDrop.ERC721LazyDrop_quantityZeroOrExceededWalletLimit.selector);
+        ERC721LazyDropFacet(address(app)).ERC721LazyDrop_verifyClaim(address(erc721), other, 0, address(erc20), 1 ether);
     }
 
     function test_reverts_when_quantity_exceeds_wallet_limit() public {
-        vm.expectRevert(IERC721Drop.ERC721Drop_quantityZeroOrExceededWalletLimit.selector);
-        ERC721DropFacet(address(app)).verifyClaim(address(erc721), other, 11, address(erc20), 1 ether);
+        vm.expectRevert(IERC721LazyDrop.ERC721LazyDrop_quantityZeroOrExceededWalletLimit.selector);
+        ERC721LazyDropFacet(address(app)).ERC721LazyDrop_verifyClaim(
+            address(erc721), other, 11, address(erc20), 1 ether
+        );
     }
 
     function test_reverts_when_quantity_exceeds_max_supply() public {
         // set max supply to 9
         testClaimCondition.maxClaimableSupply = 9;
         vm.prank(nftOwner);
-        ERC721DropFacet(address(app)).setClaimCondition(address(erc721), testClaimCondition, false);
+        ERC721LazyDropFacet(address(app)).ERC721LazyDrop_setClaimCondition(address(erc721), testClaimCondition, false);
 
-        vm.expectRevert(IERC721Drop.ERC721Drop_exceededMaxSupply.selector);
-        ERC721DropFacet(address(app)).verifyClaim(address(erc721), other, 10, address(erc20), 1 ether);
+        vm.expectRevert(IERC721LazyDrop.ERC721LazyDrop_exceededMaxSupply.selector);
+        ERC721LazyDropFacet(address(app)).ERC721LazyDrop_verifyClaim(
+            address(erc721), other, 10, address(erc20), 1 ether
+        );
     }
 
     function test_reverts_before_start_timestamp() public {
         testClaimCondition.startTimestamp = 1000;
         vm.prank(nftOwner);
-        ERC721DropFacet(address(app)).setClaimCondition(address(erc721), testClaimCondition, false);
+        ERC721LazyDropFacet(address(app)).ERC721LazyDrop_setClaimCondition(address(erc721), testClaimCondition, false);
 
-        vm.expectRevert(IERC721Drop.ERC721Drop_cantClaimYet.selector);
-        ERC721DropFacet(address(app)).verifyClaim(address(erc721), other, 10, address(erc20), 1 ether);
+        vm.expectRevert(IERC721LazyDrop.ERC721LazyDrop_cantClaimYet.selector);
+        ERC721LazyDropFacet(address(app)).ERC721LazyDrop_verifyClaim(
+            address(erc721), other, 10, address(erc20), 1 ether
+        );
     }
 }
 
-contract ERC721DropFacet_removeClaimCondition is Setup {
-    ERC721DropStorage.ClaimCondition testClaimCondition;
+contract ERC721LazyDropFacet_ERC721LazyDrop_removeClaimCondition is Setup {
+    ERC721LazyDropStorage.ClaimCondition testClaimCondition;
 
     function _afterSetUp() internal override {
-        testClaimCondition = ERC721DropStorage.ClaimCondition({
+        testClaimCondition = ERC721LazyDropStorage.ClaimCondition({
             startTimestamp: 0,
             maxClaimableSupply: 100,
             supplyClaimed: 0,
@@ -259,16 +271,16 @@ contract ERC721DropFacet_removeClaimCondition is Setup {
         });
 
         vm.prank(nftOwner);
-        ERC721DropFacet(address(app)).setClaimCondition(address(erc721), testClaimCondition, false);
+        ERC721LazyDropFacet(address(app)).ERC721LazyDrop_setClaimCondition(address(erc721), testClaimCondition, false);
     }
 
     function test_removes_claim_condition() public {
         vm.prank(nftOwner);
-        ERC721DropFacet(address(app)).removeClaimCondition(address(erc721));
+        ERC721LazyDropFacet(address(app)).ERC721LazyDrop_removeClaimCondition(address(erc721));
 
         assertEqClaimCondition(
-            ERC721DropFacet(address(app)).getClaimCondition(address(erc721)),
-            ERC721DropStorage.ClaimCondition({
+            ERC721LazyDropFacet(address(app)).ERC721LazyDrop_getClaimCondition(address(erc721)),
+            ERC721LazyDropStorage.ClaimCondition({
                 startTimestamp: 0,
                 maxClaimableSupply: 0,
                 supplyClaimed: 0,
@@ -280,19 +292,19 @@ contract ERC721DropFacet_removeClaimCondition is Setup {
     }
 
     function test_reverts_if_not_owner_or_admin() public {
-        vm.expectRevert(IERC721Drop.ERC721Drop_notAuthorised.selector);
+        vm.expectRevert(IERC721LazyDrop.ERC721LazyDrop_notAuthorised.selector);
         vm.prank(other);
-        ERC721DropFacet(address(app)).removeClaimCondition(address(erc721));
+        ERC721LazyDropFacet(address(app)).ERC721LazyDrop_removeClaimCondition(address(erc721));
     }
 }
 
-contract ERC721DropFacet_setClaimCondition is Setup {
-    ERC721DropStorage.ClaimCondition testClaimCondition;
+contract ERC721LazyDropFacet_ERC721LazyDrop_setClaimCondition is Setup {
+    ERC721LazyDropStorage.ClaimCondition testClaimCondition;
 
-    event ClaimConditionUpdated(ERC721DropStorage.ClaimCondition condition, bool resetEligibility);
+    event ClaimConditionUpdated(ERC721LazyDropStorage.ClaimCondition condition, bool resetEligibility);
 
     function _afterSetUp() internal override {
-        testClaimCondition = ERC721DropStorage.ClaimCondition({
+        testClaimCondition = ERC721LazyDropStorage.ClaimCondition({
             startTimestamp: 0,
             maxClaimableSupply: 10,
             supplyClaimed: 0,
@@ -304,10 +316,10 @@ contract ERC721DropFacet_setClaimCondition is Setup {
 
     function test_can_set_claim_condition() public {
         vm.prank(nftOwner);
-        ERC721DropFacet(address(app)).setClaimCondition(address(erc721), testClaimCondition, false);
+        ERC721LazyDropFacet(address(app)).ERC721LazyDrop_setClaimCondition(address(erc721), testClaimCondition, false);
 
-        ERC721DropStorage.ClaimCondition memory claimCondition =
-            ERC721DropFacet(address(app)).getClaimCondition(address(erc721));
+        ERC721LazyDropStorage.ClaimCondition memory claimCondition =
+            ERC721LazyDropFacet(address(app)).ERC721LazyDrop_getClaimCondition(address(erc721));
 
         assertEqClaimCondition(claimCondition, testClaimCondition);
     }
@@ -319,33 +331,35 @@ contract ERC721DropFacet_setClaimCondition is Setup {
         vm.deal(nftOwner, 0.1 ether);
 
         vm.prank(nftOwner);
-        ERC721DropFacet(address(app)).setClaimCondition{value: 0.1 ether}(address(erc721), testClaimCondition, false);
+        ERC721LazyDropFacet(address(app)).ERC721LazyDrop_setClaimCondition{value: 0.1 ether}(
+            address(erc721), testClaimCondition, false
+        );
 
         assertEq(socialConscienceLayer.balance, 0.1 ether);
     }
 
     function test_only_token_contract_owner_can_set_claim_condition() public {
-        vm.expectRevert(IERC721Drop.ERC721Drop_notAuthorised.selector);
+        vm.expectRevert(IERC721LazyDrop.ERC721LazyDrop_notAuthorised.selector);
         vm.prank(other);
-        ERC721DropFacet(address(app)).setClaimCondition(address(erc721), testClaimCondition, false);
+        ERC721LazyDropFacet(address(app)).ERC721LazyDrop_setClaimCondition(address(erc721), testClaimCondition, false);
     }
 
     function test_update_claim_condition() public {
         // set claim condition
         vm.prank(nftOwner);
-        ERC721DropFacet(address(app)).setClaimCondition(address(erc721), testClaimCondition, false);
+        ERC721LazyDropFacet(address(app)).ERC721LazyDrop_setClaimCondition(address(erc721), testClaimCondition, false);
 
         // create a new claim condition with updated startTimestamp and pricePerToken
-        ERC721DropStorage.ClaimCondition memory newClaimCondition = testClaimCondition;
+        ERC721LazyDropStorage.ClaimCondition memory newClaimCondition = testClaimCondition;
         newClaimCondition.startTimestamp = 1000;
         newClaimCondition.pricePerToken = 1 ether;
 
         // update
         vm.prank(nftOwner);
-        ERC721DropFacet(address(app)).setClaimCondition(address(erc721), newClaimCondition, true);
+        ERC721LazyDropFacet(address(app)).ERC721LazyDrop_setClaimCondition(address(erc721), newClaimCondition, true);
 
-        ERC721DropStorage.ClaimCondition memory claimCondition =
-            ERC721DropFacet(address(app)).getClaimCondition(address(erc721));
+        ERC721LazyDropStorage.ClaimCondition memory claimCondition =
+            ERC721LazyDropFacet(address(app)).ERC721LazyDrop_getClaimCondition(address(erc721));
         assertEqClaimCondition(claimCondition, newClaimCondition);
     }
 
@@ -353,18 +367,18 @@ contract ERC721DropFacet_setClaimCondition is Setup {
         vm.expectEmit(true, true, true, true);
         emit ClaimConditionUpdated(testClaimCondition, false);
         vm.prank(nftOwner);
-        ERC721DropFacet(address(app)).setClaimCondition(address(erc721), testClaimCondition, false);
+        ERC721LazyDropFacet(address(app)).ERC721LazyDrop_setClaimCondition(address(erc721), testClaimCondition, false);
     }
 }
 
-contract ERC721DropFacet_claim is Setup {
+contract ERC721LazyDropFacet_ERC721LazyDrop_claim is Setup {
     bytes32 MINTER_ROLE = bytes32(uint256(1));
-    ERC721DropStorage.ClaimCondition testClaimCondition;
+    ERC721LazyDropStorage.ClaimCondition testClaimCondition;
 
     event TokensClaimed(address tokenContract, address claimer, address receiver, uint256 quantityClaimed);
 
     function _afterSetUp() internal override {
-        testClaimCondition = ERC721DropStorage.ClaimCondition({
+        testClaimCondition = ERC721LazyDropStorage.ClaimCondition({
             startTimestamp: 0,
             maxClaimableSupply: 10,
             supplyClaimed: 0,
@@ -380,7 +394,7 @@ contract ERC721DropFacet_claim is Setup {
         erc721.grantRole(MINTER_ROLE, address(app));
 
         vm.prank(nftOwner);
-        ERC721DropFacet(address(app)).setClaimCondition(address(erc721), testClaimCondition, false);
+        ERC721LazyDropFacet(address(app)).ERC721LazyDrop_setClaimCondition(address(erc721), testClaimCondition, false);
 
         // approve spending allowance for app
         vm.prank(other);
@@ -389,7 +403,7 @@ contract ERC721DropFacet_claim is Setup {
 
     function test_can_claim_a_token() public {
         vm.prank(other);
-        ERC721DropFacet(address(app)).claim(
+        ERC721LazyDropFacet(address(app)).ERC721LazyDrop_claim(
             address(erc721), other, 1, testClaimCondition.currency, testClaimCondition.pricePerToken
         );
 
@@ -398,7 +412,7 @@ contract ERC721DropFacet_claim is Setup {
 
     function test_can_batch_claim_a_token() public {
         vm.prank(other);
-        ERC721DropFacet(address(app)).claim(
+        ERC721LazyDropFacet(address(app)).ERC721LazyDrop_claim(
             address(erc721), other, 2, testClaimCondition.currency, testClaimCondition.pricePerToken
         );
 
@@ -410,11 +424,11 @@ contract ERC721DropFacet_claim is Setup {
         // update claim condition price per token
         testClaimCondition.pricePerToken = 1 ether;
         vm.prank(nftOwner);
-        ERC721DropFacet(address(app)).setClaimCondition(address(erc721), testClaimCondition, false);
+        ERC721LazyDropFacet(address(app)).ERC721LazyDrop_setClaimCondition(address(erc721), testClaimCondition, false);
 
         // make claim with ether
         vm.prank(other);
-        ERC721DropFacet(address(app)).claim{value: 1 ether}(
+        ERC721LazyDropFacet(address(app)).ERC721LazyDrop_claim{value: 1 ether}(
             address(erc721), other, 1, testClaimCondition.currency, testClaimCondition.pricePerToken
         );
 
@@ -429,11 +443,11 @@ contract ERC721DropFacet_claim is Setup {
         // update claim condition price per token
         testClaimCondition.pricePerToken = 1 ether;
         vm.prank(nftOwner);
-        ERC721DropFacet(address(app)).setClaimCondition(address(erc721), testClaimCondition, false);
+        ERC721LazyDropFacet(address(app)).ERC721LazyDrop_setClaimCondition(address(erc721), testClaimCondition, false);
 
         // make claim with ether
         vm.prank(other);
-        ERC721DropFacet(address(app)).claim{value: 1 ether}(
+        ERC721LazyDropFacet(address(app)).ERC721LazyDrop_claim{value: 1 ether}(
             address(erc721), other, 1, testClaimCondition.currency, testClaimCondition.pricePerToken
         );
 
@@ -445,14 +459,14 @@ contract ERC721DropFacet_claim is Setup {
         // update claim condition price per token
         testClaimCondition.pricePerToken = 1 ether;
         vm.prank(nftOwner);
-        ERC721DropFacet(address(app)).setClaimCondition(address(erc721), testClaimCondition, false);
+        ERC721LazyDropFacet(address(app)).ERC721LazyDrop_setClaimCondition(address(erc721), testClaimCondition, false);
 
         // set platform fee
         globals.setPlatformFee(0.1 ether, 0, socialConscienceLayer);
 
         // make claim with ether
         vm.prank(other);
-        ERC721DropFacet(address(app)).claim{value: 1.1 ether}(
+        ERC721LazyDropFacet(address(app)).ERC721LazyDrop_claim{value: 1.1 ether}(
             address(erc721), other, 1, testClaimCondition.currency, testClaimCondition.pricePerToken
         );
 
@@ -464,7 +478,7 @@ contract ERC721DropFacet_claim is Setup {
         // update claim condition price per token
         testClaimCondition.pricePerToken = 1 ether;
         vm.prank(nftOwner);
-        ERC721DropFacet(address(app)).setClaimCondition(address(erc721), testClaimCondition, false);
+        ERC721LazyDropFacet(address(app)).ERC721LazyDrop_setClaimCondition(address(erc721), testClaimCondition, false);
 
         // set platform fee
         globals.setPlatformFee(0.1 ether, 0, socialConscienceLayer);
@@ -475,7 +489,7 @@ contract ERC721DropFacet_claim is Setup {
 
         // make claim with ether
         vm.prank(other);
-        ERC721DropFacet(address(app)).claim{value: 1.1 ether}(
+        ERC721LazyDropFacet(address(app)).ERC721LazyDrop_claim{value: 1.1 ether}(
             address(erc721), other, 1, testClaimCondition.currency, testClaimCondition.pricePerToken
         );
 
@@ -489,11 +503,11 @@ contract ERC721DropFacet_claim is Setup {
         testClaimCondition.pricePerToken = 1 ether;
         testClaimCondition.currency = address(erc20);
         vm.prank(nftOwner);
-        ERC721DropFacet(address(app)).setClaimCondition(address(erc721), testClaimCondition, false);
+        ERC721LazyDropFacet(address(app)).ERC721LazyDrop_setClaimCondition(address(erc721), testClaimCondition, false);
 
         // make claim with erc20
         vm.prank(other);
-        ERC721DropFacet(address(app)).claim(
+        ERC721LazyDropFacet(address(app)).ERC721LazyDrop_claim(
             address(erc721), other, 1, testClaimCondition.currency, testClaimCondition.pricePerToken
         );
 
@@ -509,11 +523,11 @@ contract ERC721DropFacet_claim is Setup {
         testClaimCondition.pricePerToken = 1 ether;
         testClaimCondition.currency = address(erc20);
         vm.prank(nftOwner);
-        ERC721DropFacet(address(app)).setClaimCondition(address(erc721), testClaimCondition, false);
+        ERC721LazyDropFacet(address(app)).ERC721LazyDrop_setClaimCondition(address(erc721), testClaimCondition, false);
 
         // make claim with erc20
         vm.prank(other);
-        ERC721DropFacet(address(app)).claim(
+        ERC721LazyDropFacet(address(app)).ERC721LazyDrop_claim(
             address(erc721), other, 1, testClaimCondition.currency, testClaimCondition.pricePerToken
         );
 
@@ -526,14 +540,14 @@ contract ERC721DropFacet_claim is Setup {
         testClaimCondition.pricePerToken = 1 ether;
         testClaimCondition.currency = address(erc20);
         vm.prank(nftOwner);
-        ERC721DropFacet(address(app)).setClaimCondition(address(erc721), testClaimCondition, false);
+        ERC721LazyDropFacet(address(app)).ERC721LazyDrop_setClaimCondition(address(erc721), testClaimCondition, false);
 
         // set platform fee
         globals.setPlatformFee(0.1 ether, 0, socialConscienceLayer);
 
         // make claim with platform fee
         vm.prank(other);
-        ERC721DropFacet(address(app)).claim{value: 0.1 ether}(
+        ERC721LazyDropFacet(address(app)).ERC721LazyDrop_claim{value: 0.1 ether}(
             address(erc721), other, 1, testClaimCondition.currency, testClaimCondition.pricePerToken
         );
 
@@ -546,7 +560,7 @@ contract ERC721DropFacet_claim is Setup {
         testClaimCondition.pricePerToken = 1 ether;
         testClaimCondition.currency = address(erc20);
         vm.prank(nftOwner);
-        ERC721DropFacet(address(app)).setClaimCondition(address(erc721), testClaimCondition, false);
+        ERC721LazyDropFacet(address(app)).ERC721LazyDrop_setClaimCondition(address(erc721), testClaimCondition, false);
 
         // set platform fee
         globals.setPlatformFee(0.1 ether, 0, socialConscienceLayer);
@@ -557,7 +571,7 @@ contract ERC721DropFacet_claim is Setup {
 
         // make claim with ether
         vm.prank(other);
-        ERC721DropFacet(address(app)).claim{value: 0.1 ether}(
+        ERC721LazyDropFacet(address(app)).ERC721LazyDrop_claim{value: 0.1 ether}(
             address(erc721), other, 1, testClaimCondition.currency, testClaimCondition.pricePerToken
         );
 
@@ -568,13 +582,13 @@ contract ERC721DropFacet_claim is Setup {
 
     function test_reverts_when_quantity_per_wallet_limit_exceeded() public {
         vm.prank(other);
-        ERC721DropFacet(address(app)).claim(
+        ERC721LazyDropFacet(address(app)).ERC721LazyDrop_claim(
             address(erc721), other, 2, testClaimCondition.currency, testClaimCondition.pricePerToken
         );
 
-        vm.expectRevert(IERC721Drop.ERC721Drop_quantityZeroOrExceededWalletLimit.selector);
+        vm.expectRevert(IERC721LazyDrop.ERC721LazyDrop_quantityZeroOrExceededWalletLimit.selector);
         vm.prank(other);
-        ERC721DropFacet(address(app)).claim(
+        ERC721LazyDropFacet(address(app)).ERC721LazyDrop_claim(
             address(erc721), other, 1, testClaimCondition.currency, testClaimCondition.pricePerToken
         );
     }
@@ -585,7 +599,7 @@ contract ERC721DropFacet_claim is Setup {
 
         vm.expectRevert("Not authorized to mint.");
         vm.prank(other);
-        ERC721DropFacet(address(app)).claim(
+        ERC721LazyDropFacet(address(app)).ERC721LazyDrop_claim(
             address(erc721), other, 1, testClaimCondition.currency, testClaimCondition.pricePerToken
         );
     }

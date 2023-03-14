@@ -3,12 +3,12 @@ pragma solidity ^0.8.16;
 
 import {ReentrancyGuard} from "@solidstate/contracts/utils/ReentrancyGuard.sol";
 
-import {IERC721Drop} from "./IERC721Drop.sol";
-import {ERC721DropStorage} from "./ERC721DropStorage.sol";
-import {ERC721DropInternal} from "./ERC721DropInternal.sol";
+import {IERC721LazyDrop} from "./IERC721LazyDrop.sol";
+import {ERC721LazyDropStorage} from "./ERC721LazyDropStorage.sol";
+import {ERC721LazyDropInternal} from "./ERC721LazyDropInternal.sol";
 
 /**
- * @title   "ERC721Drop Facet"
+ * @title   "ERC721LazyDrop Facet"
  * @notice  (WIP) Allows nft contract owners to setup a drop on an app
  *          For an nft to contract to be compatible:
  *          erc721 contract must have `owner() returns (address)`, `mintTo(address)` and `batchMintTo(address,uint256)`
@@ -20,16 +20,16 @@ import {ERC721DropInternal} from "./ERC721DropInternal.sol";
  *          Some logic has been removed but may be added in again (merkle tree, metadata)
  */
 
-abstract contract ERC721Drop is IERC721Drop, ERC721DropInternal, ReentrancyGuard {
-    function getClaimCondition(address _tokenContract)
+abstract contract ERC721LazyDrop is IERC721LazyDrop, ERC721LazyDropInternal, ReentrancyGuard {
+    function ERC721LazyDrop_getClaimCondition(address _tokenContract)
         external
         view
-        returns (ERC721DropStorage.ClaimCondition memory)
+        returns (ERC721LazyDropStorage.ClaimCondition memory)
     {
         return _getClaimCondition(_tokenContract);
     }
 
-    function verifyClaim(
+    function ERC721LazyDrop_verifyClaim(
         address _tokenContract,
         address _claimer,
         uint256 _quantity,
@@ -40,10 +40,10 @@ abstract contract ERC721Drop is IERC721Drop, ERC721DropInternal, ReentrancyGuard
         return true;
     }
 
-    // TODO: consider renaming to ERC721Drop_claim to avoid facet function clashes, could also make it internal/public
+    // TODO: consider renaming to ERC721LazyDrop_claim to avoid facet function clashes, could also make it internal/public
     // TODO: consider making this ERC agnostic ... param currency -> priceCurrency
 
-    function claim(
+    function ERC721LazyDrop_claim(
         address _tokenContract,
         address _receiver,
         uint256 _quantity,
@@ -66,14 +66,14 @@ abstract contract ERC721Drop is IERC721Drop, ERC721DropInternal, ReentrancyGuard
         emit TokensClaimed(_tokenContract, _dropMsgSender(), _receiver, _quantity);
     }
 
-    // TODO: consider renaming to ERC721Drop_claim to avoid facet function clashes
-    function setClaimCondition(
+    // TODO: consider renaming to ERC721LazyDrop_claim to avoid facet function clashes
+    function ERC721LazyDrop_setClaimCondition(
         address _tokenContract,
-        ERC721DropStorage.ClaimCondition calldata _condition,
+        ERC721LazyDropStorage.ClaimCondition calldata _condition,
         bool _resetClaimEligibility
     ) external payable nonReentrant {
         if (!_canSetClaimCondition(_tokenContract)) {
-            revert ERC721Drop_notAuthorised();
+            revert ERC721LazyDrop_notAuthorised();
         }
 
         // perform any extra checks
@@ -90,12 +90,12 @@ abstract contract ERC721Drop is IERC721Drop, ERC721DropInternal, ReentrancyGuard
         }
 
         if (supplyClaimedAlready > _condition.maxClaimableSupply) {
-            revert ERC721Drop_maxSupplyClaimed();
+            revert ERC721LazyDrop_maxSupplyClaimed();
         }
 
         _setClaimCondition(
             _tokenContract,
-            ERC721DropStorage.ClaimCondition({
+            ERC721LazyDropStorage.ClaimCondition({
                 startTimestamp: _condition.startTimestamp,
                 maxClaimableSupply: _condition.maxClaimableSupply,
                 supplyClaimed: supplyClaimedAlready,
@@ -113,9 +113,9 @@ abstract contract ERC721Drop is IERC721Drop, ERC721DropInternal, ReentrancyGuard
         emit ClaimConditionUpdated(_condition, _resetClaimEligibility);
     }
 
-    function removeClaimCondition(address _tokenContract) external {
+    function ERC721LazyDrop_removeClaimCondition(address _tokenContract) external {
         if (!_canSetClaimCondition(_tokenContract)) {
-            revert ERC721Drop_notAuthorised();
+            revert ERC721LazyDrop_notAuthorised();
         }
 
         _removeClaimCondition(_tokenContract);
