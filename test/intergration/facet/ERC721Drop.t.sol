@@ -102,10 +102,11 @@ contract Setup is Test, Helpers {
             dropFacet = new ERC721DropFacet();
 
             // add facet to registry
-            bytes4[] memory selectors = new bytes4[](3);
+            bytes4[] memory selectors = new bytes4[](4);
             selectors[0] = dropFacet.setClaimCondition.selector;
             selectors[1] = dropFacet.getClaimCondition.selector;
             selectors[2] = dropFacet.claim.selector;
+            selectors[3] = dropFacet.verifyClaim.selector;
 
             registry.diamondCut(
                 prepareSingleFacetCut(address(dropFacet), IDiamondWritableInternal.FacetCutAction.ADD, selectors),
@@ -152,9 +153,9 @@ contract ERC721DropFacet_getClaimCondition is Setup {
     function _afterSetUp() internal override {
         testClaimCondition = ERC721DropStorage.ClaimCondition({
             startTimestamp: 100,
-            maxClaimableSupply: 10,
+            maxClaimableSupply: 100,
             supplyClaimed: 0,
-            quantityLimitPerWallet: 1,
+            quantityLimitPerWallet: 10,
             pricePerToken: 1 ether,
             currency: address(erc20)
         });
@@ -182,7 +183,66 @@ contract ERC721DropFacet_getClaimCondition is Setup {
     }
 }
 
-contract ERC721DropFacet_verifyClaim is Setup {}
+contract ERC721DropFacet_verifyClaim is Setup {
+    ERC721DropStorage.ClaimCondition testClaimCondition;
+
+    function _afterSetUp() internal override {
+        testClaimCondition = ERC721DropStorage.ClaimCondition({
+            startTimestamp: 0,
+            maxClaimableSupply: 100,
+            supplyClaimed: 0,
+            quantityLimitPerWallet: 10,
+            pricePerToken: 1 ether,
+            currency: address(erc20)
+        });
+
+        vm.prank(nftOwner);
+        ERC721DropFacet(address(app)).setClaimCondition(address(erc721), testClaimCondition, false);
+    }
+
+    function test_can_verify_claim() public {
+        assertTrue(ERC721DropFacet(address(app)).verifyClaim(address(erc721), other, 1, address(erc20), 1 ether));
+    }
+
+    function test_reverts_when_price_is_invalid() public {
+        vm.expectRevert(IERC721Drop.ERC721Drop_invalidPriceOrCurrency.selector);
+        ERC721DropFacet(address(app)).verifyClaim(address(erc721), other, 1, address(erc20), 0);
+    }
+
+    function test_reverts_when_currency_is_invalid() public {
+        vm.expectRevert(IERC721Drop.ERC721Drop_invalidPriceOrCurrency.selector);
+        ERC721DropFacet(address(app)).verifyClaim(address(erc721), other, 1, address(0), 1 ether);
+    }
+
+    function test_reverts_when_quantity_is_zero() public {
+        vm.expectRevert(IERC721Drop.ERC721Drop_quantityZeroOrExceededWalletLimit.selector);
+        ERC721DropFacet(address(app)).verifyClaim(address(erc721), other, 0, address(erc20), 1 ether);
+    }
+
+    function test_reverts_when_quantity_exceeds_wallet_limit() public {
+        vm.expectRevert(IERC721Drop.ERC721Drop_quantityZeroOrExceededWalletLimit.selector);
+        ERC721DropFacet(address(app)).verifyClaim(address(erc721), other, 11, address(erc20), 1 ether);
+    }
+
+    function test_reverts_when_quantity_exceeds_max_supply() public {
+        // set max supply to 9
+        testClaimCondition.maxClaimableSupply = 9;
+        vm.prank(nftOwner);
+        ERC721DropFacet(address(app)).setClaimCondition(address(erc721), testClaimCondition, false);
+
+        vm.expectRevert(IERC721Drop.ERC721Drop_exceededMaxSupply.selector);
+        ERC721DropFacet(address(app)).verifyClaim(address(erc721), other, 10, address(erc20), 1 ether);
+    }
+
+    function test_reverts_before_start_timestamp() public {
+        testClaimCondition.startTimestamp = 1000;
+        vm.prank(nftOwner);
+        ERC721DropFacet(address(app)).setClaimCondition(address(erc721), testClaimCondition, false);
+
+        vm.expectRevert(IERC721Drop.ERC721Drop_cantClaimYet.selector);
+        ERC721DropFacet(address(app)).verifyClaim(address(erc721), other, 10, address(erc20), 1 ether);
+    }
+}
 
 contract ERC721DropFacet_removeClaimCondition is Setup {}
 
