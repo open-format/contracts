@@ -85,27 +85,18 @@ abstract contract ERC721DropInternal {
         }
     }
 
+    /// @dev inheriting contract must override this function to handle payments
     function _collectPriceOnClaim(
         address _tokenContract,
         uint256 _quantityToClaim,
         address _currency,
         uint256 _pricePerToken
-    ) internal virtual {
-        // TODO: add payments - possibly use royalty interface?
-    }
+    ) internal virtual;
 
-    /// @dev Transfers the NFTs being claimed.
-    // TODO: can this be ERC agnostic? transfer
+    /// @dev inheriting contract must override this function to handle transfer of tokens
     function _transferTokensOnClaim(address _tokenContract, address _to, uint256 _quantityBeingClaimed)
         internal
-        virtual
-    {
-        if (_quantityBeingClaimed > 1) {
-            ICompatibleERC721(_tokenContract).batchMintTo(_to, _quantityBeingClaimed);
-        } else {
-            ICompatibleERC721(_tokenContract).mintTo(_to);
-        }
-    }
+        virtual;
 
     // NOTE maybe have this defualt to a simpler function or _canSetERC721DropClaimCondition
     function _isTokenContractOwner(address _tokenContract) internal virtual returns (bool) {
@@ -121,7 +112,13 @@ abstract contract ERC721DropInternal {
         return msg.sender;
     }
 
-    function _beforeSetClaimCondition(ERC721DropStorage.ClaimCondition calldata _condition) internal virtual {}
+    function _beforeSetClaimCondition(address _tokenContract, ERC721DropStorage.ClaimCondition calldata _condition)
+        internal
+        virtual
+    {}
 
-    function _afterSetClaimCondition(ERC721DropStorage.ClaimCondition calldata _condition) internal virtual {}
+    function _afterSetClaimCondition(address _tokenContract, ERC721DropStorage.ClaimCondition calldata _condition)
+        internal
+        virtual
+    {}
 }

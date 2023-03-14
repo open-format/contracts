@@ -2,6 +2,7 @@
 pragma solidity ^0.8.16;
 
 import {ERC721Drop, IERC721Drop} from "src/extensions/ERC721Drop/ERC721Drop.sol";
+import {ICompatibleERC721} from "src/extensions/ERC721Drop/ICompatibleERC721.sol";
 import {ERC721DropStorage} from "src/extensions/ERC721Drop/ERC721DropStorage.sol";
 
 import {PlatformFee} from "src/extensions/platformFee/PlatformFee.sol";
@@ -16,7 +17,16 @@ contract ERC721DropFacet is ERC721Drop, PlatformFee, ApplicationFee {
      *      requires msg.value to be equal or more than base platform fee
      *      when calling setClaimCondition
      */
-    function _beforeSetClaimCondition(ERC721DropStorage.ClaimCondition calldata _condition) internal override {
+    function _beforeSetClaimCondition(address _tokenContract, ERC721DropStorage.ClaimCondition calldata _condition)
+        internal
+        override
+    {
+        // token contracts must support the royalty standard
+        bool supportsERC281 = ICompatibleERC721(_tokenContract).supportsInterface(0x2a55205a);
+        if (!supportsERC281) {
+            revert("must support nft royalty standard");
+        }
+
         (address recipient, uint256 amount) = _platformFeeInfo(0);
 
         if (amount == 0) {
@@ -24,7 +34,7 @@ contract ERC721DropFacet is ERC721Drop, PlatformFee, ApplicationFee {
         }
 
         // ensure the ether being sent was included in the transaction
-        if (msg.value < amount) {
+        if (amount > msg.value) {
             revert CurrencyTransferLib.Error_insufficientValue();
         }
 
@@ -33,12 +43,30 @@ contract ERC721DropFacet is ERC721Drop, PlatformFee, ApplicationFee {
         emit PaidPlatformFee(address(0), amount);
     }
 
+    function _transferTokensOnClaim(address _tokenContract, address _to, uint256 _quantityBeingClaimed)
+        internal
+        override
+    {
+        if (_quantityBeingClaimed > 1) {
+            ICompatibleERC721(_tokenContract).batchMintTo(_to, _quantityBeingClaimed);
+        } else {
+            ICompatibleERC721(_tokenContract).mintTo(_to);
+        }
+    }
+
     function _collectPriceOnClaim(address _tokenContract, uint256 _quantity, address _currency, uint256 _pricePerToken)
         internal
         override
         onlyAcceptedCurrencies(_currency)
     {
-        // TODO: is this at risk of overflow?
+        // Get recipient from royaltyInfo
+        // We are only after an address to send funds so price and id doesn't matter
+        (address royaltyRecipient,) = IERC2981(_tokenContract).royaltyInfo(0, 0);
+
+        if (royaltyRecipient == address(0)) {
+            revert("No recipient setup");
+        }
+
         uint256 totalPrice = _quantity * _pricePerToken;
         (address platformFeeRecipient, uint256 platformFee) = _platformFeeInfo(totalPrice);
         (address applicationFeeRecipient, uint256 applicationFee) = _applicationFeeInfo(totalPrice);
@@ -68,16 +96,11 @@ contract ERC721DropFacet is ERC721Drop, PlatformFee, ApplicationFee {
             emit PaidApplicationFee(_currency, applicationFee);
         }
 
-        // send remaining
-        // Get recipient from royaltyInfo
-        // TODO: is passing the 0 token id and 0 for price best practice here?
-        // We are only after a place to send funds. This could be included in the drop?
-        (address to,) = IERC2981(_tokenContract).royaltyInfo(0, 0);
-
+        // pay nft royalty recipient
         if (isNativeToken) {
-            CurrencyTransferLib.safeTransferNativeToken(to, msg.value - fees);
+            CurrencyTransferLib.safeTransferNativeToken(royaltyRecipient, msg.value - fees);
         } else {
-            CurrencyTransferLib.safeTransferERC20(_currency, msg.sender, to, totalPrice - applicationFee);
+            CurrencyTransferLib.safeTransferERC20(_currency, msg.sender, royaltyRecipient, totalPrice - applicationFee);
         }
     }
 }

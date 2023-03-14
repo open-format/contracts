@@ -53,7 +53,6 @@ abstract contract ERC721Drop is IERC721Drop, ERC721DropInternal {
         emit TokensClaimed(_tokenContract, _dropMsgSender(), _receiver, _quantity);
     }
 
-    // TODO: add fee payments
     // TODO: consider renaming to ERC721Drop_claim to avoid facet function clashes
     function setClaimCondition(
         address _tokenContract,
@@ -65,7 +64,7 @@ abstract contract ERC721Drop is IERC721Drop, ERC721DropInternal {
         }
 
         // perform any extra checks
-        _beforeSetClaimCondition(_condition);
+        _beforeSetClaimCondition(_tokenContract, _condition);
 
         bytes32 targetConditionId = _getClaimConditionId(_tokenContract);
         uint256 supplyClaimedAlready = _getClaimCondition(_tokenContract).supplyClaimed;
@@ -96,7 +95,7 @@ abstract contract ERC721Drop is IERC721Drop, ERC721DropInternal {
         _setClaimConditionId(_tokenContract, targetConditionId);
 
         // perform any extra logic
-        _afterSetClaimCondition(_condition);
+        _afterSetClaimCondition(_tokenContract, _condition);
 
         emit ClaimConditionUpdated(_condition, _resetClaimEligibility);
     }
