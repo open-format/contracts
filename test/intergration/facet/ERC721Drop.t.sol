@@ -24,7 +24,7 @@ import {SettingsFacet} from "src/facet/SettingsFacet.sol";
 
 import {IERC721Drop} from "src/extensions/ERC721Drop/ERC721Drop.sol";
 
-abstract contract Helpers {
+abstract contract Helpers is Test {
     function prepareSingleFacetCut(
         address cutAddress,
         IDiamondWritableInternal.FacetCutAction cutAction,
@@ -33,6 +33,18 @@ abstract contract Helpers {
         IDiamondWritableInternal.FacetCut[] memory cuts = new IDiamondWritableInternal.FacetCut[](1);
         cuts[0] = IDiamondWritableInternal.FacetCut(cutAddress, cutAction, selectors);
         return cuts;
+    }
+
+    function assertEqClaimCondition(
+        ERC721DropStorage.ClaimCondition memory _A,
+        ERC721DropStorage.ClaimCondition memory _B
+    ) public {
+        assertEq(_A.startTimestamp, _B.startTimestamp);
+        assertEq(_A.supplyClaimed, _B.supplyClaimed);
+        assertEq(_A.maxClaimableSupply, _B.maxClaimableSupply);
+        assertEq(_A.quantityLimitPerWallet, _B.quantityLimitPerWallet);
+        assertEq(_A.pricePerToken, _B.pricePerToken);
+        assertEq(_A.currency, _B.currency);
     }
 }
 
@@ -134,6 +146,46 @@ contract Setup is Test, Helpers {
     function _afterSetUp() internal virtual {}
 }
 
+contract ERC721DropFacet_getClaimCondition is Setup {
+    ERC721DropStorage.ClaimCondition testClaimCondition;
+
+    function _afterSetUp() internal override {
+        testClaimCondition = ERC721DropStorage.ClaimCondition({
+            startTimestamp: 100,
+            maxClaimableSupply: 10,
+            supplyClaimed: 0,
+            quantityLimitPerWallet: 1,
+            pricePerToken: 1 ether,
+            currency: address(erc20)
+        });
+
+        vm.prank(nftOwner);
+        ERC721DropFacet(address(app)).setClaimCondition(address(erc721), testClaimCondition, false);
+    }
+
+    function test_gets_claim_condition() public {
+        assertEqClaimCondition(ERC721DropFacet(address(app)).getClaimCondition(address(erc721)), testClaimCondition);
+    }
+
+    function test_returns_empty_claim_condition_if_not_set() public {
+        assertEqClaimCondition(
+            ERC721DropFacet(address(app)).getClaimCondition(address(0)),
+            ERC721DropStorage.ClaimCondition({
+                startTimestamp: 0,
+                maxClaimableSupply: 0,
+                supplyClaimed: 0,
+                quantityLimitPerWallet: 0,
+                pricePerToken: 0,
+                currency: address(0)
+            })
+        );
+    }
+}
+
+contract ERC721DropFacet_verifyClaim is Setup {}
+
+contract ERC721DropFacet_removeClaimCondition is Setup {}
+
 contract ERC721DropFacet_setClaimCondition is Setup {
     ERC721DropStorage.ClaimCondition testClaimCondition;
 
@@ -148,18 +200,6 @@ contract ERC721DropFacet_setClaimCondition is Setup {
             pricePerToken: 0,
             currency: address(0)
         });
-    }
-
-    function assertEqClaimCondition(
-        ERC721DropStorage.ClaimCondition memory _A,
-        ERC721DropStorage.ClaimCondition memory _B
-    ) public {
-        assertEq(_A.startTimestamp, _B.startTimestamp);
-        assertEq(_A.supplyClaimed, _B.supplyClaimed);
-        assertEq(_A.maxClaimableSupply, _B.maxClaimableSupply);
-        assertEq(_A.quantityLimitPerWallet, _B.quantityLimitPerWallet);
-        assertEq(_A.pricePerToken, _B.pricePerToken);
-        assertEq(_A.currency, _B.currency);
     }
 
     function test_can_set_claim_condition() public {
@@ -432,8 +472,7 @@ contract ERC721DropFacet_claim is Setup {
             address(erc721), other, 2, testClaimCondition.currency, testClaimCondition.pricePerToken
         );
 
-        // TODO: replace expectRevert() with vm.expectRevert("!Qty") currently causing compiler error.
-        vm.expectRevert();
+        vm.expectRevert(IERC721Drop.ERC721Drop_quantityZeroOrExceededWalletLimit.selector);
         vm.prank(other);
         ERC721DropFacet(address(app)).claim(
             address(erc721), other, 1, testClaimCondition.currency, testClaimCondition.pricePerToken
