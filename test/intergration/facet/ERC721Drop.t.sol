@@ -102,11 +102,12 @@ contract Setup is Test, Helpers {
             dropFacet = new ERC721DropFacet();
 
             // add facet to registry
-            bytes4[] memory selectors = new bytes4[](4);
+            bytes4[] memory selectors = new bytes4[](5);
             selectors[0] = dropFacet.setClaimCondition.selector;
             selectors[1] = dropFacet.getClaimCondition.selector;
             selectors[2] = dropFacet.claim.selector;
             selectors[3] = dropFacet.verifyClaim.selector;
+            selectors[4] = dropFacet.removeClaimCondition.selector;
 
             registry.diamondCut(
                 prepareSingleFacetCut(address(dropFacet), IDiamondWritableInternal.FacetCutAction.ADD, selectors),
@@ -244,7 +245,46 @@ contract ERC721DropFacet_verifyClaim is Setup {
     }
 }
 
-contract ERC721DropFacet_removeClaimCondition is Setup {}
+contract ERC721DropFacet_removeClaimCondition is Setup {
+    ERC721DropStorage.ClaimCondition testClaimCondition;
+
+    function _afterSetUp() internal override {
+        testClaimCondition = ERC721DropStorage.ClaimCondition({
+            startTimestamp: 0,
+            maxClaimableSupply: 100,
+            supplyClaimed: 0,
+            quantityLimitPerWallet: 10,
+            pricePerToken: 1 ether,
+            currency: address(erc20)
+        });
+
+        vm.prank(nftOwner);
+        ERC721DropFacet(address(app)).setClaimCondition(address(erc721), testClaimCondition, false);
+    }
+
+    function test_removes_claim_condition() public {
+        vm.prank(nftOwner);
+        ERC721DropFacet(address(app)).removeClaimCondition(address(erc721));
+
+        assertEqClaimCondition(
+            ERC721DropFacet(address(app)).getClaimCondition(address(erc721)),
+            ERC721DropStorage.ClaimCondition({
+                startTimestamp: 0,
+                maxClaimableSupply: 0,
+                supplyClaimed: 0,
+                quantityLimitPerWallet: 0,
+                pricePerToken: 0,
+                currency: address(0)
+            })
+        );
+    }
+
+    function test_reverts_if_not_owner_or_admin() public {
+        vm.expectRevert(IERC721Drop.ERC721Drop_notAuthorised.selector);
+        vm.prank(other);
+        ERC721DropFacet(address(app)).removeClaimCondition(address(erc721));
+    }
+}
 
 contract ERC721DropFacet_setClaimCondition is Setup {
     ERC721DropStorage.ClaimCondition testClaimCondition;
