@@ -1,5 +1,15 @@
 # @openformat/contracts
 
+## 0.0.5
+
+### Patch Changes
+
+- [#63](https://github.com/open-format/contracts/pull/63) [`8065799`](https://github.com/open-format/contracts/commit/8065799de8d5cdf55ea88cc4994b89a5bfac9e72) Thanks [@george-e-d-g-e](https://github.com/george-e-d-g-e)! - update error names
+
+- [#61](https://github.com/open-format/contracts/pull/61) [`76177b1`](https://github.com/open-format/contracts/commit/76177b10ebef470a798435813faf53b57712137d) Thanks [@george-e-d-g-e](https://github.com/george-e-d-g-e)! - erc20 factory bug fixes
+
+- [#58](https://github.com/open-format/contracts/pull/58) [`97de1f3`](https://github.com/open-format/contracts/commit/97de1f3d8aeda3039c19fdf8175c8db233d84190) Thanks [@george-e-d-g-e](https://github.com/george-e-d-g-e)! - factorys can create multiple implementations
+
 ## 0.0.4
 
 ### Patch Changes
