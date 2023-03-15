@@ -38,7 +38,7 @@ contract ERC721LazyDropFacet is ERC721LazyDrop, PlatformFee, ApplicationFee {
 
         // ensure the ether being sent was included in the transaction
         if (amount > msg.value) {
-            revert CurrencyTransferLib.Error_insufficientValue();
+            revert CurrencyTransferLib.CurrencyTransferLib_insufficientValue();
         }
 
         CurrencyTransferLib.safeTransferNativeToken(recipient, amount);
@@ -78,7 +78,7 @@ contract ERC721LazyDropFacet is ERC721LazyDrop, PlatformFee, ApplicationFee {
         uint256 fees = isNativeToken ? platformFee + applicationFee : platformFee;
 
         if (fees > msg.value) {
-            revert CurrencyTransferLib.Error_insufficientValue();
+            revert CurrencyTransferLib.CurrencyTransferLib_insufficientValue();
         }
 
         // pay platform fee
