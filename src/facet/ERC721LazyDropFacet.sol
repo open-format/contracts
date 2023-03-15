@@ -11,6 +11,11 @@ import {CurrencyTransferLib} from "src/lib/CurrencyTransferLib.sol";
 
 import {IERC2981} from "@solidstate/contracts/interfaces/IERC2981.sol";
 
+/**
+ * @title   "ERC721LazyDrop Facet"
+ * @notice  Allows token contract admins/owners to use an app to drop lazy minted tokens for a price
+ */
+
 contract ERC721LazyDropFacet is ERC721LazyDrop, PlatformFee, ApplicationFee {
     error ERC721LazyDropFacet_EIP2981NotSupported();
     error ERC721LazyDropFacet_royaltyRecipientNotFound();
