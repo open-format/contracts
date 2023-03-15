@@ -16,7 +16,7 @@ contract ERC721FactoryFacet is ERC721Factory, PlatformFee, Ownable {
      * @dev sets permissions to create new nft to proxy app owner
      */
     function _canCreate() internal view override returns (bool) {
-        return msg.sender == _owner();
+        return true;
     }
 
     /**

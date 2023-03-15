@@ -16,7 +16,7 @@ contract ERC20FactoryFacet is ERC20Factory, Ownable, PlatformFee {
      * @dev sets permissions to create new erc20
      */
     function _canCreate() internal view override returns (bool) {
-        return msg.sender == _owner();
+        return true;
     }
 
     /**
