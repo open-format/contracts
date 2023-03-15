@@ -5,19 +5,6 @@ import {IERC721LazyDrop} from "./IERC721LazyDrop.sol";
 import {ERC721LazyDropStorage} from "./ERC721LazyDropStorage.sol";
 import {ICompatibleERC721} from "./ICompatibleERC721.sol";
 
-/**
- * @title   "ERC721LazyDrop Facet"
- * @notice  (WIP) Allows nft contract owners to setup a drop on an app
- *          For an nft to contract to be compatible:
- *          erc721 contract must have `owner() returns (address)`, `mintTo(address)` and `batchMintTo(address,uint256)`
- *          and give access to the app to perform those functions
- *
- *          This contract is heavily inspired from thirdwebs SinglePhaseDrop extension.
- *          https://github.com/thirdweb-dev/contracts/blob/main/contracts/extension/DropSinglePhase.sol
- *          Modified to work as a service rather than be included in erc721 contracts
- *          Some logic has been removed but may be added in again (merkle tree, metadata)
- */
-
 abstract contract ERC721LazyDropInternal is IERC721LazyDrop {
     function _getClaimCondition(address _tokenContract)
         internal
@@ -90,7 +77,9 @@ abstract contract ERC721LazyDropInternal is IERC721LazyDrop {
         }
     }
 
-    /// @dev inheriting contract must override this function to handle payments
+    /**
+     * @dev inheriting contract must override this function to handle payments
+     */
     function _collectPriceOnClaim(
         address _tokenContract,
         uint256 _quantityToClaim,
@@ -98,17 +87,24 @@ abstract contract ERC721LazyDropInternal is IERC721LazyDrop {
         uint256 _pricePerToken
     ) internal virtual;
 
-    /// @dev inheriting contract must override this function to handle transfer of tokens
+    /**
+     * @dev inheriting contract must override this function to handle payments
+     */
     function _transferTokensOnClaim(address _tokenContract, address _to, uint256 _quantityBeingClaimed)
         internal
         virtual;
 
+    /**
+     * @dev checks if the msg.sender is the owner or admin of the given token contract.
+     *      This supports the openzepplin/solidstate `ownable` and `access control` contract defaults.
+     *      override to support different access requirements
+     */
     function _canSetClaimCondition(address _tokenContract) internal virtual returns (bool) {
         try ICompatibleERC721(_tokenContract).owner() returns (address _owner) {
-            return _owner == msg.sender;
+            return _owner == _dropMsgSender();
         } catch {
             // owner not implemented, try access control DEFAULT_ADMIN_ROLE
-            return ICompatibleERC721(_tokenContract).hasRole(0x00, msg.sender);
+            return ICompatibleERC721(_tokenContract).hasRole(0x00, _dropMsgSender());
         }
     }
 
@@ -116,11 +112,17 @@ abstract contract ERC721LazyDropInternal is IERC721LazyDrop {
         return msg.sender;
     }
 
+    /**
+     * @dev inheriting contract can override this function to perform logic before a claim condition is set
+     */
     function _beforeSetClaimCondition(address _tokenContract, ERC721LazyDropStorage.ClaimCondition calldata _condition)
         internal
         virtual
     {}
 
+    /**
+     * @dev inheriting contract can override this function to perform logic after a claim condition is set
+     */
     function _afterSetClaimCondition(address _tokenContract, ERC721LazyDropStorage.ClaimCondition calldata _condition)
         internal
         virtual

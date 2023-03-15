@@ -11,6 +11,9 @@ interface IERC721LazyDrop {
     error ERC721LazyDrop_exceededMaxSupply();
     error ERC721LazyDrop_cantClaimYet();
 
-    event ClaimConditionUpdated(ERC721LazyDropStorage.ClaimCondition condition, bool resetEligibility);
+    event ClaimConditionUpdated(
+        address tokenContract, ERC721LazyDropStorage.ClaimCondition condition, bool resetEligibility
+    );
+    event ClaimConditionRemoved(address tokenContract);
     event TokensClaimed(address tokenContract, address claimer, address receiver, uint256 quantityClaimed);
 }

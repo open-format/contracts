@@ -8,11 +8,10 @@ import {ERC721LazyDropStorage} from "./ERC721LazyDropStorage.sol";
 import {ERC721LazyDropInternal} from "./ERC721LazyDropInternal.sol";
 
 /**
- * @title   "ERC721LazyDrop Facet"
+ * @title   "ERC721LazyDrop extension"
  * @notice  (WIP) Allows nft contract owners to setup a drop on an app
- *          For an nft to contract to be compatible:
- *          erc721 contract must have `owner() returns (address)`, `mintTo(address)` and `batchMintTo(address,uint256)`
- *          and give access to the app to perform those functions
+ *          See ICompatibleERC721.sol for necessary interface.
+ *          The inheriting contract must be given minter access to perform the mintTo and batchMintTo functions
  *
  *          This contract is heavily inspired from thirdwebs SinglePhaseDrop extension.
  *          https://github.com/thirdweb-dev/contracts/blob/main/contracts/extension/DropSinglePhase.sol
@@ -21,6 +20,12 @@ import {ERC721LazyDropInternal} from "./ERC721LazyDropInternal.sol";
  */
 
 abstract contract ERC721LazyDrop is IERC721LazyDrop, ERC721LazyDropInternal, ReentrancyGuard {
+    /**
+     * @notice gets the current claim condition for a given token contract
+     * @param _tokenContract the address of the token contract
+     * @return ERC721LazyDropStorage.ClaimCondition the claim condition for the give token contract,
+     *         will be all zeros if no claim condition exists
+     */
     function ERC721LazyDrop_getClaimCondition(address _tokenContract)
         external
         view
@@ -29,6 +34,16 @@ abstract contract ERC721LazyDrop is IERC721LazyDrop, ERC721LazyDropInternal, Ree
         return _getClaimCondition(_tokenContract);
     }
 
+    /**
+     * @notice verifies a claim against the current claim condition for a given token contract
+     * @dev will return true for a valid claim and revert if is invalid
+     * @param _tokenContract the address of the token contract
+     * @param _claimer the address making the claim
+     * @param _quantity the amount of the tokens claiming
+     * @param _currency the currency of the claim
+     * @param _pricePerToken the price per token of the claim
+     * @return bool whether the claim is valid
+     */
     function ERC721LazyDrop_verifyClaim(
         address _tokenContract,
         address _claimer,
@@ -40,9 +55,19 @@ abstract contract ERC721LazyDrop is IERC721LazyDrop, ERC721LazyDropInternal, Ree
         return true;
     }
 
-    // TODO: consider renaming to ERC721LazyDrop_claim to avoid facet function clashes, could also make it internal/public
-    // TODO: consider making this ERC agnostic ... param currency -> priceCurrency
-
+    /**
+     * @notice claims given quantity of tokens for a price
+     * @dev inheriting contracts should override `_collectPriceOnClaim` to handle payments
+     *      and `_transferTokensOnClaim` to handle the transfer of tokens.
+     *      emits TokensClaimed event on successful claim
+     *      This function is nonReentrant as it depends on external calls to given token contract
+     *
+     * @param _tokenContract the address of the token contract
+     * @param _receiver the address to send the claimed tokens
+     * @param _quantity the amount of the tokens claiming
+     * @param _currency the currency of the claim
+     * @param _pricePerToken the price per token of the claim
+     */
     function ERC721LazyDrop_claim(
         address _tokenContract,
         address _receiver,
@@ -52,21 +77,25 @@ abstract contract ERC721LazyDrop is IERC721LazyDrop, ERC721LazyDropInternal, Ree
     ) external payable nonReentrant {
         _verifyClaim(_tokenContract, _dropMsgSender(), _quantity, _currency, _pricePerToken);
 
-        // Update contract state.
         _updateClaimConditionQuantity(_tokenContract, _dropMsgSender(), _quantity);
 
-        // If there's a price, collect price.
         _collectPriceOnClaim(_tokenContract, _quantity, _currency, _pricePerToken);
 
-        // Mint the relevant NFTs to claimer.
-        // NOTE: web three's implementation returns startTokenId and adds it to tokenClaimed event
-        // have removed for now to limit ERC721 compatibility requirements
         _transferTokensOnClaim(_tokenContract, _receiver, _quantity);
 
         emit TokensClaimed(_tokenContract, _dropMsgSender(), _receiver, _quantity);
     }
 
-    // TODO: consider renaming to ERC721LazyDrop_claim to avoid facet function clashes
+    /**
+     * @notice sets the claim condition for a given token contract.
+     * @dev    inheriting contracts can override `_beforeSetClaimCondition` and `_afterSetClaimCondition` to perform
+     *         extra checks and logic. `_canSetClaimCondition` can be overridden to give different access.
+     *         emits ClaimedConditionUpdated event on successfully setting a claim.
+     *         Is non-reentrant as it depends on external calls to the given token contract
+     * @param _tokenContract the address of the token contract
+     * @param _condition the claim condition to set, see `ERC721LazyDropStorage.ClaimCondition`
+     * @param _resetClaimEligibility resets total supply claimed and the claimed tokens per wallet
+     */
     function ERC721LazyDrop_setClaimCondition(
         address _tokenContract,
         ERC721LazyDropStorage.ClaimCondition calldata _condition,
@@ -110,14 +139,22 @@ abstract contract ERC721LazyDrop is IERC721LazyDrop, ERC721LazyDropInternal, Ree
         // perform any extra logic
         _afterSetClaimCondition(_tokenContract, _condition);
 
-        emit ClaimConditionUpdated(_condition, _resetClaimEligibility);
+        emit ClaimConditionUpdated(_tokenContract, _condition, _resetClaimEligibility);
     }
 
+    /**
+     * @notice removes a claim condition for a given token contract
+     * @dev    this is more gas efficient than setting the claim condition params to zero
+     *         emits ClaimConditionRemoved event
+     * @param _tokenContract the address of the token contract to remove claim condition
+     */
     function ERC721LazyDrop_removeClaimCondition(address _tokenContract) external {
         if (!_canSetClaimCondition(_tokenContract)) {
             revert ERC721LazyDrop_notAuthorised();
         }
 
         _removeClaimCondition(_tokenContract);
+
+        emit ClaimConditionRemoved(_tokenContract);
     }
 }

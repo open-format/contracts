@@ -301,7 +301,9 @@ contract ERC721LazyDropFacet_ERC721LazyDrop_removeClaimCondition is Setup {
 contract ERC721LazyDropFacet_ERC721LazyDrop_setClaimCondition is Setup {
     ERC721LazyDropStorage.ClaimCondition testClaimCondition;
 
-    event ClaimConditionUpdated(ERC721LazyDropStorage.ClaimCondition condition, bool resetEligibility);
+    event ClaimConditionUpdated(
+        address tokenContract, ERC721LazyDropStorage.ClaimCondition condition, bool resetEligibility
+    );
 
     function _afterSetUp() internal override {
         testClaimCondition = ERC721LazyDropStorage.ClaimCondition({
@@ -365,7 +367,7 @@ contract ERC721LazyDropFacet_ERC721LazyDrop_setClaimCondition is Setup {
 
     function test_emits_ClaimConditionUpdated() public {
         vm.expectEmit(true, true, true, true);
-        emit ClaimConditionUpdated(testClaimCondition, false);
+        emit ClaimConditionUpdated(address(erc721), testClaimCondition, false);
         vm.prank(nftOwner);
         ERC721LazyDropFacet(address(app)).ERC721LazyDrop_setClaimCondition(address(erc721), testClaimCondition, false);
     }
@@ -597,7 +599,7 @@ contract ERC721LazyDropFacet_ERC721LazyDrop_claim is Setup {
         vm.prank(nftOwner);
         erc721.revokeRole(MINTER_ROLE, address(app));
 
-        vm.expectRevert("Not authorized to mint.");
+        vm.expectRevert(ERC721LazyMint.ERC721LazyMint_notAuthorized.selector);
         vm.prank(other);
         ERC721LazyDropFacet(address(app)).ERC721LazyDrop_claim(
             address(erc721), other, 1, testClaimCondition.currency, testClaimCondition.pricePerToken
