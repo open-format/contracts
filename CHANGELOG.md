@@ -1,5 +1,11 @@
 # @openformat/contracts
 
+## 0.0.6
+
+### Patch Changes
+
+- [#64](https://github.com/open-format/contracts/pull/64) [`aa1fa3a`](https://github.com/open-format/contracts/commit/aa1fa3a9f5646f90b4d2b023bc49cd230f9cdd30) Thanks [@george-e-d-g-e](https://github.com/george-e-d-g-e)! - add lazy drop facet
+
 ## 0.0.5
 
 ### Patch Changes
