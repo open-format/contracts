@@ -17,7 +17,7 @@ contract ERC721LazyDropFacet is ERC721LazyDrop, PlatformFee, ApplicationFee {
     /**
      * @dev override before setClaimCondition to add platform fee
      *      requires msg.value to be equal or more than base platform fee
-     *      when calling setClaimCondition
+     *      when calling ERC721LazyDrop_setClaimCondition
      */
 
     function _beforeSetClaimCondition(address _tokenContract, ERC721LazyDropStorage.ClaimCondition calldata _condition)
@@ -46,6 +46,10 @@ contract ERC721LazyDropFacet is ERC721LazyDrop, PlatformFee, ApplicationFee {
         emit PaidPlatformFee(address(0), amount);
     }
 
+    /**
+     * @dev override to handle minting of NFT's
+     */
+
     function _transferTokensOnClaim(address _tokenContract, address _to, uint256 _quantityBeingClaimed)
         internal
         override
@@ -56,6 +60,10 @@ contract ERC721LazyDropFacet is ERC721LazyDrop, PlatformFee, ApplicationFee {
             ICompatibleERC721(_tokenContract).mintTo(_to);
         }
     }
+
+    /**
+     * @dev override to add platform and application fees as well as paying the royalty receiver
+     */
 
     function _collectPriceOnClaim(address _tokenContract, uint256 _quantity, address _currency, uint256 _pricePerToken)
         internal
