@@ -6,4 +6,8 @@ interface IInitializable {
      * @dev Triggered when the contract has been initialized or reinitialized.
      */
     event Initialized(uint8 version);
+
+    error Initializable_contractIsInitializing();
+    error Initializable_contractIsNotInitializing();
+    error Initializable_contractIsAlreadyInitialized();
 }

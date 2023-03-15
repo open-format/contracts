@@ -4,7 +4,7 @@ pragma solidity ^0.8.16;
 import "forge-std/Test.sol";
 import {IERC2981} from "@solidstate/contracts/interfaces/IERC2981.sol";
 import {IERC721} from "@solidstate/contracts/interfaces/IERC721.sol";
-import {ERC721BaseMock} from "../../../src/tokens/ERC721/ERC721BaseMock.sol";
+import {ERC721BaseMock, ERC721Base} from "../../../src/tokens/ERC721/ERC721BaseMock.sol";
 
 contract Setup is Test {
     address creator = address(0x10);
@@ -51,9 +51,9 @@ contract ERC721Base__royaltyInfo is Setup {
         erc721Base.mintTo(creator, tokenURI);
     }
 
-    function test_gets_reciever_and_amount() public {
-        (address reciever, uint256 amount) = erc721Base.royaltyInfo(0, 1 ether);
-        assertEq(reciever, creator);
+    function test_gets_receiver_and_amount() public {
+        (address receiver, uint256 amount) = erc721Base.royaltyInfo(0, 1 ether);
+        assertEq(receiver, creator);
         assertEq(amount, 0.1 ether);
     }
 
@@ -67,8 +67,8 @@ contract ERC721Base__royaltyInfo is Setup {
         uint16 fivePercentBPS = 500;
         erc721Base.setRoyaltyInfoForToken(0, other, fivePercentBPS);
 
-        (address reciever, uint256 amount) = erc721Base.royaltyInfo(0, 1 ether);
-        assertEq(reciever, other);
+        (address receiver, uint256 amount) = erc721Base.royaltyInfo(0, 1 ether);
+        assertEq(receiver, other);
         assertEq(amount, 0.05 ether);
     }
 }
@@ -79,6 +79,12 @@ contract ERC721Base__mintTo is Setup {
         erc721Base.mintTo(other, tokenURI);
 
         assertEq(other, erc721Base.ownerOf(0));
+    }
+
+    function test_reverts_if_not_authorised() public {
+        vm.expectRevert(ERC721Base.ERC721Base_notAuthorized.selector);
+        vm.prank(other);
+        erc721Base.mintTo(other, tokenURI);
     }
 }
 
@@ -111,6 +117,12 @@ contract ERC721Base__batchMintTo is Setup {
         assertEq(erc721Base.tokenURI(0), tokenURI);
         assertEq(erc721Base.tokenURI(1), string.concat(baseURI, "1"));
         assertEq(erc721Base.tokenURI(2), string.concat(baseURI, "2"));
+    }
+
+    function test_reverts_if_not_authorised() public {
+        vm.expectRevert(ERC721Base.ERC721Base_notAuthorized.selector);
+        vm.prank(other);
+        erc721Base.batchMintTo(other, 3, baseURI);
     }
 }
 

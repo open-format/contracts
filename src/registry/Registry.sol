@@ -17,7 +17,7 @@ abstract contract Registry is IRegistry, SolidStateDiamond {
      * @dev this is to prevent facets writing to registry storage through a delegate call
      */
     fallback() external payable override(Proxy, IProxy) {
-        revert Error_CannotInteractWithRegistryDirectly();
+        revert Registry_cannotInteractWithRegistryDirectly();
     }
 
     /**

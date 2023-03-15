@@ -32,6 +32,9 @@ contract ERC721LazyMint is
     Royalty,
     Multicall
 {
+    error ERC721LazyMint_notAuthorized();
+    error ERC721LazyMint_insufficientLazyMintedTokens();
+
     event Minted(address to, string tokenURI);
     event BatchMinted(address to, uint256 quantity, string baseURI);
 
@@ -103,9 +106,14 @@ contract ERC721LazyMint is
      */
 
     function mintTo(address _to) public virtual {
-        require(_canMint(), "Not authorized to mint.");
+        if (!_canMint()) {
+            revert ERC721LazyMint_notAuthorized();
+        }
         uint256 tokenId = _nextTokenId();
-        require(tokenId < _getNextTokenIdToLazyMint(), "Not enough lazy minted tokens");
+
+        if (tokenId >= _getNextTokenIdToLazyMint()) {
+            revert ERC721LazyMint_insufficientLazyMintedTokens();
+        }
 
         _safeMint(_to, 1);
 
@@ -121,8 +129,13 @@ contract ERC721LazyMint is
      */
 
     function batchMintTo(address _to, uint256 _quantity) public virtual {
-        require(_canMint(), "Not authorized to mint.");
-        require((_nextTokenId() + _quantity) - 1 < _getNextTokenIdToLazyMint(), "Not enough lazy minted tokens");
+        if (!_canMint()) {
+            revert ERC721LazyMint_notAuthorized();
+        }
+
+        if ((_nextTokenId() + _quantity) > _getNextTokenIdToLazyMint()) {
+            revert ERC721LazyMint_insufficientLazyMintedTokens();
+        }
 
         string memory _baseURI = _getBaseURI(_nextTokenId());
         _safeMint(_to, _quantity);

@@ -11,8 +11,8 @@ import {Proxy} from "../proxy/Proxy.sol";
 /**
  * @title "App Factory"
  * @notice (WIP) a factory contract for creating proxy(app) contracts
- * @dev    deploys minimal proxys that point to Proxy implementation/template
- *         is designed to be deployed sepertly from the registry and manged by open-format
+ * @dev    deploys minimal proxies that point to Proxy implementation/template
+ *         is designed to be deployed separately from the registry and managed by open-format
  */
 contract Factory is IFactory, MinimalProxyFactory, Ownable {
     address public template;
@@ -33,10 +33,9 @@ contract Factory is IFactory, MinimalProxyFactory, Ownable {
      * @dev _salt param can be thought as the app id
      */
     function create(bytes32 _name) external returns (address id) {
-        // TODO: WIP need to see other examples of factorys and handerling salt
         // check proxy not already deployed
         if (apps[_name] != address(0)) {
-            revert("name already used");
+            revert Factory_nameAlreadyUsed();
         }
 
         // deploy new proxy using CREATE2

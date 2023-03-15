@@ -21,7 +21,7 @@ import {Ownable} from "@solidstate/contracts/access/ownable/Ownable.sol";
  */
 
 contract Globals is Ownable {
-    error ERROR_percentageFeeCannotExceed100();
+    error Globals_percentageFeeCannotExceed100();
 
     event ERC721ImplementationUpdated(bytes32 _implementationId, address _implementation);
     event ERC20ImplementationUpdated(bytes32 _implementationId, address _implementation);
@@ -61,7 +61,7 @@ contract Globals is Ownable {
 
     function setPlatformFee(uint256 _base, uint16 _percentageBPS, address recipient) public onlyOwner {
         if (_percentageBPS > 10_000) {
-            revert ERROR_percentageFeeCannotExceed100();
+            revert Globals_percentageFeeCannotExceed100();
         }
         platformFee = PlatformFee(_base, _percentageBPS, recipient);
     }
@@ -72,7 +72,7 @@ contract Globals is Ownable {
 
     function setPlatformPercentageFee(uint16 _percentageBPS) public onlyOwner {
         if (_percentageBPS > 10_000) {
-            revert ERROR_percentageFeeCannotExceed100();
+            revert Globals_percentageFeeCannotExceed100();
         }
         platformFee.percentageBPS = _percentageBPS;
     }

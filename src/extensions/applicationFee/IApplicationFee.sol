@@ -2,9 +2,9 @@
 pragma solidity ^0.8.16;
 
 interface IApplicationFee {
-    error Error_currencies_and_approvals_must_be_the_same_length();
-    error Error_currency_not_accepted();
-    error Error_exceeds_max_percentBPS();
+    error ApplicationFee_currenciesAndApprovalsMustBeTheSameLength();
+    error ApplicationFee_currencyNotAccepted();
+    error ApplicationFee_exceedsMaxPercentBPS();
 
     event PaidApplicationFee(address currency, uint256 amount);
 

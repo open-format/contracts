@@ -9,6 +9,11 @@ pragma solidity ^0.8.16;
  */
 
 interface IContractMetadata {
+    error ContractMetadata_notAuthorized();
+
+    /// @dev Emitted when the contract URI is updated.
+    event ContractURIUpdated(string prevURI, string newURI);
+
     /// @dev Returns the metadata URI of the contract.
     function contractURI() external view returns (string memory);
 
@@ -17,7 +22,4 @@ interface IContractMetadata {
      *       Only module admin can call this function.
      */
     function setContractURI(string calldata _uri) external;
-
-    /// @dev Emitted when the contract URI is updated.
-    event ContractURIUpdated(string prevURI, string newURI);
 }

@@ -6,16 +6,16 @@ import {IProxy} from "../../src/proxy/IProxy.sol";
 import {ProxyMock} from "../../src/proxy/ProxyMock.sol";
 
 /**
- * @dev simple registry has a single function that returns bytes it recieved
+ * @dev simple registry has a single function that returns bytes it received
  *      and a mock facetAddress function
  */
 contract RegistryDummy {
-    function dataRecieved(bytes memory data) external pure returns (bytes memory) {
+    function dataReceived(bytes memory data) external pure returns (bytes memory) {
         return data;
     }
 
     function facetAddress(bytes4 selector) external view returns (address) {
-        if (selector == bytes4(keccak256("dataRecieved(bytes)"))) {
+        if (selector == bytes4(keccak256("dataReceived(bytes)"))) {
             return address(this);
         }
 
@@ -39,12 +39,12 @@ contract Proxy__fallback is Test {
 
     function test_data_is_forwarded_to_implementation() public {
         bytes memory data = bytes("some bytes");
-        bytes memory resp = RegistryDummy(address(proxy)).dataRecieved(data);
+        bytes memory resp = RegistryDummy(address(proxy)).dataReceived(data);
         assertEq(keccak256(resp), keccak256(data));
     }
 
     function test_reverts_when_function_selector_is_not_found() public {
-        vm.expectRevert(IProxy.Error_FunctionSelectorNotFound.selector);
+        vm.expectRevert(IProxy.Proxy_FunctionSelectorNotFound.selector);
         INotRegistered(address(proxy)).notRegistered();
     }
 }

@@ -36,7 +36,7 @@ abstract contract DefaultOperatorFiltererInternal is IDefaultOperatorFilterer {
             // under normal circumstances, this function will revert rather than return false, but inheriting contracts
             // may specify their own OperatorFilterRegistry implementations, which may behave differently
             if (!OPERATOR_FILTER_REGISTRY.isOperatorAllowed(address(this), operator)) {
-                revert OperatorNotAllowed(operator);
+                revert DefaultOperatorFilterer_OperatorNotAllowed(operator);
             }
         }
     }

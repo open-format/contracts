@@ -8,7 +8,7 @@ abstract contract RoyaltyInternal is IRoyalty {
     /// @dev Lets a contract admin update the default royalty recipient and bps.
     function _setDefaultRoyaltyInfo(address _royaltyRecipient, uint256 _royaltyBps) internal virtual {
         if (_royaltyBps > 10_000) {
-            revert("Exceeds max bps");
+            revert Royalty_exceedsMaxBPS();
         }
         RoyaltyStorage.Layout storage l = RoyaltyStorage.layout();
         l.royaltyRecipient = _royaltyRecipient;
@@ -25,7 +25,7 @@ abstract contract RoyaltyInternal is IRoyalty {
     /// @dev Lets a contract admin set the royalty recipient and bps for a particular token Id.
     function _setRoyaltyInfoForToken(uint256 _tokenId, address _recipient, uint256 _bps) internal {
         if (_bps > 10_000) {
-            revert("Exceeds max bps");
+            revert Royalty_exceedsMaxBPS();
         }
 
         RoyaltyStorage.Layout storage l = RoyaltyStorage.layout();

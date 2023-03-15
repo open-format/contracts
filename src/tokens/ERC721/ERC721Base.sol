@@ -31,6 +31,8 @@ contract ERC721Base is
     Royalty,
     Multicall
 {
+    error ERC721Base_notAuthorized();
+
     event Minted(address to, string tokenURI);
     event BatchMinted(address to, uint256 quantity, string baseURI);
 
@@ -99,7 +101,9 @@ contract ERC721Base is
      *  @param _tokenURI The full metadata URI for the NFT minted.
      */
     function mintTo(address _to, string memory _tokenURI) public virtual {
-        require(_canMint(), "Not authorized to mint.");
+        if (!_canMint()) {
+            revert ERC721Base_notAuthorized();
+        }
         _mintMetadata(_nextTokenId(), _tokenURI);
         _safeMint(_to, 1);
 
@@ -116,7 +120,9 @@ contract ERC721Base is
      */
 
     function batchMintTo(address _to, uint256 _quantity, string memory _baseURI) public virtual {
-        require(_canMint(), "Not authorized to mint.");
+        if (!_canMint()) {
+            revert ERC721Base_notAuthorized();
+        }
         _batchMintMetadata(_nextTokenId(), _quantity, _baseURI);
         _safeMint(_to, _quantity);
 

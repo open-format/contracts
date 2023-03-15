@@ -30,11 +30,11 @@ abstract contract LazyMint is ILazyMint, LazyMintInternal, BatchMintMetadata {
         returns (uint256)
     {
         if (!_canLazyMint()) {
-            revert Error_not_authorized_to_lazy_mint();
+            revert LazyMint_notAuthorizedToLazyMint();
         }
 
         if (_amount == 0) {
-            revert Error_zero_amount();
+            revert LazyMint_zeroAmount();
         }
 
         uint256 startId = _getNextTokenIdToLazyMint();

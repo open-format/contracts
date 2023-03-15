@@ -33,7 +33,7 @@ contract ERC721FactoryFacet is ERC721Factory, PlatformFee, Ownable {
 
         // ensure the ether being sent was included in the transaction
         if (msg.value < amount) {
-            revert CurrencyTransferLib.Error_insufficientValue();
+            revert CurrencyTransferLib.CurrencyTransferLib_insufficientValue();
         }
 
         CurrencyTransferLib.safeTransferNativeToken(recipient, amount);

@@ -55,7 +55,7 @@ contract ApplicationFee__internal_setApplicationFee is Setup {
     }
 
     function test_reverts_if_percent_exceeds_100() public {
-        vm.expectRevert(IApplicationFee.Error_exceeds_max_percentBPS.selector);
+        vm.expectRevert(IApplicationFee.ApplicationFee_exceedsMaxPercentBPS.selector);
         applicationFee.setApplicationFee(10_001, recipient);
     }
 }
@@ -87,7 +87,7 @@ contract ApplicationFee__internal_setAcceptedCurrencies is Setup {
         approvals[0] = true;
         approvals[1] = true;
 
-        vm.expectRevert(IApplicationFee.Error_currencies_and_approvals_must_be_the_same_length.selector);
+        vm.expectRevert(IApplicationFee.ApplicationFee_currenciesAndApprovalsMustBeTheSameLength.selector);
         applicationFee.setAcceptedCurrencies(currencies, approvals);
     }
 }
@@ -159,7 +159,7 @@ contract ApplicationFee__internal_payApplicationFee is Setup {
     }
 
     function test_reverts_if_currency_not_accepted() public {
-        vm.expectRevert(IApplicationFee.Error_currency_not_accepted.selector);
+        vm.expectRevert(IApplicationFee.ApplicationFee_currencyNotAccepted.selector);
         applicationFee.payApplicationFee(address(0xabc), 100);
     }
 
@@ -177,7 +177,7 @@ contract ApplicationFee__internal_payApplicationFee is Setup {
     }
 
     function test_reverts_if_msg_value_less_than_fee_with_native_token() public {
-        vm.expectRevert(CurrencyTransferLib.Error_insufficientValue.selector);
+        vm.expectRevert(CurrencyTransferLib.CurrencyTransferLib_insufficientValue.selector);
         applicationFee.payApplicationFee{value: 9 ether}(address(0), 100 ether);
     }
 }

@@ -33,6 +33,10 @@ import {Initializable} from "@extensions/initializable/Initializable.sol";
  */
 
 contract ERC20Base is SolidStateERC20, Ownable, Multicall, ContractMetadata, Initializable, ERC165Base {
+    error ERC20Base_notAuthorized();
+    error ERC20Base_zeroAmount();
+    error ERC20Base_insufficientBalance();
+
     function initialize(address _owner, string memory _name, string memory _symbol, uint8 _decimals, uint256 supply)
         public
         initializer
@@ -63,8 +67,13 @@ contract ERC20Base is SolidStateERC20, Ownable, Multicall, ContractMetadata, Ini
      *  @param _amount   Quantity of tokens to mint.
      */
     function mintTo(address _to, uint256 _amount) public virtual {
-        require(_canMint(), "Not authorized to mint.");
-        require(_amount != 0, "Minting zero tokens.");
+        if (!_canMint()) {
+            revert ERC20Base_notAuthorized();
+        }
+
+        if (_amount < 1) {
+            revert ERC20Base_zeroAmount();
+        }
 
         _mint(_to, _amount);
     }
@@ -76,7 +85,10 @@ contract ERC20Base is SolidStateERC20, Ownable, Multicall, ContractMetadata, Ini
      *  @param _amount   The number of tokens to burn.
      */
     function burn(uint256 _amount) external virtual {
-        require(_balanceOf(msg.sender) >= _amount, "not enough balance");
+        if (_balanceOf(msg.sender) < _amount) {
+            revert ERC20Base_insufficientBalance();
+        }
+
         _burn(msg.sender, _amount);
     }
 

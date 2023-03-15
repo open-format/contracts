@@ -2,10 +2,10 @@
 pragma solidity ^0.8.16;
 
 interface IERC20Factory {
-    error Error_do_not_have_permission();
-    error Error_no_implementation_found();
-    error Error_name_already_used();
-    error Error_failed_to_initialize();
+    error ERC20Factory_doNotHavePermission();
+    error ERC20Factory_noImplementationFound();
+    error ERC20Factory_nameAlreadyUsed();
+    error ERC20Factory_failedToInitialize();
 
     event Created(
         address id,

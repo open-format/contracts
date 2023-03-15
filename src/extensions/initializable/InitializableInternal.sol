@@ -15,7 +15,10 @@ abstract contract InitializableInternal is IInitializable {
      */
     function _disableInitializers() internal virtual {
         InitializableStorage.Layout storage l = InitializableStorage.layout();
-        require(!l._initializing, "Initializable: contract is initializing");
+        if (l._initializing) {
+            revert Initializable_contractIsInitializing();
+        }
+
         if (l._initialized != type(uint8).max) {
             l._initialized = type(uint8).max;
             emit Initialized(type(uint8).max);
