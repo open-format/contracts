@@ -14,8 +14,8 @@ interface ILazyMint {
     /// @dev Emitted when tokens are lazy minted.
     event TokensLazyMinted(uint256 indexed startTokenId, uint256 endTokenId, string baseURI, bytes encryptedBaseURI);
 
-    error Error_not_authorized_to_lazy_mint();
-    error Error_zero_amount();
+    error LazyMint_notAuthorizedToLazyMint();
+    error LazyMint_zeroAmount();
 
     /**
      *  @notice Lazy mints a given amount of NFTs.

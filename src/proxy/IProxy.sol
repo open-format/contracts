@@ -7,7 +7,7 @@ import {IERC165} from "@solidstate/contracts/interfaces/IERC165.sol";
 import {IDiamondReadable} from "@solidstate/contracts/proxy/diamond/readable/IDiamondReadable.sol";
 
 interface IProxy is IDiamondReadable, ISafeOwnable, IERC165 {
-    error Error_FunctionSelectorNotFound();
+    error Proxy_FunctionSelectorNotFound();
 
     receive() external payable;
 }

@@ -9,8 +9,8 @@ import {ContractMetadataInternal} from "./ContractMetadataInternal.sol";
  *  @notice  Thirdweb's `ContractMetadata` is a contract extension for any base contracts. It lets you set a metadata URI
  *           for you contract.
  *           Additionally, `ContractMetadata` is necessary for NFT contracts that want royalties to get distributed on OpenSea.
- *  @dev     This is a copy of ThirdWeb's ContractMetadata extentension refactored to use diamond storage pattern.
- *           Interface, storage and internal logic have been split out into seperate files
+ *  @dev     This is a copy of ThirdWeb's ContractMetadata extension refactored to use diamond storage pattern.
+ *           Interface, storage and internal logic have been split out into separate files
  *           https://github.com/thirdweb-dev/contracts/blob/main/contracts/extension/ContractMetadata.sol
  */
 
@@ -29,7 +29,7 @@ abstract contract ContractMetadata is IContractMetadata, ContractMetadataInterna
 
     function setContractURI(string memory _uri) external {
         if (!_canSetContractURI()) {
-            revert("Not authorized");
+            revert ContractMetadata_notAuthorized();
         }
 
         _setContractURI(_uri);
@@ -37,7 +37,7 @@ abstract contract ContractMetadata is IContractMetadata, ContractMetadataInterna
 
     /**
      *  @dev Returns whether contract metadata can be set in the given execution context.
-     *       Needs to be overriden by any contract inheriting ContractMetadata
+     *       Needs to be overridden by any contract inheriting ContractMetadata
      */
 
     function _canSetContractURI() internal view virtual returns (bool);

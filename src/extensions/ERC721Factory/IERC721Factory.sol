@@ -2,10 +2,10 @@
 pragma solidity ^0.8.16;
 
 interface IERC721Factory {
-    error Error_do_not_have_permission();
-    error Error_no_implementation_found();
-    error Error_name_already_used();
-    error Error_failed_to_initialize();
+    error ERC721Factory_doNotHavePermission();
+    error ERC721Factory_noImplementationFound();
+    error ERC721Factory_nameAlreadyUsed();
+    error ERC721Factory_failedToInitialize();
 
     event Created(
         address id,

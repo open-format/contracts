@@ -48,12 +48,12 @@ abstract contract ERC721Factory is IERC721Factory, ERC721FactoryInternal, Minima
         bytes32 _implementationId
     ) external payable virtual nonReentrant returns (address id) {
         if (!_canCreate()) {
-            revert Error_do_not_have_permission();
+            revert ERC721Factory_doNotHavePermission();
         }
 
         address implementation = _getImplementation(_implementationId);
         if (implementation == address(0)) {
-            revert Error_no_implementation_found();
+            revert ERC721Factory_noImplementationFound();
         }
 
         // creating a salt based of the name enforces no name is the same on each app
@@ -62,7 +62,7 @@ abstract contract ERC721Factory is IERC721Factory, ERC721FactoryInternal, Minima
         // check proxy has not deployed erc721 with the same name
         // deploying with the same salt would override that ERC721
         if (_getId(salt) != address(0)) {
-            revert Error_name_already_used();
+            revert ERC721Factory_nameAlreadyUsed();
         }
 
         // hook to add functionality before create
@@ -80,7 +80,7 @@ abstract contract ERC721Factory is IERC721Factory, ERC721FactoryInternal, Minima
         ) {
             emit Created(id, msg.sender, _name, _symbol, _royaltyRecipient, _royaltyBps, _implementationId);
         } catch {
-            revert Error_failed_to_initialize();
+            revert ERC721Factory_failedToInitialize();
         }
     }
 
@@ -101,13 +101,13 @@ abstract contract ERC721Factory is IERC721Factory, ERC721FactoryInternal, Minima
     {
         address implementation = _getImplementation(_implementationId);
         if (implementation == address(0)) {
-            revert Error_no_implementation_found();
+            revert ERC721Factory_noImplementationFound();
         }
 
         bytes32 salt = keccak256(abi.encode(_name));
         // check app has not deployed erc721 with the same name
         if (_getId(salt) != address(0)) {
-            revert Error_name_already_used();
+            revert ERC721Factory_nameAlreadyUsed();
         }
 
         return _calculateMinimalProxyDeploymentAddress(implementation, salt);

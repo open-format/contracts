@@ -12,6 +12,15 @@ import {IERC2981} from "@solidstate/contracts/interfaces/IERC2981.sol";
  */
 
 interface IRoyalty is IERC2981 {
+    error Royalty_exceedsMaxBPS();
+    error Royalty_notAuthorized();
+
+    /// @dev Emitted when royalty info is updated.
+    event DefaultRoyalty(address indexed newRoyaltyRecipient, uint256 newRoyaltyBps);
+
+    /// @dev Emitted when royalty recipient for tokenId is set
+    event RoyaltyForToken(uint256 indexed tokenId, address indexed royaltyRecipient, uint256 royaltyBps);
+
     /// @dev Returns the royalty recipient and fee bps.
     function getDefaultRoyaltyInfo() external view returns (address, uint16);
 
@@ -23,10 +32,4 @@ interface IRoyalty is IERC2981 {
 
     /// @dev Returns the royalty recipient for a particular token Id.
     function getRoyaltyInfoForToken(uint256 tokenId) external view returns (address, uint16);
-
-    /// @dev Emitted when royalty info is updated.
-    event DefaultRoyalty(address indexed newRoyaltyRecipient, uint256 newRoyaltyBps);
-
-    /// @dev Emitted when royalty recipient for tokenId is set
-    event RoyaltyForToken(uint256 indexed tokenId, address indexed royaltyRecipient, uint256 royaltyBps);
 }

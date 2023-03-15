@@ -2,12 +2,14 @@
 pragma solidity ^0.8.16;
 
 import "forge-std/Test.sol";
-import {ERC20BaseMock} from "../../../src/tokens/ERC20/ERC20BaseMock.sol";
+import {ERC20BaseMock, ERC20Base} from "../../../src/tokens/ERC20/ERC20BaseMock.sol";
 
 import {IERC165} from "@solidstate/contracts/interfaces/IERC165.sol";
 import {IERC20} from "@solidstate/contracts/interfaces/IERC20.sol";
 import {IERC2612} from "@solidstate/contracts/token/ERC20/permit/IERC2612.sol";
+
 import {IContractMetadata} from "@extensions/contractMetadata/ContractMetadata.sol";
+import {IInitializable} from "@extensions/initializable/IInitializable.sol";
 
 contract Setup is Test {
     address creator = address(0x10);
@@ -71,7 +73,7 @@ contract ERC20__initialize is Setup {
     }
 
     function test_cannot_be_initialized_again() public {
-        vm.expectRevert("Initializable: contract is already initialized");
+        vm.expectRevert(IInitializable.Initializable_contractIsAlreadyInitialized.selector);
         erc20Base.initialize(other, "Name", "Symbol", 18, 10_000);
     }
 }
@@ -85,13 +87,13 @@ contract ERC20__mintTo is Setup {
 
     function test_reverts_if_not_the_owner() public {
         vm.prank(other);
-        vm.expectRevert("Not authorized to mint.");
+        vm.expectRevert(ERC20Base.ERC20Base_notAuthorized.selector);
         erc20Base.mintTo(other, 10_000);
     }
 
     function test_reverts_amount_is_zero() public {
         vm.prank(creator);
-        vm.expectRevert("Minting zero tokens.");
+        vm.expectRevert(ERC20Base.ERC20Base_zeroAmount.selector);
         erc20Base.mintTo(other, 0);
     }
 }
@@ -105,7 +107,7 @@ contract ERC20__burn is Setup {
 
     function test_reverts_if_not_enough_balance() public {
         vm.prank(creator);
-        vm.expectRevert("not enough balance");
+        vm.expectRevert(ERC20Base.ERC20Base_insufficientBalance.selector);
         erc20Base.burn(10_001);
     }
 }

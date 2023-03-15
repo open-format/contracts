@@ -13,8 +13,8 @@ import {RoyaltyInternal} from "./RoyaltyInternal.sol";
  *  @dev     The `Royalty` contract is ERC2981 compliant.
  *  @dev     Thirdwebs royalty has been refactored to use the diamond storage pattern and internal functions have been split out into a seperate file
  *
- *  @dev     This is a copy of ThirdWeb's Royalty extentension refactored to use diamond storage pattern.
- *           Interface, storage and internal logic have been split out into seperate files
+ *  @dev     This is a copy of ThirdWeb's Royalty extension refactored to use diamond storage pattern.
+ *           Interface, storage and internal logic have been split out into separate files
  *           https://github.com/thirdweb-dev/contracts/blob/main/contracts/extension/Royalty.sol
  */
 
@@ -67,7 +67,7 @@ abstract contract Royalty is IRoyalty, RoyaltyInternal {
      */
     function setDefaultRoyaltyInfo(address _royaltyRecipient, uint256 _royaltyBps) external override {
         if (!_canSetRoyaltyInfo()) {
-            revert("Not authorized");
+            revert Royalty_notAuthorized();
         }
 
         _setDefaultRoyaltyInfo(_royaltyRecipient, _royaltyBps);
@@ -84,7 +84,7 @@ abstract contract Royalty is IRoyalty, RoyaltyInternal {
      */
     function setRoyaltyInfoForToken(uint256 _tokenId, address _recipient, uint256 _bps) external override {
         if (!_canSetRoyaltyInfo()) {
-            revert("Not authorized");
+            revert Royalty_notAuthorized();
         }
 
         _setRoyaltyInfoForToken(_tokenId, _recipient, _bps);

@@ -1,9 +1,10 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.16;
 
+import {IBatchMintMetadata} from "./IBatchMintMetadata.sol";
 import {BatchMintMetadataStorage} from "./BatchMintMetadataStorage.sol";
 
-abstract contract BatchMintMetadataInternal {
+abstract contract BatchMintMetadataInternal is IBatchMintMetadata {
     function _getBaseURICount() internal view returns (uint256) {
         return BatchMintMetadataStorage.layout().batchIds.length;
     }
@@ -27,7 +28,7 @@ abstract contract BatchMintMetadataInternal {
             }
         }
 
-        revert("Invalid tokenId");
+        revert BatchMintMetadata_invalidTokenId();
     }
 
     /**
@@ -37,7 +38,7 @@ abstract contract BatchMintMetadataInternal {
      */
     function _getBatchIdAtIndex(uint256 _index) public view returns (uint256) {
         if (_index >= _getBaseURICount()) {
-            revert("Invalid index");
+            revert BatchMintMetadata_invalidIndex();
         }
         return BatchMintMetadataStorage.layout().batchIds[_index];
     }
@@ -55,7 +56,7 @@ abstract contract BatchMintMetadataInternal {
             }
         }
 
-        revert("Invalid tokenId");
+        revert BatchMintMetadata_invalidTokenId();
     }
 
     /// @dev Sets the base URI for the batch of tokens with the given batchId.

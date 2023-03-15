@@ -25,7 +25,7 @@ abstract contract ApplicationFeeInternal is IApplicationFee {
         ApplicationFeeStorage.Layout storage l = ApplicationFeeStorage.layout();
 
         if (_percentBPS > 10_000) {
-            revert Error_exceeds_max_percentBPS();
+            revert ApplicationFee_exceedsMaxPercentBPS();
         }
 
         l.percentageBPS = _percentBPS;
@@ -36,7 +36,7 @@ abstract contract ApplicationFeeInternal is IApplicationFee {
         ApplicationFeeStorage.Layout storage l = ApplicationFeeStorage.layout();
 
         if (_currencies.length != _approvals.length) {
-            revert Error_currencies_and_approvals_must_be_the_same_length();
+            revert ApplicationFee_currenciesAndApprovalsMustBeTheSameLength();
         }
 
         for (uint256 i = 0; i < _currencies.length; i++) {

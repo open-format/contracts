@@ -19,7 +19,7 @@ import {Initializable} from "../extensions/initializable/Initializable.sol";
  * @dev     is intended to not to be called directly but via a minimal proxy https://eips.ethereum.org/EIPS/eip-1167
  */
 contract Proxy is IProxy, Readable, Upgradable, Global, ERC165Base, Initializable, SafeOwnable {
-    /// @param _disable disables initilizers, mainly used for testing and should be set to true in production
+    /// @param _disable disables initializers, mainly used for testing and should be set to true in production
     constructor(bool _disable) {
         // As this contract is intended to be called from minimal proxy contracts
         // lock contract on deployment
@@ -49,7 +49,7 @@ contract Proxy is IProxy, Readable, Upgradable, Global, ERC165Base, Initializabl
     // slither-disable-next-line locked-ether
     fallback() external payable {
         address facet = _facetAddress(msg.sig);
-        if (facet == address(0)) revert Error_FunctionSelectorNotFound();
+        if (facet == address(0)) revert Proxy_FunctionSelectorNotFound();
 
         // slither-disable-next-line assembly
         assembly {

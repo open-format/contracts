@@ -75,10 +75,17 @@ contract LazyMint__lazyMint is Setup {
         }
     }
 
-    function test_only_approved_minter_can_lazy_mint() public {
-        vm.expectRevert(ILazyMint.Error_not_authorized_to_lazy_mint.selector);
+    function test_reverts_when_minter_is_not_authorized() public {
+        vm.expectRevert(ILazyMint.LazyMint_notAuthorizedToLazyMint.selector);
 
         vm.prank(other);
         lazyMint.lazyMint(1, baseURI, "");
+    }
+
+    function test_reverts_when_amount_is_zero() public {
+        vm.expectRevert(ILazyMint.LazyMint_zeroAmount.selector);
+
+        vm.prank(minter);
+        lazyMint.lazyMint(0, baseURI, "");
     }
 }

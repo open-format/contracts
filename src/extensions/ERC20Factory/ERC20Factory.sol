@@ -49,12 +49,12 @@ abstract contract ERC20Factory is IERC20Factory, ERC20FactoryInternal, MinimalPr
         bytes32 _implementationId
     ) external payable virtual nonReentrant returns (address id) {
         if (!_canCreate()) {
-            revert Error_do_not_have_permission();
+            revert ERC20Factory_doNotHavePermission();
         }
 
         address implementation = _getImplementation(_implementationId);
         if (implementation == address(0)) {
-            revert Error_no_implementation_found();
+            revert ERC20Factory_noImplementationFound();
         }
 
         bytes32 salt = keccak256(abi.encode(_name));
@@ -62,7 +62,7 @@ abstract contract ERC20Factory is IERC20Factory, ERC20FactoryInternal, MinimalPr
         // check proxy has not deployed erc20 with the same name
         // deploying with the same salt would override that ERC20
         if (_getId(salt) != address(0)) {
-            revert Error_name_already_used();
+            revert ERC20Factory_nameAlreadyUsed();
         }
 
         // hook to add functionality before create
@@ -78,7 +78,7 @@ abstract contract ERC20Factory is IERC20Factory, ERC20FactoryInternal, MinimalPr
         try CompatibleERC20Implementation(payable(id)).initialize(msg.sender, _name, _symbol, _decimals, _supply) {
             emit Created(id, msg.sender, _name, _symbol, _decimals, _supply, _implementationId);
         } catch {
-            revert Error_failed_to_initialize();
+            revert ERC20Factory_failedToInitialize();
         }
     }
 
@@ -99,13 +99,13 @@ abstract contract ERC20Factory is IERC20Factory, ERC20FactoryInternal, MinimalPr
     {
         address implementation = _getImplementation(_implementationId);
         if (implementation == address(0)) {
-            revert Error_no_implementation_found();
+            revert ERC20Factory_noImplementationFound();
         }
 
         bytes32 salt = keccak256(abi.encode(_name));
         // check app has not deployed erc20 with the same name
         if (_getId(salt) != address(0)) {
-            revert Error_name_already_used();
+            revert ERC20Factory_nameAlreadyUsed();
         }
 
         return _calculateMinimalProxyDeploymentAddress(implementation, salt);

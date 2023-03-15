@@ -142,13 +142,13 @@ contract ERC721FactoryFacet__integration_createERC721 is Setup {
     }
 
     function test_reverts_when_do_not_have_permission() public {
-        vm.expectRevert(IERC721Factory.Error_do_not_have_permission.selector);
+        vm.expectRevert(IERC721Factory.ERC721Factory_doNotHavePermission.selector);
         vm.prank(other);
         ERC721FactoryFacet(address(app)).createERC721("name", "symbol", creator, 1000, erc721ImplementationId);
     }
 
     function test_reverts_when_no_implementation_is_found() public {
-        vm.expectRevert(IERC721Factory.Error_no_implementation_found.selector);
+        vm.expectRevert(IERC721Factory.ERC721Factory_noImplementationFound.selector);
         vm.prank(creator);
         ERC721FactoryFacet(address(app)).createERC721(
             "name", "symbol", creator, 1000, bytes32("wrong implementation id")
@@ -160,7 +160,7 @@ contract ERC721FactoryFacet__integration_createERC721 is Setup {
         vm.prank(creator);
         ERC721FactoryFacet(address(app)).createERC721("name", "symbol", creator, 1000, erc721ImplementationId);
 
-        vm.expectRevert(IERC721Factory.Error_name_already_used.selector);
+        vm.expectRevert(IERC721Factory.ERC721Factory_nameAlreadyUsed.selector);
         vm.prank(creator);
         ERC721FactoryFacet(address(app)).createERC721("name", "symbol", creator, 1000, erc721ImplementationId);
     }
@@ -171,7 +171,7 @@ contract ERC721FactoryFacet__integration_createERC721 is Setup {
 
         globals.setERC721Implementation(badErc721ImplementationId, address(badErc721Implementation));
 
-        vm.expectRevert(IERC721Factory.Error_failed_to_initialize.selector);
+        vm.expectRevert(IERC721Factory.ERC721Factory_failedToInitialize.selector);
         vm.prank(creator);
         ERC721FactoryFacet(address(app)).createERC721{value: 1 ether}(
             "name", "symbol", creator, 1000, badErc721ImplementationId
@@ -207,13 +207,13 @@ contract ERC721FactoryFacet__integration_calculateERC721DeploymentAddress is Set
         address actualDeploymentAddress =
             ERC721FactoryFacet(address(app)).createERC721("name", "symbol", creator, 1000, erc721ImplementationId);
 
-        vm.expectRevert(IERC721Factory.Error_name_already_used.selector);
+        vm.expectRevert(IERC721Factory.ERC721Factory_nameAlreadyUsed.selector);
         vm.prank(creator);
         ERC721FactoryFacet(address(app)).calculateERC721FactoryDeploymentAddress("name", erc721ImplementationId);
     }
 
     function test_reverts_if_no_implementation_found() public {
-        vm.expectRevert(IERC721Factory.Error_no_implementation_found.selector);
+        vm.expectRevert(IERC721Factory.ERC721Factory_noImplementationFound.selector);
         address implementation = ERC721FactoryFacet(address(app)).calculateERC721FactoryDeploymentAddress("name", "");
     }
 }

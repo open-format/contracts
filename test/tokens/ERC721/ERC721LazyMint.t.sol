@@ -83,9 +83,16 @@ contract ERC721LazyMint__lazyMint is Setup {
     }
 
     function test_reverts_when_access_is_invalid() public {
-        vm.expectRevert(ILazyMint.Error_not_authorized_to_lazy_mint.selector);
+        vm.expectRevert(ILazyMint.LazyMint_notAuthorizedToLazyMint.selector);
         vm.prank(other);
         erc721LazyMint.lazyMint(2, baseURI, "");
+    }
+
+    function test_reverts_when_amount_is_zero() public {
+        vm.expectRevert(ILazyMint.LazyMint_zeroAmount.selector);
+
+        vm.prank(creator);
+        erc721LazyMint.lazyMint(0, baseURI, "");
     }
 }
 
@@ -127,7 +134,7 @@ contract ERC721LazyMint__revokeRole is Setup {
         vm.prank(creator);
         erc721LazyMint.revokeRole(MINTER_ROLE, other);
 
-        vm.expectRevert("Not authorized to mint.");
+        vm.expectRevert(ERC721LazyMint.ERC721LazyMint_notAuthorized.selector);
         vm.prank(other);
         erc721LazyMint.mintTo(other);
     }
@@ -150,6 +157,22 @@ contract ERC721LazyMint__mintTo is Setup {
         erc721LazyMint.mintTo(other);
 
         assertEq(other, erc721LazyMint.ownerOf(0));
+    }
+
+    function test_reverts_if_not_authorised() public {
+        vm.expectRevert(ERC721LazyMint.ERC721LazyMint_notAuthorized.selector);
+        vm.prank(other);
+        erc721LazyMint.mintTo(other);
+    }
+
+    function test_reverts_when_next_token_has_not_been_lazy_minted() public {
+        // mint lazy minted token
+        vm.prank(creator);
+        erc721LazyMint.mintTo(other);
+
+        vm.expectRevert(ERC721LazyMint.ERC721LazyMint_insufficientLazyMintedTokens.selector);
+        vm.prank(creator);
+        erc721LazyMint.mintTo(other);
     }
 }
 
@@ -178,6 +201,28 @@ contract ERC721LazyMint__batchMintTo is Setup {
         assertEq(erc721LazyMint.tokenURI(0), baseURI);
         assertEq(erc721LazyMint.tokenURI(1), baseURI);
         assertEq(erc721LazyMint.tokenURI(2), baseURI);
+    }
+
+    function test_reverts_if_not_authorised() public {
+        vm.expectRevert(ERC721LazyMint.ERC721LazyMint_notAuthorized.selector);
+        vm.prank(other);
+        erc721LazyMint.batchMintTo(other, 2);
+    }
+
+    function test_reverts_when_insufficient_lazy_minted_tokens() public {
+        // batch mint all lazy minted tokens
+        vm.prank(creator);
+        erc721LazyMint.batchMintTo(other, 3);
+
+        vm.expectRevert(ERC721LazyMint.ERC721LazyMint_insufficientLazyMintedTokens.selector);
+        vm.prank(creator);
+        erc721LazyMint.batchMintTo(other, 1);
+    }
+
+    function test_reverts_when_quantity_exceeds_lazy_minted_tokens() public {
+        vm.expectRevert(ERC721LazyMint.ERC721LazyMint_insufficientLazyMintedTokens.selector);
+        vm.prank(creator);
+        erc721LazyMint.batchMintTo(other, 4);
     }
 }
 
