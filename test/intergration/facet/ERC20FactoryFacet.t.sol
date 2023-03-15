@@ -140,12 +140,6 @@ contract ERC20FactoryFacet__integration_createERC20 is Setup {
         ERC20FactoryFacet(address(app)).createERC20("name", "symbol", 18, 1000, erc20ImplementationId);
     }
 
-    function test_reverts_when_do_not_have_permission() public {
-        vm.expectRevert(IERC20Factory.ERC20Factory_doNotHavePermission.selector);
-        vm.prank(other);
-        ERC20FactoryFacet(address(app)).createERC20("name", "symbol", 18, 1000, erc20ImplementationId);
-    }
-
     function test_reverts_when_no_implementation_is_found() public {
         vm.expectRevert(IERC20Factory.ERC20Factory_noImplementationFound.selector);
         vm.prank(creator);

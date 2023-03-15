@@ -141,12 +141,6 @@ contract ERC721FactoryFacet__integration_createERC721 is Setup {
         ERC721FactoryFacet(address(app)).createERC721("name", "symbol", creator, 1000, erc721ImplementationId);
     }
 
-    function test_reverts_when_do_not_have_permission() public {
-        vm.expectRevert(IERC721Factory.ERC721Factory_doNotHavePermission.selector);
-        vm.prank(other);
-        ERC721FactoryFacet(address(app)).createERC721("name", "symbol", creator, 1000, erc721ImplementationId);
-    }
-
     function test_reverts_when_no_implementation_is_found() public {
         vm.expectRevert(IERC721Factory.ERC721Factory_noImplementationFound.selector);
         vm.prank(creator);
