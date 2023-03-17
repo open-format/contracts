@@ -15,6 +15,7 @@ remappings :; forge remappings > remappings.txt
 
 # deploy
 # to run: `make deploy rpc="<chain>"` e.g `make deploy rpc="anvil"`
+# TODO: compile all contracts at start then run scripts
 deploy:; make \
 	deploy-Globals \
 	deploy-Registry \
@@ -42,3 +43,16 @@ deploy-ERC20Base:; forge script scripts/tokens/ERC20Base.s.sol:Deploy --rpc-url 
 deploy-SettingsFacet:; forge script scripts/facet/SettingsFacet.s.sol:Deploy --rpc-url $(rpc) --broadcast $(verbose)
 deploy-ERC721FactoryFacet:; forge script scripts/facet/ERC721FactoryFacet.s.sol:Deploy --rpc-url $(rpc) --broadcast $(verbose)
 deploy-ERC20FactoryFacet:; forge script scripts/facet/ERC20FactoryFacet.s.sol:Deploy --rpc-url $(rpc) --broadcast $(verbose)
+
+
+# helpers
+
+# example: `make CreateApp args="app name" rpc=anvil`
+# Note: Uses a cast command to format the app name args to bytes32
+CreateApp:; forge script \
+	scripts/core/Factory.s.sol:CreateApp \
+	--sig "run(string)" \
+	--rpc-url $(rpc) \
+	--broadcast \
+	$(verbose) \
+	`cast --format-bytes32-string $(args)`
