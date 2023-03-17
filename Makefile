@@ -27,6 +27,7 @@ deploy:; make \
 	deploy-SettingsFacet \
 	deploy-ERC721FactoryFacet \
 	deploy-ERC20FactoryFacet \
+	deploy-ERC721LazyDropFacet \
 
 # core
 deploy-Globals:; forge script scripts/core/Globals.s.sol:Deploy --rpc-url $(rpc) --broadcast $(verbose)
