@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: UNLICENSED
+// SPDX-License-Identifier: Apache-2.0
 pragma solidity ^0.8.16;
 
 import {IERC20, SafeERC20} from "@solidstate/contracts/utils/SafeERC20.sol";
