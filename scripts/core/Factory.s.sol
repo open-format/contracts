@@ -5,6 +5,8 @@ import "forge-std/Script.sol";
 import {Utils} from "scripts/utils/Utils.sol";
 import {Factory} from "src/factory/Factory.sol";
 
+string constant CONTRACT_NAME = "Factory";
+
 contract Deploy is Script, Utils {
     function run() external {
         uint256 deployerPrivateKey = vm.envUint("PRIVATE_KEY");
@@ -22,6 +24,6 @@ contract Deploy is Script, Utils {
 
         vm.stopBroadcast();
 
-        exportContractDeployment("Factory", address(factory), block.number);
+        exportContractDeployment(CONTRACT_NAME, address(factory), block.number);
     }
 }

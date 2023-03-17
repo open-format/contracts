@@ -6,14 +6,17 @@ import {Utils} from "scripts/utils/Utils.sol";
 // TODO: use Registry instead of RegistryMock
 import {RegistryMock} from "src/registry/RegistryMock.sol";
 
+string constant CONTRACT_NAME = "Registry";
+
 contract Deploy is Script, Utils {
     function run() external {
         uint256 deployerPrivateKey = vm.envUint("PRIVATE_KEY");
         vm.startBroadcast(deployerPrivateKey);
 
         RegistryMock registry = new RegistryMock();
-        exportContractDeployment("Registry", address(registry), block.number);
 
         vm.stopBroadcast();
+
+        exportContractDeployment(CONTRACT_NAME, address(registry), block.number);
     }
 }
