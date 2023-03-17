@@ -2,6 +2,7 @@
 pragma solidity ^0.8.16;
 
 import "forge-std/Script.sol";
+import "forge-std/console.sol";
 import {Utils} from "scripts/utils/Utils.sol";
 import {Factory} from "src/factory/Factory.sol";
 
@@ -25,5 +26,25 @@ contract Deploy is Script, Utils {
         vm.stopBroadcast();
 
         exportContractDeployment(CONTRACT_NAME, address(factory), block.number);
+    }
+}
+
+contract CreateApp is Script, Utils {
+    function run(string memory appName) external {
+        uint256 deployerPrivateKey = vm.envUint("PRIVATE_KEY");
+        vm.startBroadcast(deployerPrivateKey);
+
+        bytes32 appNameBytes32 = vm.parseBytes32(appName);
+
+        if (appNameBytes32.length == 0) {
+            revert("please provide an app name, make CreateApp args=appName");
+        }
+
+        address appAddress = Factory(getContractDeploymentAddress(CONTRACT_NAME)).create(appNameBytes32);
+
+        console.log("App:", appName);
+        console.log("Deployed:", appAddress);
+
+        vm.stopBroadcast();
     }
 }
