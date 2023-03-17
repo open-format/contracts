@@ -69,7 +69,7 @@ contract Utils is Script {
         vm.writeJson(contractJson, path);
     }
 
-    function _getDeployedFilePath() internal returns (string memory) {
+    function _getDeployedFilePath() internal view returns (string memory) {
         string memory inputDir = string.concat(vm.projectRoot(), "/deployed/");
         string memory file = string.concat(vm.toString(block.chainid), ".json");
 
