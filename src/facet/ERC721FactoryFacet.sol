@@ -3,6 +3,7 @@ pragma solidity ^0.8.16;
 
 import {Ownable} from "@solidstate/contracts/access/ownable/Ownable.sol";
 import {CurrencyTransferLib} from "src/lib/CurrencyTransferLib.sol";
+import {ApplicationAccess} from "../extensions/applicationAccess/ApplicationAccess.sol";
 import {ERC721Factory} from "../extensions/ERC721Factory/ERC721Factory.sol";
 import {PlatformFee} from "../extensions/platformFee/PlatformFee.sol";
 
@@ -11,12 +12,12 @@ import {PlatformFee} from "../extensions/platformFee/PlatformFee.sol";
  * @notice  (WIP)
  */
 
-contract ERC721FactoryFacet is ERC721Factory, PlatformFee, Ownable {
+contract ERC721FactoryFacet is ERC721Factory, Ownable, PlatformFee, ApplicationAccess {
     /**
-     * @dev sets permissions to create new nft to proxy app owner
+     * @dev uses applicationAccess extension for create access for new erc721 contracts
      */
     function _canCreate() internal view override returns (bool) {
-        return msg.sender == _owner();
+        return _hasCreatorAccess(msg.sender);
     }
 
     /**

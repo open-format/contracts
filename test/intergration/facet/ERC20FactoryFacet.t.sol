@@ -20,6 +20,8 @@ import {IERC20Factory} from "@extensions/ERC20Factory/IERC20Factory.sol";
 import {ERC20Base} from "src/tokens/ERC20/ERC20Base.sol";
 import {ERC20FactoryFacet} from "src/facet/ERC20FactoryFacet.sol";
 
+import {SettingsFacet, IApplicationAccess} from "src/facet/SettingsFacet.sol";
+
 // bad erc20 implementation without an initialize function
 contract BadERC20 {}
 
@@ -46,6 +48,8 @@ contract Setup is Test, Helpers {
     RegistryMock registry;
     Globals globals;
 
+    SettingsFacet settingsFacet;
+
     ERC20Base erc20Implementation;
     bytes32 erc20ImplementationId;
     ERC20FactoryFacet erc20FactoryFacet;
@@ -53,7 +57,7 @@ contract Setup is Test, Helpers {
     function setUp() public {
         // assign addresses
         creator = address(0x10);
-        creator = address(0x11);
+        other = address(0x11);
         socialConscious = address(0x12);
 
         vm.deal(creator, 1 ether);
@@ -76,16 +80,33 @@ contract Setup is Test, Helpers {
         globals.setPlatformFee(0, 0, socialConscious);
         globals.setERC20Implementation(erc20ImplementationId, address(erc20Implementation));
 
-        // add facet to registry
-        bytes4[] memory selectors = new bytes4[](3);
-        selectors[0] = erc20FactoryFacet.createERC20.selector;
-        selectors[1] = erc20FactoryFacet.getERC20FactoryImplementation.selector;
-        selectors[2] = erc20FactoryFacet.calculateERC20FactoryDeploymentAddress.selector;
-        registry.diamondCut(
-            prepareSingleFacetCut(address(erc20FactoryFacet), IDiamondWritableInternal.FacetCutAction.ADD, selectors),
-            address(0),
-            ""
-        );
+        settingsFacet = new SettingsFacet();
+        {
+            // add SettingsFacet to registry
+            bytes4[] memory selectors = new bytes4[](1);
+            selectors[0] = settingsFacet.setCreatorAccess.selector;
+
+            registry.diamondCut(
+                prepareSingleFacetCut(address(settingsFacet), IDiamondWritableInternal.FacetCutAction.ADD, selectors),
+                address(0),
+                ""
+            );
+        }
+
+        {
+            // add facet to registry
+            bytes4[] memory selectors = new bytes4[](3);
+            selectors[0] = erc20FactoryFacet.createERC20.selector;
+            selectors[1] = erc20FactoryFacet.getERC20FactoryImplementation.selector;
+            selectors[2] = erc20FactoryFacet.calculateERC20FactoryDeploymentAddress.selector;
+            registry.diamondCut(
+                prepareSingleFacetCut(
+                    address(erc20FactoryFacet), IDiamondWritableInternal.FacetCutAction.ADD, selectors
+                ),
+                address(0),
+                ""
+            );
+        }
     }
 }
 
@@ -123,6 +144,20 @@ contract ERC20FactoryFacet__integration_createERC20 is Setup {
         );
         // check platform fee has been received
         assertEq(socialConscious.balance, 1 ether);
+    }
+
+    function test_can_create_erc721_when_approved_creator() public {
+        _approveCreatorAccess(other);
+
+        vm.prank(other);
+        ERC20FactoryFacet(address(app)).createERC20("name", "symbol", 18, 1000, erc20ImplementationId);
+    }
+
+    function test_can_create_erc721_when_zero_address_approved_creator() public {
+        _approveCreatorAccess(address(0));
+
+        vm.prank(other);
+        ERC20FactoryFacet(address(app)).createERC20("name", "symbol", 18, 1000, erc20ImplementationId);
     }
 
     function test_emits_Created_event() public {
@@ -171,6 +206,20 @@ contract ERC20FactoryFacet__integration_createERC20 is Setup {
         vm.expectRevert(IERC20Factory.ERC20Factory_failedToInitialize.selector);
         vm.prank(creator);
         ERC20FactoryFacet(address(app)).createERC20("name", "symbol", 18, 1000, badErc20ImplementationId);
+    }
+
+    function _approveCreatorAccess(address _account)
+        internal
+        returns (address[] memory accounts, bool[] memory approvals)
+    {
+        accounts = new address[](1);
+        accounts[0] = address(_account); // native token
+
+        approvals = new bool[](1);
+        approvals[0] = true;
+
+        vm.prank(creator);
+        SettingsFacet(address(app)).setCreatorAccess(accounts, approvals);
     }
 }
 

@@ -9,6 +9,7 @@ import {
     IDiamondWritable,
     IDiamondWritableInternal
 } from "@solidstate/contracts/proxy/diamond/writable/IDiamondWritable.sol";
+import {IOwnableInternal} from "@solidstate/contracts/access/ownable/IOwnableInternal.sol";
 
 import {Proxy} from "src/proxy/Proxy.sol";
 import {Upgradable} from "src/proxy/upgradable/Upgradable.sol";
@@ -16,7 +17,7 @@ import {RegistryMock} from "src/registry/RegistryMock.sol";
 import {Factory} from "src/factory/Factory.sol";
 import {Globals} from "src/globals/Globals.sol";
 
-import {SettingsFacet} from "src/facet/SettingsFacet.sol";
+import {SettingsFacet, IApplicationAccess} from "src/facet/SettingsFacet.sol";
 
 abstract contract Helpers {
     function prepareSingleFacetCut(
@@ -58,10 +59,12 @@ contract Setup is Test, Helpers {
         settingsFacet = new SettingsFacet();
 
         // add facet to registry
-        bytes4[] memory selectors = new bytes4[](3);
+        bytes4[] memory selectors = new bytes4[](5);
         selectors[0] = settingsFacet.setApplicationFee.selector;
         selectors[1] = settingsFacet.setAcceptedCurrencies.selector;
         selectors[2] = settingsFacet.applicationFeeInfo.selector;
+        selectors[3] = settingsFacet.setCreatorAccess.selector;
+        selectors[4] = settingsFacet.hasCreatorAccess.selector;
 
         registry.diamondCut(
             prepareSingleFacetCut(address(settingsFacet), IDiamondWritableInternal.FacetCutAction.ADD, selectors),
@@ -152,5 +155,74 @@ contract SettingsFacet__integration_transferOwnership is Setup {
         vm.prank(other);
         vm.expectRevert();
         SettingsFacet(address(app)).transferOwnership(other);
+    }
+}
+
+contract SettingsFacet__integration_setCreatorAccess is Setup {
+    event CreatorAccessUpdated(address[] accounts, bool[] approvals);
+
+    function test_can_set_creator_access() public {
+        (address[] memory accounts, bool[] memory approvals) = _prepareCreatorAccess();
+        vm.prank(appOwner);
+        SettingsFacet(address(app)).setCreatorAccess(accounts, approvals);
+
+        assertTrue(SettingsFacet(address(app)).hasCreatorAccess(other));
+    }
+
+    function test_emits_CreatorAccessUpdated() public {
+        (address[] memory accounts, bool[] memory approvals) = _prepareCreatorAccess();
+        vm.expectEmit(true, true, true, true);
+        emit CreatorAccessUpdated(accounts, approvals);
+
+        vm.prank(appOwner);
+        SettingsFacet(address(app)).setCreatorAccess(accounts, approvals);
+    }
+
+    function test_reverts_if_not_app_owner() public {
+        (address[] memory accounts, bool[] memory approvals) = _prepareCreatorAccess();
+        vm.expectRevert(IOwnableInternal.Ownable__NotOwner.selector);
+        vm.prank(other);
+        SettingsFacet(address(app)).setCreatorAccess(accounts, approvals);
+    }
+
+    function test_reverts_if_accounts_and_approvals_length_do_not_match() public {
+        (address[] memory accounts,) = _prepareCreatorAccess();
+        bool[] memory approvals = new bool[](2);
+        approvals[0] = true;
+        approvals[1] = false;
+
+        vm.expectRevert(IApplicationAccess.ApplicationAccess_AccountsAndApprovalsMustBeTheSameLength.selector);
+        vm.prank(appOwner);
+        SettingsFacet(address(app)).setCreatorAccess(accounts, approvals);
+    }
+
+    function _prepareCreatorAccess() internal returns (address[] memory accounts, bool[] memory approvals) {
+        accounts = new address[](1);
+        accounts[0] = address(other); // native token
+
+        approvals = new bool[](1);
+        approvals[0] = true;
+    }
+}
+
+contract SettingsFacet__integration_hasCreatorAccess is Setup {
+    function test_returns_true_for_app_owner() public {
+        assertTrue(SettingsFacet(address(app)).hasCreatorAccess(appOwner));
+    }
+
+    function test_returns_false_for_account_without_access() public {
+        assertFalse(SettingsFacet(address(app)).hasCreatorAccess(other));
+    }
+
+    function test_returns_true_for_all_accounts_when_zero_address_is_approved() public {
+        address[] memory accounts = new address[](1);
+        accounts[0] = address(0);
+
+        bool[] memory approvals = new bool[](1);
+        approvals[0] = true;
+        vm.prank(appOwner);
+        SettingsFacet(address(app)).setCreatorAccess(accounts, approvals);
+
+        assertTrue(SettingsFacet(address(app)).hasCreatorAccess(other));
     }
 }

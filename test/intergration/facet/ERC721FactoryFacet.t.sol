@@ -20,6 +20,8 @@ import {IERC721Factory} from "@extensions/ERC721Factory/IERC721Factory.sol";
 import {ERC721Base} from "src/tokens/ERC721/ERC721Base.sol";
 import {ERC721FactoryFacet} from "src/facet/ERC721FactoryFacet.sol";
 
+import {SettingsFacet, IApplicationAccess} from "src/facet/SettingsFacet.sol";
+
 // bad erc721 implementation without an initialize function
 contract BadERC721 {}
 
@@ -46,6 +48,8 @@ contract Setup is Test, Helpers {
     RegistryMock registry;
     Globals globals;
 
+    SettingsFacet settingsFacet;
+
     ERC721Base erc721Implementation;
     bytes32 erc721ImplementationId;
     ERC721FactoryFacet erc721FactoryFacet;
@@ -53,7 +57,7 @@ contract Setup is Test, Helpers {
     function setUp() public {
         // assign addresses
         creator = address(0x10);
-        creator = address(0x11);
+        other = address(0x11);
         socialConscious = address(0x12);
 
         vm.deal(creator, 1 ether);
@@ -76,16 +80,33 @@ contract Setup is Test, Helpers {
         globals.setPlatformFee(0, 0, socialConscious);
         globals.setERC721Implementation(erc721ImplementationId, address(erc721Implementation));
 
-        // add facet to registry
-        bytes4[] memory selectors = new bytes4[](3);
-        selectors[0] = erc721FactoryFacet.createERC721.selector;
-        selectors[1] = erc721FactoryFacet.getERC721FactoryImplementation.selector;
-        selectors[2] = erc721FactoryFacet.calculateERC721FactoryDeploymentAddress.selector;
-        registry.diamondCut(
-            prepareSingleFacetCut(address(erc721FactoryFacet), IDiamondWritableInternal.FacetCutAction.ADD, selectors),
-            address(0),
-            ""
-        );
+        settingsFacet = new SettingsFacet();
+        {
+            // add SettingsFacet to registry
+            bytes4[] memory selectors = new bytes4[](1);
+            selectors[0] = settingsFacet.setCreatorAccess.selector;
+
+            registry.diamondCut(
+                prepareSingleFacetCut(address(settingsFacet), IDiamondWritableInternal.FacetCutAction.ADD, selectors),
+                address(0),
+                ""
+            );
+        }
+
+        {
+            // add erc721FactoryFacet to registry
+            bytes4[] memory selectors = new bytes4[](3);
+            selectors[0] = erc721FactoryFacet.createERC721.selector;
+            selectors[1] = erc721FactoryFacet.getERC721FactoryImplementation.selector;
+            selectors[2] = erc721FactoryFacet.calculateERC721FactoryDeploymentAddress.selector;
+            registry.diamondCut(
+                prepareSingleFacetCut(
+                    address(erc721FactoryFacet), IDiamondWritableInternal.FacetCutAction.ADD, selectors
+                ),
+                address(0),
+                ""
+            );
+        }
     }
 }
 
@@ -124,6 +145,20 @@ contract ERC721FactoryFacet__integration_createERC721 is Setup {
         );
         // check platform fee has been received
         assertEq(socialConscious.balance, 1 ether);
+    }
+
+    function test_can_create_erc721_when_approved_creator() public {
+        _approveCreatorAccess(other);
+
+        vm.prank(other);
+        ERC721FactoryFacet(address(app)).createERC721("name", "symbol", creator, 1000, erc721ImplementationId);
+    }
+
+    function test_can_create_erc721_when_zero_address_approved_creator() public {
+        _approveCreatorAccess(address(0));
+
+        vm.prank(other);
+        ERC721FactoryFacet(address(app)).createERC721("name", "symbol", creator, 1000, erc721ImplementationId);
     }
 
     function test_emits_Created_event() public {
@@ -176,6 +211,20 @@ contract ERC721FactoryFacet__integration_createERC721 is Setup {
         ERC721FactoryFacet(address(app)).createERC721{value: 1 ether}(
             "name", "symbol", creator, 1000, badErc721ImplementationId
         );
+    }
+
+    function _approveCreatorAccess(address _account)
+        internal
+        returns (address[] memory accounts, bool[] memory approvals)
+    {
+        accounts = new address[](1);
+        accounts[0] = address(_account); // native token
+
+        approvals = new bool[](1);
+        approvals[0] = true;
+
+        vm.prank(creator);
+        SettingsFacet(address(app)).setCreatorAccess(accounts, approvals);
     }
 }
 
