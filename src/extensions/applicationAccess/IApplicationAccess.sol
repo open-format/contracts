@@ -5,5 +5,5 @@ interface IApplicationAccess {
     error ApplicationAccess_AccountsAndApprovalsMustBeTheSameLength();
     error ApplicationAccess_notAuthorised();
 
-    event setApplicationAccess(address[] _accounts, bool[] _approvals);
+    event CreatorAccessUpdated(address[] accounts, bool[] approvals);
 }

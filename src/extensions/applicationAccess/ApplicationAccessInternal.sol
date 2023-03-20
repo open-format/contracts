@@ -1,11 +1,11 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity ^0.8.16;
 
-import {OwnableInternal} from "@solidstate/contracts/access/ownable/Ownable.sol";
+import {Ownable} from "@solidstate/contracts/access/ownable/Ownable.sol";
 import {IApplicationAccess} from "./IApplicationAccess.sol";
 import {ApplicationAccessStorage} from "./ApplicationAccessStorage.sol";
 
-abstract contract ApplicationAccessInternal is IApplicationAccess, OwnableInternal {
+abstract contract ApplicationAccessInternal is IApplicationAccess, Ownable {
     /**
      * @dev checks if account can create new contracts
      *      zero address approved (open to all) or
@@ -24,7 +24,7 @@ abstract contract ApplicationAccessInternal is IApplicationAccess, OwnableIntern
      *      will revert if accounts and approvals arrays are different lengths.
      * @param _accounts wallets or contract addresses to set approval
      */
-    function _setCreatorAccess(address[] calldata _accounts, bool[] calldata _approvals) internal returns (bool) {
+    function _setCreatorAccess(address[] calldata _accounts, bool[] calldata _approvals) internal {
         ApplicationAccessStorage.Layout storage l = ApplicationAccessStorage.layout();
 
         if (_accounts.length != _approvals.length) {
@@ -34,5 +34,7 @@ abstract contract ApplicationAccessInternal is IApplicationAccess, OwnableIntern
         for (uint256 i = 0; i < _accounts.length; i++) {
             l.approvedCreators[_accounts[i]] = _approvals[i];
         }
+
+        emit CreatorAccessUpdated(_accounts, _approvals);
     }
 }
