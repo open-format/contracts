@@ -5,18 +5,19 @@ import {Ownable} from "@solidstate/contracts/access/ownable/Ownable.sol";
 import {CurrencyTransferLib} from "src/lib/CurrencyTransferLib.sol";
 import {ERC20Factory} from "../extensions/ERC20Factory/ERC20Factory.sol";
 import {PlatformFee} from "../extensions/platformFee/PlatformFee.sol";
+import {ApplicationAccess} from "../extensions/applicationAccess/ApplicationAccess.sol";
 
 /**
  * @title   "ERC20Factory Facet"
  * @notice  (WIP)
  */
 
-contract ERC20FactoryFacet is ERC20Factory, Ownable, PlatformFee {
+contract ERC20FactoryFacet is ERC20Factory, Ownable, PlatformFee, ApplicationAccess {
     /**
      * @dev sets permissions to create new erc20
      */
     function _canCreate() internal view override returns (bool) {
-        return msg.sender == _owner();
+        return _hasCreatorAccess(msg.sender);
     }
 
     /**
