@@ -14,7 +14,7 @@ import {PlatformFee} from "../extensions/platformFee/PlatformFee.sol";
 
 contract ERC721FactoryFacet is ERC721Factory, Ownable, PlatformFee, ApplicationAccess {
     /**
-     * @dev sets permissions to create new nft to proxy app owner
+     * @dev uses applicationAccess extension for create access for new erc721 contracts
      */
     function _canCreate() internal view override returns (bool) {
         return _hasCreatorAccess(msg.sender);

@@ -14,7 +14,7 @@ import {ApplicationAccess} from "../extensions/applicationAccess/ApplicationAcce
 
 contract ERC20FactoryFacet is ERC20Factory, Ownable, PlatformFee, ApplicationAccess {
     /**
-     * @dev sets permissions to create new erc20
+     * @dev uses applicationAccess extension for create access for new erc20 contracts
      */
     function _canCreate() internal view override returns (bool) {
         return _hasCreatorAccess(msg.sender);
