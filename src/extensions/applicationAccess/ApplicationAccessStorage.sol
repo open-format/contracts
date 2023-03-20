@@ -2,8 +2,12 @@
 pragma solidity ^0.8.16;
 
 library ApplicationAccessStorage {
+    /**
+     * @dev assuming the approved creators will change over time a simple
+     *      mapping will be sufficient over a merkle tree implementation.
+     */
+
     struct Layout {
-        // TODO: change to merkle tree
         mapping(address => bool) approvedCreators;
     }
 
