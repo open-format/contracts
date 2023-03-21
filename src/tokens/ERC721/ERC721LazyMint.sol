@@ -67,14 +67,7 @@ contract ERC721LazyMint is
         _setSupportsInterface(type(IERC2981).interfaceId, true);
         _setSupportsInterface(type(IContractMetadata).interfaceId, true);
 
-        if (_data.length == 0) {
-            return;
-        }
-
-        (address account) = abi.decode(_data, (address));
-        if (account != address(0)) {
-            _grantRole(MINTER_ROLE, account);
-        }
+        _grantMinterRoleFromData(_data);
     }
 
     /*//////////////////////////////////////////////////////////////
@@ -265,5 +258,17 @@ contract ERC721LazyMint is
     /// @dev Returns whether contract metadata can be set in the given execution context.
     function _canLazyMint() internal view virtual override returns (bool) {
         return _hasRole(ADMIN_ROLE, msg.sender);
+    }
+
+    /// @dev grants minter role if data is just an address
+    function _grantMinterRoleFromData(bytes memory _data) internal virtual {
+        if (_data.length == 0) {
+            return;
+        }
+
+        (address account) = abi.decode(_data, (address));
+        if (account != address(0)) {
+            _grantRole(MINTER_ROLE, account);
+        }
     }
 }
