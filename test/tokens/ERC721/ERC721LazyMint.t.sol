@@ -41,6 +41,32 @@ contract ERC721LazyMint__initialize is Setup {
         vm.expectRevert("ERC721A__Initializable: contract is already initialized");
         erc721LazyMint.initialize(creator, "Name", "Symbol", creator, uint16(tenPercentBPS), "");
     }
+
+    function test_grants_minter_role_when_passed_encoded_address() public {
+        bytes memory encodedAddress = abi.encode(other);
+        erc721LazyMint = new ERC721LazyMintMock(
+          "Name",
+          "Symbol",
+          creator,
+          uint16(tenPercentBPS),
+          encodedAddress
+        );
+
+        assertTrue(erc721LazyMint.hasRole(MINTER_ROLE, other));
+    }
+
+    function test_does_not_grant_minter_role_when_passed_encoded_zero_address() public {
+        bytes memory encodedZeroAddress = abi.encode(address(0));
+        erc721LazyMint = new ERC721LazyMintMock(
+          "Name",
+          "Symbol",
+          creator,
+          uint16(tenPercentBPS),
+          encodedZeroAddress
+        );
+
+        assertFalse(erc721LazyMint.hasRole(MINTER_ROLE, address(0)));
+    }
 }
 
 contract ERC721LazyMint__royaltyInfo is Setup {
