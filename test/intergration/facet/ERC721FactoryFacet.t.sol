@@ -17,7 +17,7 @@ import {Factory} from "src/factory/Factory.sol";
 import {Globals} from "src/globals/Globals.sol";
 
 import {IERC721Factory} from "@extensions/ERC721Factory/IERC721Factory.sol";
-import {ERC721Base} from "src/tokens/ERC721/ERC721Base.sol";
+import {ERC721Base, ADMIN_ROLE, MINTER_ROLE} from "src/tokens/ERC721/ERC721Base.sol";
 import {ERC721LazyMint} from "src/tokens/ERC721/ERC721LazyMint.sol";
 import {ERC721FactoryFacet} from "src/facet/ERC721FactoryFacet.sol";
 
@@ -132,7 +132,8 @@ contract ERC721FactoryFacet__integration_createERC721 is Setup {
         (address receiver, uint256 royaltyAmount) = ERC721Base(erc721Address).royaltyInfo(0, 1 ether);
         assertEq(receiver, creator);
         assertEq(royaltyAmount, 0.1 ether);
-        assertEq(ERC721Base(erc721Address).owner(), creator);
+        assertTrue(ERC721Base(erc721Address).hasRole(ADMIN_ROLE, creator));
+        assertTrue(ERC721Base(erc721Address).hasRole(MINTER_ROLE, address(app)));
     }
 
     function test_can_create_erc721_and_pay_platform_fee() public {
@@ -162,8 +163,7 @@ contract ERC721FactoryFacet__integration_createERC721 is Setup {
         ERC721FactoryFacet(address(app)).createERC721("name", "symbol", creator, 1000, erc721ImplementationId);
     }
 
-    function test_auto_grants_minter_role_to_app_address() public {
-        bytes32 MINTER_ROLE = bytes32(uint256(1));
+    function test_grants_minter_role_with_lazy_mint_implementation() public {
         // add lazy mint implementation
         ERC721LazyMint lazyMintImplementation = new ERC721LazyMint(false);
         bytes32 lazyMintImplementationId = bytes32("LazyMint");

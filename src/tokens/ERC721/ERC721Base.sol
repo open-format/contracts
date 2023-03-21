@@ -4,7 +4,7 @@ pragma solidity ^0.8.16;
 import {IERC165} from "@solidstate/contracts/interfaces/IERC165.sol";
 import {IERC721} from "@solidstate/contracts/interfaces/IERC721.sol";
 import {IERC2981} from "@solidstate/contracts/interfaces/IERC2981.sol";
-import {Ownable} from "@solidstate/contracts/access/ownable/Ownable.sol";
+import {AccessControl} from "@solidstate/contracts/access/access_control/AccessControl.sol";
 import {Multicall} from "@solidstate/contracts/utils/Multicall.sol";
 import {ERC165BaseInternal} from "@solidstate/contracts/introspection/ERC165/base/ERC165BaseInternal.sol";
 import {UintUtils} from "@solidstate/contracts/utils/UintUtils.sol";
@@ -20,9 +20,12 @@ import {
     DEFAULT_SUBSCRIPTION
 } from "@extensions/defaultOperatorFilterer/DefaultOperatorFilterer.sol";
 
+bytes32 constant ADMIN_ROLE = bytes32(uint256(0));
+bytes32 constant MINTER_ROLE = bytes32(uint256(1));
+
 contract ERC721Base is
     ERC721AUpgradeable,
-    Ownable,
+    AccessControl,
     ERC165BaseInternal,
     MintMetadata,
     BatchMintMetadata,
@@ -45,7 +48,7 @@ contract ERC721Base is
         bytes memory _data
     ) public initializerERC721A {
         __ERC721A_init(_name, _symbol);
-        _setOwner(_owner);
+        _grantRole(ADMIN_ROLE, _owner);
         _setDefaultRoyaltyInfo(_royaltyRecipient, _royaltyBps);
         _registerToDefaultOperatorFilterer(DEFAULT_SUBSCRIPTION, true);
 
@@ -54,6 +57,8 @@ contract ERC721Base is
         _setSupportsInterface(0x5b5e139f, true); // ERC165 interface ID for ERC721Metadata
         _setSupportsInterface(type(IERC2981).interfaceId, true);
         _setSupportsInterface(type(IContractMetadata).interfaceId, true);
+
+        _grantMinterRoleFromData(_data);
     }
 
     /*//////////////////////////////////////////////////////////////
@@ -226,16 +231,28 @@ contract ERC721Base is
 
     /// @dev Returns whether a token can be minted in the given execution context.
     function _canMint() internal view virtual returns (bool) {
-        return msg.sender == _owner();
+        return _hasRole(ADMIN_ROLE, msg.sender) || _hasRole(MINTER_ROLE, msg.sender);
     }
 
     /// @dev Returns whether royalty info can be set in the given execution context.
     function _canSetRoyaltyInfo() internal view virtual override returns (bool) {
-        return msg.sender == _owner();
+        return _hasRole(ADMIN_ROLE, msg.sender);
     }
 
     /// @dev Returns whether contract metadata can be set in the given execution context.
     function _canSetContractURI() internal view virtual override returns (bool) {
-        return msg.sender == _owner();
+        return _hasRole(ADMIN_ROLE, msg.sender);
+    }
+
+    /// @dev grants minter role if data is just an address
+    function _grantMinterRoleFromData(bytes memory _data) internal virtual {
+        if (_data.length == 0) {
+            return;
+        }
+
+        (address account) = abi.decode(_data, (address));
+        if (account != address(0)) {
+            _grantRole(MINTER_ROLE, account);
+        }
     }
 }
