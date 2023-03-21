@@ -18,6 +18,7 @@ import {Globals} from "src/globals/Globals.sol";
 
 import {IERC721Factory} from "@extensions/ERC721Factory/IERC721Factory.sol";
 import {ERC721Base} from "src/tokens/ERC721/ERC721Base.sol";
+import {ERC721LazyMint} from "src/tokens/ERC721/ERC721LazyMint.sol";
 import {ERC721FactoryFacet} from "src/facet/ERC721FactoryFacet.sol";
 
 import {SettingsFacet, IApplicationAccess} from "src/facet/SettingsFacet.sol";
@@ -159,6 +160,21 @@ contract ERC721FactoryFacet__integration_createERC721 is Setup {
 
         vm.prank(other);
         ERC721FactoryFacet(address(app)).createERC721("name", "symbol", creator, 1000, erc721ImplementationId);
+    }
+
+    function test_auto_grants_minter_role_to_app_address() public {
+        bytes32 MINTER_ROLE = bytes32(uint256(1));
+        // add lazy mint implementation
+        ERC721LazyMint lazyMintImplementation = new ERC721LazyMint(false);
+        bytes32 lazyMintImplementationId = bytes32("LazyMint");
+        globals.setERC721Implementation(lazyMintImplementationId, address(lazyMintImplementation));
+
+        // create lazy mint erc721
+        vm.prank(creator);
+        address lazyMint =
+            ERC721FactoryFacet(address(app)).createERC721("name", "symbol", creator, 1000, lazyMintImplementationId);
+
+        assertTrue(ERC721LazyMint(lazyMint).hasRole(MINTER_ROLE, address(app)));
     }
 
     function test_emits_Created_event() public {
