@@ -16,7 +16,8 @@ interface CompatibleERC721Implementation {
         string memory _name,
         string memory _symbol,
         address _royaltyRecipient,
-        uint16 _royaltyBps
+        uint16 _royaltyBps,
+        bytes memory _data
     ) external;
 }
 
@@ -76,7 +77,7 @@ abstract contract ERC721Factory is IERC721Factory, ERC721FactoryInternal, Minima
 
         // initialize ERC721 contract
         try CompatibleERC721Implementation(payable(id)).initialize(
-            msg.sender, _name, _symbol, _royaltyRecipient, _royaltyBps
+            msg.sender, _name, _symbol, _royaltyRecipient, _royaltyBps, abi.encode(address(this))
         ) {
             emit Created(id, msg.sender, _name, _symbol, _royaltyRecipient, _royaltyBps, _implementationId);
         } catch {
