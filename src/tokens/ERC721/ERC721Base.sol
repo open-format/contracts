@@ -41,7 +41,8 @@ contract ERC721Base is
         string memory _name,
         string memory _symbol,
         address _royaltyRecipient,
-        uint16 _royaltyBps
+        uint16 _royaltyBps,
+        bytes memory _data
     ) public initializerERC721A {
         __ERC721A_init(_name, _symbol);
         _setOwner(_owner);
