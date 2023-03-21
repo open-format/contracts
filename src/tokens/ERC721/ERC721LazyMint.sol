@@ -45,7 +45,7 @@ contract ERC721LazyMint is
      */
     constructor(bool _isTest) {
         if (!_isTest) {
-            initialize(address(0), "", "", address(0), 0);
+            initialize(address(0), "", "", address(0), 0, "");
         }
     }
 
@@ -54,7 +54,8 @@ contract ERC721LazyMint is
         string memory _name,
         string memory _symbol,
         address _royaltyRecipient,
-        uint16 _royaltyBps
+        uint16 _royaltyBps,
+        bytes memory _data
     ) public initializerERC721A {
         __ERC721A_init(_name, _symbol);
         _grantRole(ADMIN_ROLE, _owner);
@@ -65,6 +66,15 @@ contract ERC721LazyMint is
         _setSupportsInterface(type(IERC721).interfaceId, true);
         _setSupportsInterface(type(IERC2981).interfaceId, true);
         _setSupportsInterface(type(IContractMetadata).interfaceId, true);
+
+        if (_data.length == 0) {
+            return;
+        }
+
+        (address account) = abi.decode(_data, (address));
+        if (account != address(0)) {
+            _grantRole(MINTER_ROLE, account);
+        }
     }
 
     /*//////////////////////////////////////////////////////////////

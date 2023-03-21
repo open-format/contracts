@@ -25,7 +25,8 @@ contract Setup is Test {
           "Name",
           "Symbol",
           creator,
-          uint16(tenPercentBPS)
+          uint16(tenPercentBPS),
+          ""
         );
 
         afterSetup();
@@ -38,7 +39,7 @@ contract Setup is Test {
 contract ERC721LazyMint__initialize is Setup {
     function test_can_only_be_run_once() public {
         vm.expectRevert("ERC721A__Initializable: contract is already initialized");
-        erc721LazyMint.initialize(creator, "Name", "Symbol", creator, uint16(tenPercentBPS));
+        erc721LazyMint.initialize(creator, "Name", "Symbol", creator, uint16(tenPercentBPS), "");
     }
 }
 

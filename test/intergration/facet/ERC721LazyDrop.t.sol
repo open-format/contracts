@@ -140,7 +140,7 @@ contract Setup is Test, Helpers {
         // TODO: deploy from factory
         vm.prank(nftOwner);
         erc721 = new ERC721LazyMint(true);
-        erc721.initialize(nftOwner, "name", "symbol", nftOwner, 1_000);
+        erc721.initialize(nftOwner, "name", "symbol", nftOwner, 1_000, "");
 
         _afterSetUp();
     }
