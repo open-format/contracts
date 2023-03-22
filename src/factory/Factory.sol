@@ -47,6 +47,20 @@ contract Factory is IFactory, MinimalProxyFactory, Ownable {
         emit Created(id, msg.sender, string(abi.encodePacked(_name)));
     }
 
+    /**
+     * @notice returns the deterministic deployment address for app
+     * @dev    The contract deployed is a minimal proxy pointing to the app template
+     * @return deploymentAddress the address of the app
+     */
+    function calculateDeploymentAddress(bytes32 _name) external view returns (address) {
+        // check proxy not already deployed
+        if (apps[_name] != address(0)) {
+            revert Factory_nameAlreadyUsed();
+        }
+
+        return _calculateMinimalProxyDeploymentAddress(template, _name);
+    }
+
     function setTemplate(address _template) public onlyOwner {
         template = _template;
     }
