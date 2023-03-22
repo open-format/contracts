@@ -84,8 +84,7 @@ abstract contract ERC20Factory is IERC20Factory, ERC20FactoryInternal, MinimalPr
     /**
      * @notice returns the deterministic deployment address of ERC20 contract based on the name an implementation chosen
      * @dev    The contract deployed is a minimal proxy pointing to the implementation
-     * @return deploymentAddress the address the erc20 contract will be deployed to,
-     *         the zero address is returned when the deployment will fail
+     * @return deploymentAddress the address the erc20 contract will be deployed to
      */
     function calculateERC20FactoryDeploymentAddress(bytes32 _implementationId) external view returns (address) {
         address implementation = _getImplementation(_implementationId);
@@ -93,8 +92,6 @@ abstract contract ERC20Factory is IERC20Factory, ERC20FactoryInternal, MinimalPr
             revert ERC20Factory_noImplementationFound();
         }
 
-        bytes32 salt = _getSalt(msg.sender);
-
-        return _calculateMinimalProxyDeploymentAddress(implementation, salt);
+        return _calculateMinimalProxyDeploymentAddress(implementation, _getSalt(msg.sender));
     }
 }
