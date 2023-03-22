@@ -15,7 +15,8 @@ optimizer_runs = 200
 [rpc_endpoints]
 anvil = "http://127.0.0.1:8545"
 mumbai = "https://matic-mumbai.chainstacklabs.com"
-polygon = "https://polygon-rpc.com"
+polygon = "${POLYGON_RPC_URL}"
+aurora = "https://mainnet.aurora.dev"
 
 [etherscan]
 mumbai = {key = "${POLYGONSCAN_MUMBAI_API_KEY}", url = "https://api-testnet.polygonscan.com/api/"}
