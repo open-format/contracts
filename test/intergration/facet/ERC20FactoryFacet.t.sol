@@ -139,7 +139,7 @@ contract ERC20FactoryFacet__integration_createERC20 is Setup {
         assertTrue(ERC20Base(erc20Address).hasRole(MINTER_ROLE, address(app)));
     }
 
-    function testFuzz_can_create_multiple_erc20_contracts() public {
+    function test_can_create_multiple_erc20_contracts() public {
         for (uint256 i = 0; i < 10; i++) {
             vm.prank(creator);
             address deployed =
