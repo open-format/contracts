@@ -5,16 +5,23 @@ import {ERC721FactoryStorage} from "./ERC721FactoryStorage.sol";
 import {Global} from "../../extensions/global/Global.sol";
 
 abstract contract ERC721FactoryInternal is Global {
-    function _getId(bytes32 _salt) internal view virtual returns (address) {
-        return ERC721FactoryStorage.layout().ERC721Contracts[_salt];
-    }
-
-    function _setId(bytes32 _salt, address _id) internal virtual {
-        ERC721FactoryStorage.layout().ERC721Contracts[_salt] = _id;
-    }
-
     function _getImplementation(bytes32 _implementationId) internal view returns (address) {
         return _getGlobals().getERC721Implementation(_implementationId);
+    }
+
+    /**
+     * @dev hash of address and the number of created contracts from that address
+     */
+    function _getSalt(address _account) internal view virtual returns (bytes32) {
+        return keccak256(abi.encode(_account, _getContractCount(_account)));
+    }
+
+    function _getContractCount(address _account) internal view virtual returns (uint256) {
+        return ERC721FactoryStorage.layout().contractCount[_account];
+    }
+
+    function _increaseContractCount(address _account) internal virtual {
+        ERC721FactoryStorage.layout().contractCount[_account]++;
     }
 
     function _canCreate() internal view virtual returns (bool);

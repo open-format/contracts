@@ -76,3 +76,19 @@ contract Factory__apps is Setup {
         assertEq(factory.apps("app_name"), address(0));
     }
 }
+
+contract Factory__calculateDeploymentAddress is Setup {
+    function test_can_get_address_of_deployment() public {
+        address expectedAddress = factory.calculateDeploymentAddress("app_name");
+
+        address minimalProxy = factory.create("app_name");
+        assertEq(expectedAddress, minimalProxy);
+    }
+
+    function test_reverts_when_name_is_already_used() public {
+        address minimalProxy = factory.create("app_name");
+
+        vm.expectRevert(IFactory.Factory_nameAlreadyUsed.selector);
+        factory.calculateDeploymentAddress("app_name");
+    }
+}

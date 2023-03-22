@@ -58,22 +58,12 @@ abstract contract ERC20Factory is IERC20Factory, ERC20FactoryInternal, MinimalPr
             revert ERC20Factory_noImplementationFound();
         }
 
-        bytes32 salt = keccak256(abi.encode(_name));
-
-        // check proxy has not deployed erc20 with the same name
-        // deploying with the same salt would override that ERC20
-        if (_getId(salt) != address(0)) {
-            revert ERC20Factory_nameAlreadyUsed();
-        }
-
         // hook to add functionality before create
         _beforeCreate();
 
         // deploys new proxy using CREATE2
-        id = _deployMinimalProxy(implementation, salt);
-
-        // saves deployment for checking later
-        _setId(salt, id);
+        id = _deployMinimalProxy(implementation, _getSalt(msg.sender));
+        _increaseContractCount(msg.sender);
 
         // add the app address as encoded data, mainly intended for auto granting minter role
         bytes memory data = abi.encode(address(this));
@@ -94,25 +84,14 @@ abstract contract ERC20Factory is IERC20Factory, ERC20FactoryInternal, MinimalPr
     /**
      * @notice returns the deterministic deployment address of ERC20 contract based on the name an implementation chosen
      * @dev    The contract deployed is a minimal proxy pointing to the implementation
-     * @return deploymentAddress the address the erc20 contract will be deployed to,
-     *         the zero address is returned when the deployment will fail
+     * @return deploymentAddress the address the erc20 contract will be deployed to
      */
-    function calculateERC20FactoryDeploymentAddress(string calldata _name, bytes32 _implementationId)
-        external
-        view
-        returns (address)
-    {
+    function calculateERC20FactoryDeploymentAddress(bytes32 _implementationId) external view returns (address) {
         address implementation = _getImplementation(_implementationId);
         if (implementation == address(0)) {
             revert ERC20Factory_noImplementationFound();
         }
 
-        bytes32 salt = keccak256(abi.encode(_name));
-        // check app has not deployed erc20 with the same name
-        if (_getId(salt) != address(0)) {
-            revert ERC20Factory_nameAlreadyUsed();
-        }
-
-        return _calculateMinimalProxyDeploymentAddress(implementation, salt);
+        return _calculateMinimalProxyDeploymentAddress(implementation, _getSalt(msg.sender));
     }
 }
