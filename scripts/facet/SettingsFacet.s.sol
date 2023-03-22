@@ -21,10 +21,12 @@ contract Deploy is Script, Utils {
         SettingsFacet settingsFacet = new SettingsFacet();
 
         // construct array of function selectors
-        bytes4[] memory selectors = new bytes4[](3);
+        bytes4[] memory selectors = new bytes4[](5);
         selectors[0] = settingsFacet.setApplicationFee.selector;
         selectors[1] = settingsFacet.setAcceptedCurrencies.selector;
         selectors[2] = settingsFacet.applicationFeeInfo.selector;
+        selectors[3] = settingsFacet.setCreatorAccess.selector;
+        selectors[4] = settingsFacet.hasCreatorAccess.selector;
 
         // construct and ADD facet cut
         IDiamondWritableInternal.FacetCut[] memory cuts = new IDiamondWritableInternal.FacetCut[](1);
