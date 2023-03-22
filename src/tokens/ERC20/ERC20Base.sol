@@ -9,7 +9,7 @@ import {IERC2612} from "@solidstate/contracts/token/ERC20/permit/IERC2612.sol";
 import {ERC165Base} from "@solidstate/contracts/introspection/ERC165/base/ERC165Base.sol";
 import {IERC165} from "@solidstate/contracts/interfaces/IERC165.sol";
 
-import {Ownable} from "@solidstate/contracts/access/ownable/Ownable.sol";
+import {AccessControl} from "@solidstate/contracts/access/access_control/AccessControl.sol";
 import {Multicall} from "@solidstate/contracts/utils/Multicall.sol";
 import {ContractMetadata, IContractMetadata} from "@extensions/contractMetadata/ContractMetadata.sol";
 import {Initializable} from "@extensions/initializable/Initializable.sol";
@@ -32,27 +32,36 @@ import {Initializable} from "@extensions/initializable/Initializable.sol";
  *                             presenting a message signed by the account.
  */
 
-contract ERC20Base is SolidStateERC20, Ownable, Multicall, ContractMetadata, Initializable, ERC165Base {
+bytes32 constant ADMIN_ROLE = bytes32(uint256(0));
+bytes32 constant MINTER_ROLE = bytes32(uint256(1));
+
+contract ERC20Base is SolidStateERC20, AccessControl, Multicall, ContractMetadata, Initializable, ERC165Base {
     error ERC20Base_notAuthorized();
     error ERC20Base_zeroAmount();
     error ERC20Base_insufficientBalance();
 
-    function initialize(address _owner, string memory _name, string memory _symbol, uint8 _decimals, uint256 supply)
-        public
-        initializer
-    {
-        _setOwner(_owner);
+    function initialize(
+        address _owner,
+        string memory _name,
+        string memory _symbol,
+        uint8 _decimals,
+        uint256 _supply,
+        bytes memory _data
+    ) public initializer {
+        _grantRole(ADMIN_ROLE, _owner);
 
         _setName(_name);
         _setSymbol(_symbol);
         _setDecimals(_decimals);
 
-        _mint(_owner, supply);
+        _mint(_owner, _supply);
 
         _setSupportsInterface(type(IERC165).interfaceId, true);
         _setSupportsInterface(type(IERC20).interfaceId, true);
         _setSupportsInterface(type(IERC2612).interfaceId, true);
         _setSupportsInterface(type(IContractMetadata).interfaceId, true);
+
+        _grantMinterRoleFromData(_data);
     }
 
     /*//////////////////////////////////////////////////////////////
@@ -98,11 +107,23 @@ contract ERC20Base is SolidStateERC20, Ownable, Multicall, ContractMetadata, Ini
 
     /// @dev Returns whether tokens can be minted in the given execution context.
     function _canMint() internal view virtual returns (bool) {
-        return msg.sender == owner();
+        return _hasRole(ADMIN_ROLE, msg.sender) || _hasRole(MINTER_ROLE, msg.sender);
     }
 
     /// @dev Returns whether owner can be set in the given execution context.
     function _canSetContractURI() internal view virtual override returns (bool) {
-        return msg.sender == _owner();
+        return _hasRole(ADMIN_ROLE, msg.sender);
+    }
+
+    /// @dev grants minter role if data is just an address
+    function _grantMinterRoleFromData(bytes memory _data) internal virtual {
+        if (_data.length == 0) {
+            return;
+        }
+
+        (address account) = abi.decode(_data, (address));
+        if (account != address(0)) {
+            _grantRole(MINTER_ROLE, account);
+        }
     }
 }

@@ -17,7 +17,7 @@ import {Factory} from "src/factory/Factory.sol";
 import {Globals} from "src/globals/Globals.sol";
 
 import {IERC20Factory} from "@extensions/ERC20Factory/IERC20Factory.sol";
-import {ERC20Base} from "src/tokens/ERC20/ERC20Base.sol";
+import {ERC20Base, ADMIN_ROLE, MINTER_ROLE} from "src/tokens/ERC20/ERC20Base.sol";
 import {ERC20FactoryFacet} from "src/facet/ERC20FactoryFacet.sol";
 
 import {SettingsFacet, IApplicationAccess} from "src/facet/SettingsFacet.sol";
@@ -131,6 +131,9 @@ contract ERC20FactoryFacet__integration_createERC20 is Setup {
         assertEq(ERC20Base(erc20Address).decimals(), 18);
         assertEq(ERC20Base(erc20Address).totalSupply(), 1000);
         assertEq(ERC20Base(erc20Address).balanceOf(creator), 1000);
+
+        assertTrue(ERC20Base(erc20Address).hasRole(ADMIN_ROLE, creator));
+        assertTrue(ERC20Base(erc20Address).hasRole(MINTER_ROLE, address(app)));
     }
 
     function test_can_create_erc20_and_pay_platform_fee() public {

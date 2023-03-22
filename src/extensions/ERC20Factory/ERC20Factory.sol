@@ -17,7 +17,8 @@ interface CompatibleERC20Implementation {
         string memory _name,
         string memory _symbol,
         uint8 _decimals,
-        uint256 supply
+        uint256 _supply,
+        bytes memory _data
     ) external;
 }
 
@@ -74,8 +75,12 @@ abstract contract ERC20Factory is IERC20Factory, ERC20FactoryInternal, MinimalPr
         // saves deployment for checking later
         _setId(salt, id);
 
+        // add the app address as encoded data, mainly intended for auto granting minter role
+        bytes memory data = abi.encode(address(this));
+
         // initialize ERC20 contract
-        try CompatibleERC20Implementation(payable(id)).initialize(msg.sender, _name, _symbol, _decimals, _supply) {
+        try CompatibleERC20Implementation(payable(id)).initialize(msg.sender, _name, _symbol, _decimals, _supply, data)
+        {
             emit Created(id, msg.sender, _name, _symbol, _decimals, _supply, _implementationId);
         } catch {
             revert ERC20Factory_failedToInitialize();

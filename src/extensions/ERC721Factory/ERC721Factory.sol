@@ -16,7 +16,8 @@ interface CompatibleERC721Implementation {
         string memory _name,
         string memory _symbol,
         address _royaltyRecipient,
-        uint16 _royaltyBps
+        uint16 _royaltyBps,
+        bytes memory _data
     ) external;
 }
 
@@ -74,9 +75,12 @@ abstract contract ERC721Factory is IERC721Factory, ERC721FactoryInternal, Minima
         // saves deployment for checking later
         _setId(salt, id);
 
+        // add the app address as encoded data, mainly intended for auto granting minter role
+        bytes memory data = abi.encode(address(this));
+
         // initialize ERC721 contract
         try CompatibleERC721Implementation(payable(id)).initialize(
-            msg.sender, _name, _symbol, _royaltyRecipient, _royaltyBps
+            msg.sender, _name, _symbol, _royaltyRecipient, _royaltyBps, data
         ) {
             emit Created(id, msg.sender, _name, _symbol, _royaltyRecipient, _royaltyBps, _implementationId);
         } catch {

@@ -11,6 +11,9 @@ import {IERC2612} from "@solidstate/contracts/token/ERC20/permit/IERC2612.sol";
 import {IContractMetadata} from "@extensions/contractMetadata/ContractMetadata.sol";
 import {IInitializable} from "@extensions/initializable/IInitializable.sol";
 
+bytes32 constant ADMIN_ROLE = bytes32(uint256(0));
+bytes32 constant MINTER_ROLE = bytes32(uint256(1));
+
 contract Setup is Test {
     address creator = address(0x10);
     address other = address(0x11);
@@ -36,8 +39,8 @@ contract Setup is Test {
 }
 
 contract ERC20__initialize is Setup {
-    function test_sets_owner() public {
-        assertEq(erc20Base.owner(), creator);
+    function test_sets_admin() public {
+        assertTrue(erc20Base.hasRole(ADMIN_ROLE, creator));
     }
 
     function test_sets_name() public {
@@ -74,7 +77,7 @@ contract ERC20__initialize is Setup {
 
     function test_cannot_be_initialized_again() public {
         vm.expectRevert(IInitializable.Initializable_contractIsAlreadyInitialized.selector);
-        erc20Base.initialize(other, "Name", "Symbol", 18, 10_000);
+        erc20Base.initialize(other, "Name", "Symbol", 18, 10_000, "");
     }
 }
 
