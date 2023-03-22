@@ -33,8 +33,7 @@ interface CompatibleERC721Implementation {
 abstract contract ERC721Factory is IERC721Factory, ERC721FactoryInternal, MinimalProxyFactory, ReentrancyGuard {
     /**
      * @notice creates an erc721 contract based on implementation
-     * @dev the hash of the name is used as a "salt" so each contract is deployed to a different address
-     *      the deployed contract is a minimal proxy that points to the implementation chosen
+     * @dev the deployed contract is a minimal proxy that points to the implementation chosen
      * @param _name the name of the ERC721 contract
      * @param _symbol the symbol of the ERC721 contract
      * @param _royaltyRecipient the default address that royalties are sent to
@@ -57,23 +56,12 @@ abstract contract ERC721Factory is IERC721Factory, ERC721FactoryInternal, Minima
             revert ERC721Factory_noImplementationFound();
         }
 
-        // creating a salt based of the name enforces no name is the same on each app
-        bytes32 salt = keccak256(abi.encode(_name));
-
-        // check proxy has not deployed erc721 with the same name
-        // deploying with the same salt would override that ERC721
-        if (_getId(salt) != address(0)) {
-            revert ERC721Factory_nameAlreadyUsed();
-        }
-
         // hook to add functionality before create
         _beforeCreate();
 
         // deploys new proxy using CREATE2
-        id = _deployMinimalProxy(implementation, salt);
-
-        // saves deployment for checking later
-        _setId(salt, id);
+        id = _deployMinimalProxy(implementation, _getSalt(msg.sender));
+        _increaseContractCount(msg.sender);
 
         // add the app address as encoded data, mainly intended for auto granting minter role
         bytes memory data = abi.encode(address(this));
@@ -95,25 +83,14 @@ abstract contract ERC721Factory is IERC721Factory, ERC721FactoryInternal, Minima
     /**
      * @notice returns the deterministic deployment address for ERC721 contracts based on the name an implementation chosen
      * @dev    The contract deployed is a minimal proxy pointing to the implementation
-     * @return deploymentAddress the address the erc20 contract will be deployed to,
-     *         the zero address is returned when the deployment will fail
+     * @return deploymentAddress the address the erc20 contract will be deployed to
      */
-    function calculateERC721FactoryDeploymentAddress(string calldata _name, bytes32 _implementationId)
-        external
-        view
-        returns (address)
-    {
+    function calculateERC721FactoryDeploymentAddress(bytes32 _implementationId) external view returns (address) {
         address implementation = _getImplementation(_implementationId);
         if (implementation == address(0)) {
             revert ERC721Factory_noImplementationFound();
         }
 
-        bytes32 salt = keccak256(abi.encode(_name));
-        // check app has not deployed erc721 with the same name
-        if (_getId(salt) != address(0)) {
-            revert ERC721Factory_nameAlreadyUsed();
-        }
-
-        return _calculateMinimalProxyDeploymentAddress(implementation, salt);
+        return _calculateMinimalProxyDeploymentAddress(implementation, _getSalt(msg.sender));
     }
 }
