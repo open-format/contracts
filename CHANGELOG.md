@@ -1,5 +1,17 @@
 # @openformat/contracts
 
+## 0.0.7
+
+### Patch Changes
+
+- [#72](https://github.com/open-format/contracts/pull/72) [`32a2e36`](https://github.com/open-format/contracts/commit/32a2e3606ca773b36a9ae565e5782d1af7d53912) Thanks [@george-e-d-g-e](https://github.com/george-e-d-g-e)! - improved deployment scripts
+
+- [#73](https://github.com/open-format/contracts/pull/73) [`9d07e4e`](https://github.com/open-format/contracts/commit/9d07e4e281cb7a4e0430c8aa8a35591d47b96dda) Thanks [@george-e-d-g-e](https://github.com/george-e-d-g-e)! - add application access settings
+
+- [#78](https://github.com/open-format/contracts/pull/78) [`8f38326`](https://github.com/open-format/contracts/commit/8f3832695744867d00ae33a3d21cda7a43f34186) Thanks [@george-e-d-g-e](https://github.com/george-e-d-g-e)! - erc20, erc721 factories now have internal salt
+
+- [#76](https://github.com/open-format/contracts/pull/76) [`6da0e9d`](https://github.com/open-format/contracts/commit/6da0e9d2ed429bca907bcfc46bcf7d9c211c7944) Thanks [@george-e-d-g-e](https://github.com/george-e-d-g-e)! - tokens use access control, minter role granted to app on create
+
 ## 0.0.6
 
 ### Patch Changes
