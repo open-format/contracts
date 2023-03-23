@@ -58,3 +58,14 @@ CreateApp:; forge script \
 	--broadcast \
 	$(verbose) \
 	`cast --format-bytes32-string $(args)`
+
+
+# example: `make SetPlatformFee args="0.01 0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266" rpc=anvil`
+# Note: Uses a cast command to convert the given price in Ether to Wei
+SetPlatformFee:; forge script \
+	scripts/core/Globals.s.sol:SetPlatformFee \
+	--sig "run(uint256,address)" \
+	--rpc-url $(rpc) \
+	--broadcast \
+	$(verbose) \
+	`cast --to-wei $(word 1, $(args))` $(word 2, $(args))
