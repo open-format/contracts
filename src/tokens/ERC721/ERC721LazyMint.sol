@@ -67,6 +67,8 @@ contract ERC721LazyMint is
         _setSupportsInterface(type(IERC2981).interfaceId, true);
         _setSupportsInterface(type(IContractMetadata).interfaceId, true);
 
+        // TODO: derive minter address and globals address from data
+        // TODO: what happens when globals fails here?
         _grantMinterRoleFromData(_data);
     }
 
@@ -270,5 +272,29 @@ contract ERC721LazyMint is
         if (account != address(0)) {
             _grantRole(MINTER_ROLE, account);
         }
+    }
+
+    // platform fee
+    function _payPlatformFee() internal {
+        // only charge platform fee if sender is not a contract
+        if (isContract(msg.sender)) {
+            return;
+        }
+
+        // TODO: get platform fee from globals
+        // TODO: pay platform fee
+        // TODO: emit paid platform fee
+    }
+    /**
+     * @dev derived from Openzepplin's address utils
+     *      https://github.com/OpenZeppelin/openzeppelin-contracts/blob/v4.8.2/contracts/utils/Address.sol
+     */
+
+    function _isContract(address _account) internal view returns (bool) {
+        // This method relies on extcodesize/address.code.length, which returns 0
+        // for contracts in construction, since the code is only stored at the end
+        // of the constructor execution.
+
+        return account.code.length > 0;
     }
 }
