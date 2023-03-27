@@ -54,8 +54,8 @@ contract Factory is IFactory, MinimalProxyFactory, Ownable {
      * @dev    The contract deployed is a minimal proxy pointing to the app template
      * @return deploymentAddress the address of the app
      */
-    function calculateDeploymentAddress(bytes32 _name) external view returns (address) {
-        bytes32 salt = keccak256(abi.encode(msg.sender, _name));
+    function calculateDeploymentAddress(address _account, bytes32 _name) external view returns (address) {
+        bytes32 salt = keccak256(abi.encode(_account, _name));
         // check proxy not already deployed
         if (apps[salt] != address(0)) {
             revert Factory_nameAlreadyUsed();
