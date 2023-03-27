@@ -18,6 +18,7 @@ import {
     DefaultOperatorFilterer,
     DEFAULT_SUBSCRIPTION
 } from "@extensions/defaultOperatorFilterer/DefaultOperatorFilterer.sol";
+import {Global} from "@extensions/global/Global.sol";
 
 bytes32 constant ADMIN_ROLE = bytes32(uint256(0));
 bytes32 constant MINTER_ROLE = bytes32(uint256(1));
@@ -30,7 +31,8 @@ contract ERC721LazyMint is
     ContractMetadata,
     DefaultOperatorFilterer,
     Royalty,
-    Multicall
+    Multicall,
+    Global
 {
     error ERC721LazyMint_notAuthorized();
     error ERC721LazyMint_insufficientLazyMintedTokens();
@@ -67,9 +69,20 @@ contract ERC721LazyMint is
         _setSupportsInterface(type(IERC2981).interfaceId, true);
         _setSupportsInterface(type(IContractMetadata).interfaceId, true);
 
-        // TODO: derive minter address and globals address from data
-        // TODO: what happens when globals fails here?
-        _grantMinterRoleFromData(_data);
+        if (_data.length == 0) {
+            return;
+        }
+        // TODO: consider a try catch to throw error if data encoded incorrectly
+        // decode data
+        (address app, address globals) = abi.decode(_data, (address, address));
+
+        if (app != address(0)) {
+            _grantRole(MINTER_ROLE, app);
+        }
+
+        if (globals != address(0)) {
+            _setGlobals(globals);
+        }
     }
 
     /*//////////////////////////////////////////////////////////////
@@ -262,22 +275,10 @@ contract ERC721LazyMint is
         return _hasRole(ADMIN_ROLE, msg.sender);
     }
 
-    /// @dev grants minter role if data is just an address
-    function _grantMinterRoleFromData(bytes memory _data) internal virtual {
-        if (_data.length == 0) {
-            return;
-        }
-
-        (address account) = abi.decode(_data, (address));
-        if (account != address(0)) {
-            _grantRole(MINTER_ROLE, account);
-        }
-    }
-
     // platform fee
     function _payPlatformFee() internal {
-        // only charge platform fee if sender is not a contract
-        if (isContract(msg.sender)) {
+        // don't charge platform fee if sender is a contract or globals address is not set
+        if (_isContract(msg.sender) || _getGlobalsAddress() == address(0)) {
             return;
         }
 
@@ -295,6 +296,6 @@ contract ERC721LazyMint is
         // for contracts in construction, since the code is only stored at the end
         // of the constructor execution.
 
-        return account.code.length > 0;
+        return _account.code.length > 0;
     }
 }
