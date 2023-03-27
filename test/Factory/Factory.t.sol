@@ -48,7 +48,7 @@ contract Factory__create is Setup, IFactory {
     function test_emits_created_event() public {
         // get deployment address by calling `calculateDeploymentAddress` from creators wallet
         vm.prank(creator);
-        address id = factory.calculateDeploymentAddress("app_name");
+        address id = factory.calculateDeploymentAddress(creator, "app_name");
 
         string memory zeroPaddedAppName = string(abi.encodePacked(bytes32("app_name")));
 
@@ -83,16 +83,20 @@ contract Factory__apps is Setup {
 
 contract Factory__calculateDeploymentAddress is Setup {
     function test_can_get_address_of_deployment() public {
-        address expectedAddress = factory.calculateDeploymentAddress("app_name");
+        vm.prank(creator);
+        address expectedAddress = factory.calculateDeploymentAddress(creator, "app_name");
 
+        vm.prank(creator);
         address minimalProxy = factory.create("app_name");
         assertEq(expectedAddress, minimalProxy);
     }
 
     function test_reverts_when_name_is_already_used() public {
+        vm.prank(creator);
         address minimalProxy = factory.create("app_name");
 
         vm.expectRevert(IFactory.Factory_nameAlreadyUsed.selector);
-        factory.calculateDeploymentAddress("app_name");
+        vm.prank(creator);
+        factory.calculateDeploymentAddress(creator, "app_name");
     }
 }
