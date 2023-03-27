@@ -19,6 +19,9 @@ import {
     DEFAULT_SUBSCRIPTION
 } from "@extensions/defaultOperatorFilterer/DefaultOperatorFilterer.sol";
 import {Global} from "@extensions/global/Global.sol";
+import {PlatformFee} from "@extensions/platformFee/PlatformFee.sol";
+
+import {CurrencyTransferLib} from "src/lib/CurrencyTransferLib.sol";
 
 bytes32 constant ADMIN_ROLE = bytes32(uint256(0));
 bytes32 constant MINTER_ROLE = bytes32(uint256(1));
@@ -32,7 +35,8 @@ contract ERC721LazyMint is
     DefaultOperatorFilterer,
     Royalty,
     Multicall,
-    Global
+    Global,
+    PlatformFee
 {
     error ERC721LazyMint_notAuthorized();
     error ERC721LazyMint_insufficientLazyMintedTokens();
@@ -127,6 +131,9 @@ contract ERC721LazyMint is
         if (!_canMint()) {
             revert ERC721LazyMint_notAuthorized();
         }
+
+        (address platformFeeRecipient, uint256 platformFeeAmount) = _checkPlatformFee();
+
         uint256 tokenId = _nextTokenId();
 
         if (tokenId >= _getNextTokenIdToLazyMint()) {
@@ -136,6 +143,8 @@ contract ERC721LazyMint is
         _safeMint(_to, 1);
 
         emit Minted(_to, _getBaseURI(tokenId));
+
+        _payPlatformFee(platformFeeRecipient, platformFeeAmount);
     }
 
     /**
@@ -151,6 +160,8 @@ contract ERC721LazyMint is
             revert ERC721LazyMint_notAuthorized();
         }
 
+        (address platformFeeRecipient, uint256 platformFeeAmount) = _checkPlatformFee();
+
         if ((_nextTokenId() + _quantity) > _getNextTokenIdToLazyMint()) {
             revert ERC721LazyMint_insufficientLazyMintedTokens();
         }
@@ -159,6 +170,8 @@ contract ERC721LazyMint is
         _safeMint(_to, _quantity);
 
         emit BatchMinted(_to, _quantity, _baseURI);
+
+        _payPlatformFee(platformFeeRecipient, platformFeeAmount);
     }
 
     /**
@@ -275,17 +288,34 @@ contract ERC721LazyMint is
         return _hasRole(ADMIN_ROLE, msg.sender);
     }
 
-    // platform fee
-    function _payPlatformFee() internal {
+    /*//////////////////////////////////////////////////////////////
+                        Internal (platform fee) functions
+    //////////////////////////////////////////////////////////////*/
+
+    function _checkPlatformFee() internal view returns (address recipient, uint256 amount) {
         // don't charge platform fee if sender is a contract or globals address is not set
         if (_isContract(msg.sender) || _getGlobalsAddress() == address(0)) {
+            return (address(0), 0);
+        }
+
+        (recipient, amount) = _platformFeeInfo(0);
+
+        // ensure the ether being sent was included in the transaction
+        if (amount > msg.value) {
+            revert CurrencyTransferLib.CurrencyTransferLib_insufficientValue();
+        }
+    }
+
+    function _payPlatformFee(address recipient, uint256 amount) internal {
+        if (amount == 0) {
             return;
         }
 
-        // TODO: get platform fee from globals
-        // TODO: pay platform fee
-        // TODO: emit paid platform fee
+        CurrencyTransferLib.safeTransferNativeToken(recipient, amount);
+
+        emit PaidPlatformFee(address(0), amount);
     }
+
     /**
      * @dev derived from Openzepplin's address utils
      *      https://github.com/OpenZeppelin/openzeppelin-contracts/blob/v4.8.2/contracts/utils/Address.sol
