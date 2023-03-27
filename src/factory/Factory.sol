@@ -33,14 +33,16 @@ contract Factory is IFactory, MinimalProxyFactory, Ownable {
      * @dev _salt param can be thought as the app id
      */
     function create(bytes32 _name) external returns (address id) {
+        bytes32 salt = keccak256(abi.encode(msg.sender, _name));
+
         // check proxy not already deployed
-        if (apps[_name] != address(0)) {
+        if (apps[salt] != address(0)) {
             revert Factory_nameAlreadyUsed();
         }
 
         // deploy new proxy using CREATE2
-        id = _deployMinimalProxy(template, _name);
-        apps[_name] = id;
+        id = _deployMinimalProxy(template, salt);
+        apps[salt] = id;
 
         Proxy(payable(id)).init(msg.sender, registry, globals);
 
@@ -52,13 +54,14 @@ contract Factory is IFactory, MinimalProxyFactory, Ownable {
      * @dev    The contract deployed is a minimal proxy pointing to the app template
      * @return deploymentAddress the address of the app
      */
-    function calculateDeploymentAddress(bytes32 _name) external view returns (address) {
+    function calculateDeploymentAddress(address _account, bytes32 _name) external view returns (address) {
+        bytes32 salt = keccak256(abi.encode(_account, _name));
         // check proxy not already deployed
-        if (apps[_name] != address(0)) {
+        if (apps[salt] != address(0)) {
             revert Factory_nameAlreadyUsed();
         }
 
-        return _calculateMinimalProxyDeploymentAddress(template, _name);
+        return _calculateMinimalProxyDeploymentAddress(template, salt);
     }
 
     function setTemplate(address _template) public onlyOwner {

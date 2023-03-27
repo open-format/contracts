@@ -38,17 +38,18 @@ contract Factory__create is Setup, IFactory {
         assertEq(DummyImplementation(minimalProxy).boop(), "boop");
     }
 
-    function test_emits_created_event() public {
-        /**
-         * @dev id is deterministic and derived from factory address and name
-         */
-        address id = 0x2bC632E15Eb74471E9C40D3915c7Dfae878D681c;
+    function test_can_create_with_the_same_name_from_different_accounts() public {
+        factory.create("app_name");
 
-        /**
-         * @dev the name param in the Created event is converted from bytes32 to string
-         *      in the create function. To ensure vm.expectEmit matches the event data
-         *      we have to also zero pad the string to 32 bytes.
-         */
+        vm.prank(creator);
+        factory.create("app_name");
+    }
+
+    function test_emits_created_event() public {
+        // get deployment address by calling `calculateDeploymentAddress` from creators wallet
+        vm.prank(creator);
+        address id = factory.calculateDeploymentAddress(creator, "app_name");
+
         string memory zeroPaddedAppName = string(abi.encodePacked(bytes32("app_name")));
 
         vm.expectEmit(true, true, true, true);
@@ -58,7 +59,7 @@ contract Factory__create is Setup, IFactory {
         factory.create("app_name");
     }
 
-    function test_reverts_if_name_already_used() public {
+    function test_reverts_if_name_already_used_by_same_account() public {
         factory.create("app_name");
 
         vm.expectRevert(IFactory.Factory_nameAlreadyUsed.selector);
@@ -67,28 +68,35 @@ contract Factory__create is Setup, IFactory {
 }
 
 contract Factory__apps is Setup {
-    function test_can_get_address_via_name() public {
+    function test_can_get_address_via_hash_of_address_and_name() public {
+        vm.prank(creator);
         address minimalProxy = factory.create("app_name");
-        assertEq(factory.apps("app_name"), minimalProxy);
+
+        bytes32 id = keccak256(abi.encode(creator, bytes32("app_name")));
+        assertEq(factory.apps(id), minimalProxy);
     }
 
     function test_returns_zero_address_if_name_is_free() public {
-        assertEq(factory.apps("app_name"), address(0));
+        assertEq(factory.apps(keccak256(abi.encode(creator, bytes32("app_name")))), address(0));
     }
 }
 
 contract Factory__calculateDeploymentAddress is Setup {
     function test_can_get_address_of_deployment() public {
-        address expectedAddress = factory.calculateDeploymentAddress("app_name");
+        vm.prank(creator);
+        address expectedAddress = factory.calculateDeploymentAddress(creator, "app_name");
 
+        vm.prank(creator);
         address minimalProxy = factory.create("app_name");
         assertEq(expectedAddress, minimalProxy);
     }
 
     function test_reverts_when_name_is_already_used() public {
+        vm.prank(creator);
         address minimalProxy = factory.create("app_name");
 
         vm.expectRevert(IFactory.Factory_nameAlreadyUsed.selector);
-        factory.calculateDeploymentAddress("app_name");
+        vm.prank(creator);
+        factory.calculateDeploymentAddress(creator, "app_name");
     }
 }
