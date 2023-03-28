@@ -10,6 +10,8 @@ import {ILazyMint} from "@extensions/lazyMint/LazyMint.sol";
 contract Setup is Test {
     address creator = address(0x10);
     address other = address(0x11);
+    address globals = address(0x12);
+
     ERC721LazyMintMock erc721LazyMint;
 
     uint16 tenPercentBPS = 1000;
@@ -42,30 +44,46 @@ contract ERC721LazyMint__initialize is Setup {
         erc721LazyMint.initialize(creator, "Name", "Symbol", creator, uint16(tenPercentBPS), "");
     }
 
-    function test_grants_minter_role_when_passed_encoded_address() public {
-        bytes memory encodedAddress = abi.encode(other);
+    function test_sets_minter_role_and_global_when_passed_encoded_data() public {
+        bytes memory data = abi.encode(other, globals);
         erc721LazyMint = new ERC721LazyMintMock(
           "Name",
           "Symbol",
           creator,
           uint16(tenPercentBPS),
-          encodedAddress
+          data
         );
 
         assertTrue(erc721LazyMint.hasRole(MINTER_ROLE, other));
+        assertEq(erc721LazyMint._globals(), globals);
     }
 
     function test_does_not_grant_minter_role_when_passed_encoded_zero_address() public {
-        bytes memory encodedZeroAddress = abi.encode(address(0));
+        bytes memory data = abi.encode(address(0), globals);
         erc721LazyMint = new ERC721LazyMintMock(
           "Name",
           "Symbol",
           creator,
           uint16(tenPercentBPS),
-          encodedZeroAddress
+          data
         );
 
         assertFalse(erc721LazyMint.hasRole(MINTER_ROLE, address(0)));
+    }
+
+    function test_minter_role_and_globals_are_set_with_extra_data() public {
+        bytes memory data = abi.encode(other, globals, 12356789);
+
+        erc721LazyMint = new ERC721LazyMintMock(
+          "Name",
+          "Symbol",
+          creator,
+          uint16(tenPercentBPS),
+          data
+        );
+
+        assertTrue(erc721LazyMint.hasRole(MINTER_ROLE, other));
+        assertEq(erc721LazyMint._globals(), globals);
     }
 }
 
