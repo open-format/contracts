@@ -55,6 +55,16 @@ contract ERC721LazyMint is
         }
     }
 
+    /**
+     * @dev initialize should be called from a trusted contract and not directly by an account.
+     *      platform fee could easily be bypassed by not properly encoding data.
+     *
+     * @param _data bytes encoded with the signature (address,address)
+     *              the fist will be granted a minter role
+     *              the second address will be set as the globals address
+     *              used to calculate platform fees
+     */
+
     function initialize(
         address _owner,
         string memory _name,
@@ -76,8 +86,8 @@ contract ERC721LazyMint is
         if (_data.length == 0) {
             return;
         }
-        // TODO: consider a try catch to throw error if data encoded incorrectly
-        // decode data
+
+        // decode data to app address and globals address
         (address app, address globals) = abi.decode(_data, (address, address));
 
         if (app != address(0)) {
@@ -127,7 +137,7 @@ contract ERC721LazyMint is
      *  @param _to       The recipient of the NFT to mint.
      */
 
-    function mintTo(address _to) public virtual {
+    function mintTo(address _to) public payable virtual {
         if (!_canMint()) {
             revert ERC721LazyMint_notAuthorized();
         }
@@ -155,7 +165,7 @@ contract ERC721LazyMint is
      *  @param _quantity The number of NFTs to mint.
      */
 
-    function batchMintTo(address _to, uint256 _quantity) public virtual {
+    function batchMintTo(address _to, uint256 _quantity) public payable virtual {
         if (!_canMint()) {
             revert ERC721LazyMint_notAuthorized();
         }
