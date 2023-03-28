@@ -143,9 +143,13 @@ contract ERC721LazyMint is
     function lazyMint(uint256 _amount, string calldata _baseURIForTokens, bytes calldata _data)
         public
         payable
-        returns (uint256)
+        returns (uint256 batchId)
     {
-        return _lazyMint(_amount, _baseURIForTokens, _data);
+        (address platformFeeRecipient, uint256 platformFeeAmount) = _checkPlatformFee();
+
+        batchId = _lazyMint(_amount, _baseURIForTokens, _data);
+
+        _payPlatformFee(platformFeeRecipient, platformFeeAmount);
     }
 
     /**
