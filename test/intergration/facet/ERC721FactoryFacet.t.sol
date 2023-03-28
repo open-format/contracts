@@ -305,7 +305,6 @@ contract Helper_ERC721LazyMint_Setup is Setup {
         );
         // forgefmt: disable-end
 
-        // TODO: add to fee hooks to lazyMint
         vm.prank(creator);
         lazyMint.lazyMint(3, "ipfs://", "");
     }
@@ -351,6 +350,20 @@ contract ERC721LazyMint__integration_batchMintTo is Helper_ERC721LazyMint_Setup 
 
         vm.prank(creator);
         lazyMint.batchMintTo{value: basePlatformFee}(creator, 3);
+
+        // check platform fee has been received
+        assertEq(socialConscious.balance, basePlatformFee);
+    }
+}
+
+contract ERC721LazyMint__integration_lazyMint is Helper_ERC721LazyMint_Setup {
+    function test_pays_platform_fee() public {
+        // set platform base fee to 0.001 ether
+        uint256 basePlatformFee = 0.001 ether;
+        globals.setPlatformFee(basePlatformFee, 0, socialConscious);
+
+        vm.prank(creator);
+        lazyMint.lazyMint{value: basePlatformFee}(3, "ipfs://", "");
 
         // check platform fee has been received
         assertEq(socialConscious.balance, basePlatformFee);
