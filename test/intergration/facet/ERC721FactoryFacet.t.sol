@@ -70,7 +70,7 @@ contract Setup is Test, Helpers {
         appFactory = new Factory(address(appImplementation), address(registry), address(globals));
 
         erc721Implementation = new ERC721Base();
-        erc721ImplementationId = bytes32("base");
+        erc721ImplementationId = bytes32("Base");
         erc721FactoryFacet = new ERC721FactoryFacet();
 
         // create app
@@ -108,7 +108,11 @@ contract Setup is Test, Helpers {
                 ""
             );
         }
+
+        _afterSetup();
     }
+
+    function _afterSetup() internal virtual {}
 }
 
 contract ERC721FactoryFacet__integration_createERC721 is Setup {
@@ -159,7 +163,7 @@ contract ERC721FactoryFacet__integration_createERC721 is Setup {
         ERC721FactoryFacet(address(app)).createERC721("name", "symbol", creator, 1000, erc721ImplementationId);
     }
 
-    function test_can_create_multiple_erc20_contracts() public {
+    function test_can_create_multiple_erc721_contracts() public {
         for (uint256 i = 0; i < 10; i++) {
             vm.prank(creator);
             address deployed =
@@ -275,5 +279,80 @@ contract ERC721FactoryFacet__integration_calculateERC721DeploymentAddress is Set
     function test_reverts_if_no_implementation_found() public {
         vm.expectRevert(IERC721Factory.ERC721Factory_noImplementationFound.selector);
         address implementation = ERC721FactoryFacet(address(app)).calculateERC721FactoryDeploymentAddress("");
+    }
+}
+
+contract Helper_ERC721LazyMint_Setup is Setup {
+    ERC721LazyMint lazyMint;
+
+    function _afterSetup() internal override {
+        // add lazy mint implementation
+        ERC721LazyMint lazyMintImplementation = new ERC721LazyMint(false);
+        bytes32 lazyMintImplementationId = bytes32("LazyMint");
+        globals.setERC721Implementation(lazyMintImplementationId, address(lazyMintImplementation));
+
+        // create lazy mint erc721
+        vm.prank(creator);
+        // forgefmt: disable-start
+        lazyMint = ERC721LazyMint(
+            ERC721FactoryFacet(address(app)).createERC721(
+                "name",
+                "symbol",
+                creator,
+                1000,
+                lazyMintImplementationId
+            )
+        );
+        // forgefmt: disable-end
+
+        // TODO: add to fee hooks to lazyMint
+        vm.prank(creator);
+        lazyMint.lazyMint(3, "ipfs://", "");
+    }
+}
+
+contract ERC721LazyMint__integration_mintTo is Helper_ERC721LazyMint_Setup {
+    function test_mints_nft() public {
+        vm.prank(creator);
+        lazyMint.mintTo(creator);
+
+        // check nft is minted to creator
+        assertEq(lazyMint.ownerOf(0), creator);
+    }
+
+    function test_pays_platform_fee() public {
+        // set platform base fee to 0.001 ether
+        uint256 basePlatformFee = 0.001 ether;
+        globals.setPlatformFee(basePlatformFee, 0, socialConscious);
+
+        vm.prank(creator);
+        lazyMint.mintTo{value: basePlatformFee}(creator);
+
+        // check platform fee has been received
+        assertEq(socialConscious.balance, basePlatformFee);
+    }
+}
+
+contract ERC721LazyMint__integration_batchMintTo is Helper_ERC721LazyMint_Setup {
+    function test_batch_mints_nfts() public {
+        vm.prank(creator);
+        lazyMint.batchMintTo(creator, 3);
+
+        // check nft is minted to creator
+        assertEq(lazyMint.ownerOf(0), creator);
+        assertEq(lazyMint.ownerOf(1), creator);
+        assertEq(lazyMint.ownerOf(2), creator);
+    }
+
+    function test_pays_platform_fee() public {
+        // set platform base fee to 0.001 ether
+        uint256 basePlatformFee = 0.001 ether;
+        globals.setPlatformFee(basePlatformFee, 0, socialConscious);
+
+        vm.prank(creator);
+        lazyMint.batchMintTo{value: basePlatformFee}(creator, 3);
+
+        // check platform fee has been received
+        assertEq(socialConscious.balance, basePlatformFee);
     }
 }
