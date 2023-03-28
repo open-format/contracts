@@ -8,6 +8,7 @@ import {AccessControl} from "@solidstate/contracts/access/access_control/AccessC
 import {Multicall} from "@solidstate/contracts/utils/Multicall.sol";
 import {ERC165BaseInternal} from "@solidstate/contracts/introspection/ERC165/base/ERC165BaseInternal.sol";
 import {UintUtils} from "@solidstate/contracts/utils/UintUtils.sol";
+import {ReentrancyGuard} from "@solidstate/contracts/utils/ReentrancyGuard.sol";
 
 import {ERC721AUpgradeable} from "@erc721a-upgradeable/contracts/ERC721AUpgradeable.sol";
 
@@ -36,7 +37,8 @@ contract ERC721LazyMint is
     Royalty,
     Multicall,
     Global,
-    PlatformFee
+    PlatformFee,
+    ReentrancyGuard
 {
     error ERC721LazyMint_notAuthorized();
     error ERC721LazyMint_insufficientLazyMintedTokens();
@@ -143,6 +145,7 @@ contract ERC721LazyMint is
     function lazyMint(uint256 _amount, string calldata _baseURIForTokens, bytes calldata _data)
         public
         payable
+        nonReentrant
         returns (uint256 batchId)
     {
         (address platformFeeRecipient, uint256 platformFeeAmount) = _checkPlatformFee();
@@ -159,7 +162,7 @@ contract ERC721LazyMint is
      *  @param _to       The recipient of the NFT to mint.
      */
 
-    function mintTo(address _to) public payable virtual {
+    function mintTo(address _to) public payable virtual nonReentrant {
         if (!_canMint()) {
             revert ERC721LazyMint_notAuthorized();
         }
@@ -187,7 +190,7 @@ contract ERC721LazyMint is
      *  @param _quantity The number of NFTs to mint.
      */
 
-    function batchMintTo(address _to, uint256 _quantity) public payable virtual {
+    function batchMintTo(address _to, uint256 _quantity) public payable virtual nonReentrant {
         if (!_canMint()) {
             revert ERC721LazyMint_notAuthorized();
         }
