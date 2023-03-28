@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity ^0.8.16;
 
-// The following sets up the open-format contracts ready for integration tests
+// The following tests ERC721LazyMint integration with Globals ERC721FactoryFacet and platform fees
 
 import "forge-std/Test.sol";
 
