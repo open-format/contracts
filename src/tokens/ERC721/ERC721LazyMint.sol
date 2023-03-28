@@ -131,6 +131,24 @@ contract ERC721LazyMint is
     //////////////////////////////////////////////////////////////*/
 
     /**
+     *  @notice                  Lets an authorized address lazy mint a given amount of NFTs.
+     *
+     *  @param _amount           The number of NFTs to lazy mint.
+     *  @param _baseURIForTokens The base URI for the 'n' number of NFTs being lazy minted, where the metadata for each
+     *                           of those NFTs is the same.
+     *  @param _data             Additional bytes data to be used at the discretion of the consumer of the contract.
+     *  @return batchId          A unique integer identifier for the batch of NFTs lazy minted together.
+     */
+
+    function lazyMint(uint256 _amount, string calldata _baseURIForTokens, bytes calldata _data)
+        public
+        payable
+        returns (uint256)
+    {
+        return _lazyMint(_amount, _baseURIForTokens, _data);
+    }
+
+    /**
      *  @notice          Lets an authorized address mint an NFT to a recipient.
      *  @dev             The logic in the `_canMint` function determines whether the caller is authorized to mint NFTs.
      *
@@ -194,10 +212,6 @@ contract ERC721LazyMint is
     function burn(uint256 _tokenId) external virtual {
         _burn(_tokenId, true);
     }
-
-    /*//////////////////////////////////////////////////////////////
-                        Public getters
-    //////////////////////////////////////////////////////////////*/
 
     /// @notice The tokenId assigned to the next new NFT to be minted.
     function nextTokenIdToMint() public view virtual returns (uint256) {
