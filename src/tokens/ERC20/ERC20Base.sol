@@ -53,8 +53,6 @@ contract ERC20Base is
     error ERC20Base_zeroAmount();
     error ERC20Base_insufficientBalance();
 
-    // TODO: initialize implementation
-
     function initialize(
         address _owner,
         string memory _name,
