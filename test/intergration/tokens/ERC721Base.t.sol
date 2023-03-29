@@ -41,12 +41,12 @@ abstract contract Helpers {
  */
 
 contract ContractDummy {
-    function mintTo(address _erc72, address _to, string memory _tokenURI) public {
-        ERC721Base(_erc72).mintTo(_to, _tokenURI);
+    function mintTo(address _erc721, address _to, string memory _tokenURI) public {
+        ERC721Base(_erc721).mintTo(_to, _tokenURI);
     }
 
-    function batchMintTo(address _erc72, address _to, uint256 _quantity, string memory _baseURI) public {
-        ERC721Base(_erc72).batchMintTo(_to, _quantity, _baseURI);
+    function batchMintTo(address _erc721, address _to, uint256 _quantity, string memory _baseURI) public {
+        ERC721Base(_erc721).batchMintTo(_to, _quantity, _baseURI);
     }
 }
 
