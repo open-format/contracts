@@ -35,6 +35,17 @@ abstract contract Helpers {
     }
 }
 
+/**
+ * @dev dummy contract to test platform fee is not paid when called from a contract
+ *      must first grant MINTER_ROLE to this contract
+ */
+
+contract MinterDummy {
+    function mintTo(address _erc20, address _account, uint256 _amount) public {
+        ERC20Base(_erc20).mintTo(_account, _amount);
+    }
+}
+
 contract Setup is Test, Helpers {
     address creator;
     address other;
@@ -117,6 +128,7 @@ contract Setup is Test, Helpers {
 
 contract ERC20Base_Setup is Setup {
     ERC20Base base;
+    MinterDummy minter;
 
     function _afterSetup() internal override {
         // add lazy mint implementation
@@ -137,6 +149,12 @@ contract ERC20Base_Setup is Setup {
             )
         );
         // forgefmt: disable-end
+
+        // create contract that can mint
+        minter = new MinterDummy();
+        // grant minter role to minter contract
+        vm.prank(creator);
+        base.grantRole(MINTER_ROLE, address(minter));
     }
 }
 
@@ -159,5 +177,14 @@ contract ERC20Base__integration_mintTo is ERC20Base_Setup {
 
         // check platform fee has been received
         assertEq(socialConscious.balance, basePlatformFee);
+    }
+
+    function test_does_not_pay_platform_fee_when_called_from_contract() public {
+        // set platform base fee to 0.001 ether
+        uint256 basePlatformFee = 0.001 ether;
+        globals.setPlatformFee(basePlatformFee, 0, socialConscious);
+
+        minter.mintTo(address(base), creator, 1000);
+        assertEq(base.balanceOf(creator), 1000);
     }
 }
