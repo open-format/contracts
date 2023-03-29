@@ -9,9 +9,13 @@ import {ERC721BaseMock, ERC721Base} from "../../../src/tokens/ERC721/ERC721BaseM
 contract Setup is Test {
     address creator = address(0x10);
     address other = address(0x11);
+    address globals = address(0x12);
+
     ERC721BaseMock erc721Base;
 
     uint16 tenPercentBPS = 1000;
+    bytes32 constant ADMIN_ROLE = bytes32(uint256(0));
+    bytes32 constant MINTER_ROLE = bytes32(uint256(1));
 
     // ipfs uri taken from https://docs.ipfs.tech/how-to/best-practices-for-nft-data/#types-of-ipfs-links-and-when-to-use-them
     string baseURI = "ipfs://bafybeibnsoufr2renqzsh347nrx54wcubt5lgkeivez63xvivplfwhtpym/";
@@ -23,7 +27,8 @@ contract Setup is Test {
           "Name",
           "Symbol",
           creator,
-          uint16(tenPercentBPS)
+          uint16(tenPercentBPS),
+          ""
         );
 
         setUpAfter();
@@ -42,6 +47,48 @@ contract ERC721Base__initialize is Setup {
     function test_can_only_be_run_once() public {
         vm.expectRevert("ERC721A__Initializable: contract is already initialized");
         erc721Base.initialize(creator, "Name", "Symbol", creator, uint16(tenPercentBPS), "");
+    }
+
+    function test_sets_minter_role_and_global_when_passed_encoded_data() public {
+        bytes memory data = abi.encode(other, globals);
+        erc721Base = new ERC721BaseMock(
+          "Name",
+          "Symbol",
+          creator,
+          uint16(tenPercentBPS),
+          data
+        );
+
+        assertTrue(erc721Base.hasRole(MINTER_ROLE, other));
+        assertEq(erc721Base._globals(), globals);
+    }
+
+    function test_does_not_grant_minter_role_when_passed_encoded_zero_address() public {
+        bytes memory data = abi.encode(address(0), globals);
+        erc721Base = new ERC721BaseMock(
+          "Name",
+          "Symbol",
+          creator,
+          uint16(tenPercentBPS),
+          data
+        );
+
+        assertFalse(erc721Base.hasRole(MINTER_ROLE, address(0)));
+    }
+
+    function test_minter_role_and_globals_are_set_with_extra_data() public {
+        bytes memory data = abi.encode(other, globals, 12356789);
+
+        erc721Base = new ERC721BaseMock(
+          "Name",
+          "Symbol",
+          creator,
+          uint16(tenPercentBPS),
+          data
+        );
+
+        assertTrue(erc721Base.hasRole(MINTER_ROLE, other));
+        assertEq(erc721Base._globals(), globals);
     }
 }
 

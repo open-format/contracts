@@ -70,7 +70,7 @@ contract Setup is Test, Helpers {
         appFactory = new Factory(address(appImplementation), address(registry), address(globals));
 
         erc721Implementation = new ERC721Base();
-        erc721ImplementationId = bytes32("base");
+        erc721ImplementationId = bytes32("Base");
         erc721FactoryFacet = new ERC721FactoryFacet();
 
         // create app
@@ -108,7 +108,11 @@ contract Setup is Test, Helpers {
                 ""
             );
         }
+
+        _afterSetup();
     }
+
+    function _afterSetup() internal virtual {}
 }
 
 contract ERC721FactoryFacet__integration_createERC721 is Setup {
@@ -159,7 +163,7 @@ contract ERC721FactoryFacet__integration_createERC721 is Setup {
         ERC721FactoryFacet(address(app)).createERC721("name", "symbol", creator, 1000, erc721ImplementationId);
     }
 
-    function test_can_create_multiple_erc20_contracts() public {
+    function test_can_create_multiple_erc721_contracts() public {
         for (uint256 i = 0; i < 10; i++) {
             vm.prank(creator);
             address deployed =

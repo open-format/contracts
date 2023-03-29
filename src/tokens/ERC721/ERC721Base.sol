@@ -8,6 +8,7 @@ import {AccessControl} from "@solidstate/contracts/access/access_control/AccessC
 import {Multicall} from "@solidstate/contracts/utils/Multicall.sol";
 import {ERC165BaseInternal} from "@solidstate/contracts/introspection/ERC165/base/ERC165BaseInternal.sol";
 import {UintUtils} from "@solidstate/contracts/utils/UintUtils.sol";
+import {ReentrancyGuard} from "@solidstate/contracts/utils/ReentrancyGuard.sol";
 
 import {ERC721AUpgradeable} from "@erc721a-upgradeable/contracts/ERC721AUpgradeable.sol";
 
@@ -19,6 +20,10 @@ import {
     DefaultOperatorFilterer,
     DEFAULT_SUBSCRIPTION
 } from "@extensions/defaultOperatorFilterer/DefaultOperatorFilterer.sol";
+import {Global} from "@extensions/global/Global.sol";
+import {PlatformFee} from "@extensions/platformFee/PlatformFee.sol";
+
+import {CurrencyTransferLib} from "src/lib/CurrencyTransferLib.sol";
 
 bytes32 constant ADMIN_ROLE = bytes32(uint256(0));
 bytes32 constant MINTER_ROLE = bytes32(uint256(1));
@@ -32,7 +37,10 @@ contract ERC721Base is
     ContractMetadata,
     DefaultOperatorFilterer,
     Royalty,
-    Multicall
+    Multicall,
+    Global,
+    PlatformFee,
+    ReentrancyGuard
 {
     error ERC721Base_notAuthorized();
 
@@ -58,7 +66,20 @@ contract ERC721Base is
         _setSupportsInterface(type(IERC2981).interfaceId, true);
         _setSupportsInterface(type(IContractMetadata).interfaceId, true);
 
-        _grantMinterRoleFromData(_data);
+        if (_data.length == 0) {
+            return;
+        }
+
+        // decode data to app address and globals address
+        (address app, address globals) = abi.decode(_data, (address, address));
+
+        if (app != address(0)) {
+            _grantRole(MINTER_ROLE, app);
+        }
+
+        if (globals != address(0)) {
+            _setGlobals(globals);
+        }
     }
 
     /*//////////////////////////////////////////////////////////////
@@ -106,14 +127,19 @@ contract ERC721Base is
      *  @param _to       The recipient of the NFT to mint.
      *  @param _tokenURI The full metadata URI for the NFT minted.
      */
-    function mintTo(address _to, string memory _tokenURI) public virtual {
+    function mintTo(address _to, string memory _tokenURI) public payable virtual nonReentrant {
         if (!_canMint()) {
             revert ERC721Base_notAuthorized();
         }
+
+        (address platformFeeRecipient, uint256 platformFeeAmount) = _checkPlatformFee();
+
         _mintMetadata(_nextTokenId(), _tokenURI);
         _safeMint(_to, 1);
 
         emit Minted(_to, _tokenURI);
+
+        _payPlatformFee(platformFeeRecipient, platformFeeAmount);
     }
 
     /**
@@ -125,14 +151,19 @@ contract ERC721Base is
      *  @param _baseURI  The baseURI for the `n` number of NFTs minted. The metadata for each NFT is `baseURI/tokenId`
      */
 
-    function batchMintTo(address _to, uint256 _quantity, string memory _baseURI) public virtual {
+    function batchMintTo(address _to, uint256 _quantity, string memory _baseURI) public payable virtual nonReentrant {
         if (!_canMint()) {
             revert ERC721Base_notAuthorized();
         }
+
+        (address platformFeeRecipient, uint256 platformFeeAmount) = _checkPlatformFee();
+
         _batchMintMetadata(_nextTokenId(), _quantity, _baseURI);
         _safeMint(_to, _quantity);
 
         emit BatchMinted(_to, _quantity, _baseURI);
+
+        _payPlatformFee(platformFeeRecipient, platformFeeAmount);
     }
 
     /**
@@ -244,15 +275,44 @@ contract ERC721Base is
         return _hasRole(ADMIN_ROLE, msg.sender);
     }
 
-    /// @dev grants minter role if data is just an address
-    function _grantMinterRoleFromData(bytes memory _data) internal virtual {
-        if (_data.length == 0) {
+    /*//////////////////////////////////////////////////////////////
+                        Internal (platform fee) functions
+    //////////////////////////////////////////////////////////////*/
+
+    function _checkPlatformFee() internal view returns (address recipient, uint256 amount) {
+        // don't charge platform fee if sender is a contract or globals address is not set
+        if (_isContract(msg.sender) || _getGlobalsAddress() == address(0)) {
+            return (address(0), 0);
+        }
+
+        (recipient, amount) = _platformFeeInfo(0);
+
+        // ensure the ether being sent was included in the transaction
+        if (amount > msg.value) {
+            revert CurrencyTransferLib.CurrencyTransferLib_insufficientValue();
+        }
+    }
+
+    function _payPlatformFee(address recipient, uint256 amount) internal {
+        if (amount == 0) {
             return;
         }
 
-        (address account) = abi.decode(_data, (address));
-        if (account != address(0)) {
-            _grantRole(MINTER_ROLE, account);
-        }
+        CurrencyTransferLib.safeTransferNativeToken(recipient, amount);
+
+        emit PaidPlatformFee(address(0), amount);
+    }
+
+    /**
+     * @dev derived from Openzepplin's address utils
+     *      https://github.com/OpenZeppelin/openzeppelin-contracts/blob/v4.8.2/contracts/utils/Address.sol
+     */
+
+    function _isContract(address _account) internal view returns (bool) {
+        // This method relies on extcodesize/address.code.length, which returns 0
+        // for contracts in construction, since the code is only stored at the end
+        // of the constructor execution.
+
+        return _account.code.length > 0;
     }
 }

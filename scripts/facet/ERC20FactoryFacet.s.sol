@@ -40,3 +40,33 @@ contract Deploy is Script, Utils {
         exportContractDeployment(CONTRACT_NAME, address(erc20FactoryFacet), block.number);
     }
 }
+
+contract Update is Script, Utils {
+    function run() external {
+        uint256 deployerPrivateKey = vm.envUint("PRIVATE_KEY");
+        vm.startBroadcast(deployerPrivateKey);
+
+        // deploy new facet
+        ERC20FactoryFacet erc20FactoryFacet = new ERC20FactoryFacet();
+
+        // construct array of function selectors
+        bytes4[] memory selectors = new bytes4[](3);
+        selectors[0] = erc20FactoryFacet.createERC20.selector;
+        selectors[1] = erc20FactoryFacet.getERC20FactoryImplementation.selector;
+        selectors[2] = erc20FactoryFacet.calculateERC20FactoryDeploymentAddress.selector;
+
+        // construct and REPLACE facet cut
+        IDiamondWritableInternal.FacetCut[] memory cuts = new IDiamondWritableInternal.FacetCut[](1);
+        cuts[0] = IDiamondWritableInternal.FacetCut(
+            address(erc20FactoryFacet), IDiamondWritableInternal.FacetCutAction.REPLACE, selectors
+        );
+
+        // replace on registry
+        RegistryMock(payable(getContractDeploymentAddress("Registry"))).diamondCut(cuts, address(0), "");
+
+        vm.stopBroadcast();
+
+        // update new address
+        exportContractDeployment(CONTRACT_NAME, address(erc20FactoryFacet), block.number);
+    }
+}

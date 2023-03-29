@@ -2,17 +2,20 @@
 pragma solidity ^0.8.16;
 
 import {IERC20} from "@solidstate/contracts/interfaces/IERC20.sol";
-
 import {SolidStateERC20} from "@solidstate/contracts/token/ERC20/SolidStateERC20.sol";
 import {IERC2612} from "@solidstate/contracts/token/ERC20/permit/IERC2612.sol";
-
 import {ERC165Base} from "@solidstate/contracts/introspection/ERC165/base/ERC165Base.sol";
 import {IERC165} from "@solidstate/contracts/interfaces/IERC165.sol";
-
 import {AccessControl} from "@solidstate/contracts/access/access_control/AccessControl.sol";
 import {Multicall} from "@solidstate/contracts/utils/Multicall.sol";
+import {ReentrancyGuard} from "@solidstate/contracts/utils/ReentrancyGuard.sol";
+
 import {ContractMetadata, IContractMetadata} from "@extensions/contractMetadata/ContractMetadata.sol";
 import {Initializable} from "@extensions/initializable/Initializable.sol";
+import {Global} from "@extensions/global/Global.sol";
+import {PlatformFee} from "@extensions/platformFee/PlatformFee.sol";
+
+import {CurrencyTransferLib} from "src/lib/CurrencyTransferLib.sol";
 
 /**
  *  @dev Thirdweb inspired ERC20Base contract using solidstates ERC20 contract and diamond storage throughout.
@@ -35,7 +38,17 @@ import {Initializable} from "@extensions/initializable/Initializable.sol";
 bytes32 constant ADMIN_ROLE = bytes32(uint256(0));
 bytes32 constant MINTER_ROLE = bytes32(uint256(1));
 
-contract ERC20Base is SolidStateERC20, AccessControl, Multicall, ContractMetadata, Initializable, ERC165Base {
+contract ERC20Base is
+    SolidStateERC20,
+    AccessControl,
+    Multicall,
+    ContractMetadata,
+    Initializable,
+    ERC165Base,
+    Global,
+    PlatformFee,
+    ReentrancyGuard
+{
     error ERC20Base_notAuthorized();
     error ERC20Base_zeroAmount();
     error ERC20Base_insufficientBalance();
@@ -61,7 +74,20 @@ contract ERC20Base is SolidStateERC20, AccessControl, Multicall, ContractMetadat
         _setSupportsInterface(type(IERC2612).interfaceId, true);
         _setSupportsInterface(type(IContractMetadata).interfaceId, true);
 
-        _grantMinterRoleFromData(_data);
+        if (_data.length == 0) {
+            return;
+        }
+
+        // decode data to app address and globals address
+        (address app, address globals) = abi.decode(_data, (address, address));
+
+        if (app != address(0)) {
+            _grantRole(MINTER_ROLE, app);
+        }
+
+        if (globals != address(0)) {
+            _setGlobals(globals);
+        }
     }
 
     /*//////////////////////////////////////////////////////////////
@@ -75,7 +101,7 @@ contract ERC20Base is SolidStateERC20, AccessControl, Multicall, ContractMetadat
      *  @param _to       The recipient of the tokens to mint.
      *  @param _amount   Quantity of tokens to mint.
      */
-    function mintTo(address _to, uint256 _amount) public virtual {
+    function mintTo(address _to, uint256 _amount) public payable virtual nonReentrant {
         if (!_canMint()) {
             revert ERC20Base_notAuthorized();
         }
@@ -84,7 +110,11 @@ contract ERC20Base is SolidStateERC20, AccessControl, Multicall, ContractMetadat
             revert ERC20Base_zeroAmount();
         }
 
+        (address platformFeeRecipient, uint256 platformFeeAmount) = _checkPlatformFee();
+
         _mint(_to, _amount);
+
+        _payPlatformFee(platformFeeRecipient, platformFeeAmount);
     }
 
     /**
@@ -125,5 +155,46 @@ contract ERC20Base is SolidStateERC20, AccessControl, Multicall, ContractMetadat
         if (account != address(0)) {
             _grantRole(MINTER_ROLE, account);
         }
+    }
+
+    /*//////////////////////////////////////////////////////////////
+                        Internal (platform fee) functions
+    //////////////////////////////////////////////////////////////*/
+
+    function _checkPlatformFee() internal view returns (address recipient, uint256 amount) {
+        // don't charge platform fee if sender is a contract or globals address is not set
+        if (_isContract(msg.sender) || _getGlobalsAddress() == address(0)) {
+            return (address(0), 0);
+        }
+
+        (recipient, amount) = _platformFeeInfo(0);
+
+        // ensure the ether being sent was included in the transaction
+        if (amount > msg.value) {
+            revert CurrencyTransferLib.CurrencyTransferLib_insufficientValue();
+        }
+    }
+
+    function _payPlatformFee(address recipient, uint256 amount) internal {
+        if (amount == 0) {
+            return;
+        }
+
+        CurrencyTransferLib.safeTransferNativeToken(recipient, amount);
+
+        emit PaidPlatformFee(address(0), amount);
+    }
+
+    /**
+     * @dev derived from Openzepplin's address utils
+     *      https://github.com/OpenZeppelin/openzeppelin-contracts/blob/v4.8.2/contracts/utils/Address.sol
+     */
+
+    function _isContract(address _account) internal view returns (bool) {
+        // This method relies on extcodesize/address.code.length, which returns 0
+        // for contracts in construction, since the code is only stored at the end
+        // of the constructor execution.
+
+        return _account.code.length > 0;
     }
 }

@@ -65,8 +65,9 @@ abstract contract ERC20Factory is IERC20Factory, ERC20FactoryInternal, MinimalPr
         id = _deployMinimalProxy(implementation, _getSalt(msg.sender));
         _increaseContractCount(msg.sender);
 
-        // add the app address as encoded data, mainly intended for auto granting minter role
-        bytes memory data = abi.encode(address(this));
+        // add the app address and globals as encoded data
+        // this enables ERC20 contracts to grant minter role to the app and pay platform fee's
+        bytes memory data = abi.encode(address(this), _getGlobalsAddress());
 
         // initialize ERC20 contract
         try CompatibleERC20Implementation(payable(id)).initialize(msg.sender, _name, _symbol, _decimals, _supply, data)

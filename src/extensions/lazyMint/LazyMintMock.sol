@@ -11,6 +11,13 @@ contract LazyMintMock is LazyMint {
         minter = _minter;
     }
 
+    function lazyMint(uint256 _amount, string calldata _baseURIForTokens, bytes calldata _data)
+        external
+        returns (uint256)
+    {
+        return _lazyMint(_amount, _baseURIForTokens, _data);
+    }
+
     /// @dev override to test permissions
     function _canLazyMint() internal view virtual override returns (bool) {
         return msg.sender == minter;

@@ -75,3 +75,20 @@ SetPlatformFee:; forge script \
   $(slow) \
 	$(verbose) \
 	`cast --to-wei $(word 1, $(args))` $(word 2, $(args))
+
+
+# update
+update-ERC721FactoryFacet:; forge script scripts/facet/ERC721FactoryFacet.s.sol:Update --rpc-url $(rpc) --broadcast $(verbose) $(legacy) $(slow)
+update-ERC20FactoryFacet:; forge script scripts/facet/ERC20FactoryFacet.s.sol:Update --rpc-url $(rpc) --broadcast $(verbose) $(legacy) $(slow)
+
+# Add platform fee to tokens
+# Date: 29.03.23
+# redeploys erc20FactoryFacet, erc721FactoyFacet and replaces all functions on registry
+# deploys new ERC721Base ERC721LazyMint ERC20 and replaces exisitng implementations on globals
+# PR #91 https://github.com/open-format/contracts/pull/91
+update-addPlatformFeeToTokens:; make \
+	update-ERC721FactoryFacet \
+	update-ERC20FactoryFacet \
+	deploy-ERC721Base \
+	deploy-ERC721LazyMint \
+	deploy-ERC20Base \
