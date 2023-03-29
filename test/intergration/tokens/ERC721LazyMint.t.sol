@@ -22,7 +22,7 @@ import {IERC721Factory} from "@extensions/ERC721Factory/IERC721Factory.sol";
 import {ERC721FactoryFacet} from "src/facet/ERC721FactoryFacet.sol";
 import {SettingsFacet, IApplicationAccess} from "src/facet/SettingsFacet.sol";
 
-import {Deploy} from "scripts/core/Globals.s.sol";
+import {CurrencyTransferLib} from "src/lib/CurrencyTransferLib.sol";
 
 abstract contract Helpers {
     function prepareSingleFacetCut(
@@ -33,6 +33,25 @@ abstract contract Helpers {
         IDiamondWritableInternal.FacetCut[] memory cuts = new IDiamondWritableInternal.FacetCut[](1);
         cuts[0] = IDiamondWritableInternal.FacetCut(cutAddress, cutAction, selectors);
         return cuts;
+    }
+}
+
+/**
+ * @dev dummy contract to test platform fee is not paid when called from a contract
+ *      must first grant ADMIN_ROLE to this contract
+ */
+
+contract ContractDummy {
+    function mintTo(address _erc72, address _to) public {
+        ERC721LazyMint(_erc72).mintTo(_to);
+    }
+
+    function batchMintTo(address _erc72, address _to, uint256 _quantity) public {
+        ERC721LazyMint(_erc72).batchMintTo(_to, _quantity);
+    }
+
+    function lazyMint(address _erc721, uint256 _amount, string memory _baseURI) public {
+        ERC721LazyMint(_erc721).lazyMint(_amount, _baseURI, "");
     }
 }
 
@@ -118,6 +137,7 @@ contract Setup is Test, Helpers {
 
 contract ERC721LazyMint_Setup is Setup {
     ERC721LazyMint lazyMint;
+    ContractDummy contractDummy;
 
     function _afterSetup() internal override {
         // add lazy mint implementation
@@ -141,6 +161,12 @@ contract ERC721LazyMint_Setup is Setup {
 
         vm.prank(creator);
         lazyMint.lazyMint(3, "ipfs://", "");
+
+        // create contract that can mint
+        contractDummy = new ContractDummy();
+        // grant admin role to minter contract
+        vm.prank(creator);
+        lazyMint.grantRole(ADMIN_ROLE, address(contractDummy));
     }
 }
 
@@ -163,6 +189,25 @@ contract ERC721LazyMint__integration_mintTo is ERC721LazyMint_Setup {
 
         // check platform fee has been received
         assertEq(socialConscious.balance, basePlatformFee);
+    }
+
+    function test_reverts_if_platform_fee_not_supplied() public {
+        // set platform base fee to 0.001 ether
+        uint256 basePlatformFee = 0.001 ether;
+        globals.setPlatformFee(basePlatformFee, 0, socialConscious);
+
+        vm.expectRevert(CurrencyTransferLib.CurrencyTransferLib_insufficientValue.selector);
+        vm.prank(creator);
+        lazyMint.mintTo(creator);
+    }
+
+    function test_does_not_pay_platform_fee_when_called_from_contract() public {
+        // set platform base fee to 0.001 ether
+        uint256 basePlatformFee = 0.001 ether;
+        globals.setPlatformFee(basePlatformFee, 0, socialConscious);
+
+        contractDummy.mintTo(address(lazyMint), creator);
+        assertEq(lazyMint.ownerOf(0), creator);
     }
 }
 
@@ -194,9 +239,20 @@ contract ERC721LazyMint__integration_batchMintTo is ERC721LazyMint_Setup {
         uint256 basePlatformFee = 0.001 ether;
         globals.setPlatformFee(basePlatformFee, 0, socialConscious);
 
-        vm.expectRevert();
+        vm.expectRevert(CurrencyTransferLib.CurrencyTransferLib_insufficientValue.selector);
         vm.prank(creator);
         lazyMint.batchMintTo(creator, 3);
+    }
+
+    function test_does_not_pay_platform_fee_when_called_from_contract() public {
+        // set platform base fee to 0.001 ether
+        uint256 basePlatformFee = 0.001 ether;
+        globals.setPlatformFee(basePlatformFee, 0, socialConscious);
+
+        contractDummy.batchMintTo(address(lazyMint), creator, 3);
+        assertEq(lazyMint.ownerOf(0), creator);
+        assertEq(lazyMint.ownerOf(1), creator);
+        assertEq(lazyMint.ownerOf(2), creator);
     }
 }
 
@@ -218,8 +274,18 @@ contract ERC721LazyMint__integration_lazyMint is ERC721LazyMint_Setup {
         uint256 basePlatformFee = 0.001 ether;
         globals.setPlatformFee(basePlatformFee, 0, socialConscious);
 
-        vm.expectRevert();
+        vm.expectRevert(CurrencyTransferLib.CurrencyTransferLib_insufficientValue.selector);
         vm.prank(creator);
-        lazyMint.batchMintTo(creator, 3);
+        lazyMint.lazyMint(3, "ipfs://", "");
+        assertEq(lazyMint.tokenURI(2), "ipfs://");
+    }
+
+    function test_does_not_pay_platform_fee_when_called_from_contract() public {
+        // set platform base fee to 0.001 ether
+        uint256 basePlatformFee = 0.001 ether;
+        globals.setPlatformFee(basePlatformFee, 0, socialConscious);
+
+        contractDummy.lazyMint(address(lazyMint), 3, "ipfs://");
+        assertEq(lazyMint.tokenURI(2), "ipfs://");
     }
 }
