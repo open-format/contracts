@@ -1,0 +1,14 @@
+{
+  "Globals": {
+    "startBlock": 122267212,
+    "address": "0xa424149b165F81341b41fF72a2Db489b27AecAf5"
+  },
+  "Registry": {
+    "startBlock": 122267234,
+    "address": "0xcD288D67b371AB590962B2bd8FEd9866d8d6C69d"
+  },
+  "doNotRemoveUsedToParseFile": [
+    "Globals",
+    "Registry"
+  ]
+}
