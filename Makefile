@@ -77,7 +77,7 @@ SetPlatformFee:; forge script \
 	`cast --to-wei $(word 1, $(args))` $(word 2, $(args))
 
 
-# Running a update scripts
+# Run all update scripts
 update:; make \
 	update-ERC721FactoryFacet \
 	update-ERC20FactoryFacet \
