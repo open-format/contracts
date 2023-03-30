@@ -4,13 +4,14 @@ pragma solidity ^0.8.16;
 import {SafeOwnable, OwnableInternal} from "@solidstate/contracts/access/ownable/SafeOwnable.sol";
 import {ApplicationFee} from "../extensions/applicationFee/ApplicationFee.sol";
 import {ApplicationAccess, IApplicationAccess} from "../extensions/applicationAccess/ApplicationAccess.sol";
+import {PlatformFee} from "../extensions/platformFee/PlatformFee.sol";
 
 /**
  * @title   "Settings Facet"
  * @notice  (WIP) allows app owner to manage application wide settings
  */
 
-contract SettingsFacet is ApplicationFee, SafeOwnable, ApplicationAccess {
+contract SettingsFacet is ApplicationFee, PlatformFee, SafeOwnable, ApplicationAccess {
     /**
      * @notice sets the application percentage fee in BPS and the recipient wallet
      * @param percentBPS The percentage used to calculate application fee
@@ -47,6 +48,13 @@ contract SettingsFacet is ApplicationFee, SafeOwnable, ApplicationAccess {
      */
     function hasCreatorAccess(address account) external view returns (bool) {
         return _hasCreatorAccess(account);
+    }
+
+    /**
+     * @notice gets the address of the globals contract
+     */
+    function getGlobalsAddress() external view returns (address) {
+        return _getGlobalsAddress();
     }
 
     /**
