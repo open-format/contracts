@@ -59,12 +59,14 @@ contract Setup is Test, Helpers {
         settingsFacet = new SettingsFacet();
 
         // add facet to registry
-        bytes4[] memory selectors = new bytes4[](5);
+        bytes4[] memory selectors = new bytes4[](7);
         selectors[0] = settingsFacet.setApplicationFee.selector;
         selectors[1] = settingsFacet.setAcceptedCurrencies.selector;
         selectors[2] = settingsFacet.applicationFeeInfo.selector;
         selectors[3] = settingsFacet.setCreatorAccess.selector;
         selectors[4] = settingsFacet.hasCreatorAccess.selector;
+        selectors[5] = settingsFacet.platformFeeInfo.selector;
+        selectors[6] = settingsFacet.getGlobalsAddress.selector;
 
         registry.diamondCut(
             prepareSingleFacetCut(address(settingsFacet), IDiamondWritableInternal.FacetCutAction.ADD, selectors),
@@ -224,5 +226,23 @@ contract SettingsFacet__integration_hasCreatorAccess is Setup {
         SettingsFacet(address(app)).setCreatorAccess(accounts, approvals);
 
         assertTrue(SettingsFacet(address(app)).hasCreatorAccess(other));
+    }
+}
+
+contract SettingsFacet__integration_getGlobalsAddress is Setup {
+    function test_returns_globals_address() public {
+        assertEq(SettingsFacet(address(app)).getGlobalsAddress(), address(globals));
+    }
+}
+
+contract SettingsFacet__integration_platformFeeInfo is Setup {
+    function test_returns_platform_fee_info() public {
+        // set platform base fee to 1 ether
+        globals.setPlatformFee(1 ether, 0, other);
+
+        (address recipient, uint256 amount) = SettingsFacet(address(app)).platformFeeInfo(0);
+
+        assertEq(recipient, other);
+        assertEq(amount, 1 ether);
     }
 }
