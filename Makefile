@@ -97,4 +97,4 @@ update-addPlatformFeeToTokens:; make \
 # deploys a new settings facet, replaces exisitng function selectors and adds new ones
 # Date: 30.03.23
 
-update-SettingsFacet-ExposeGloals:; forge script scripts/facet/SettingsFacet.s.sol:Update_ExposeGlobals --rpc-url $(rpc) --broadcast $(verbose) $(legacy) $(slow)
+update-SettingsFacet-ExposeGlobals:; forge script scripts/facet/SettingsFacet.s.sol:Update_ExposeGlobals --rpc-url $(rpc) --broadcast $(verbose) $(legacy) $(slow)
