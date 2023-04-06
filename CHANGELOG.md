@@ -1,5 +1,21 @@
 # @openformat/contracts
 
+## 0.1.0
+
+### Minor Changes
+
+- [#93](https://github.com/open-format/contracts/pull/93) [`6f9e914`](https://github.com/open-format/contracts/commit/6f9e9141c1fb87c476e196baaf879071f9531f17) Thanks [@tinypell3ts](https://github.com/tinypell3ts)! - - Deployments
+
+- [#91](https://github.com/open-format/contracts/pull/91) [`b819a28`](https://github.com/open-format/contracts/commit/b819a28bf306c552669d7252899d88c1a5d1b505) Thanks [@george-e-d-g-e](https://github.com/george-e-d-g-e)! - token contracts now charge platform fee when minting
+
+### Patch Changes
+
+- [#92](https://github.com/open-format/contracts/pull/92) [`5affc38`](https://github.com/open-format/contracts/commit/5affc383f21afafc68d30583eac0ca793d015c93) Thanks [@george-e-d-g-e](https://github.com/george-e-d-g-e)! - add globals and platform fee info to settings
+
+- [#85](https://github.com/open-format/contracts/pull/85) [`5fe672c`](https://github.com/open-format/contracts/commit/5fe672cd5b4b6074c555e1175e1978cfc368ee05) Thanks [@george-e-d-g-e](https://github.com/george-e-d-g-e)! - modify salt in factory contract
+
+- [#94](https://github.com/open-format/contracts/pull/94) [`601b7f0`](https://github.com/open-format/contracts/commit/601b7f0f7e025910f0d89404337ac955236e6ee8) Thanks [@tinypell3ts](https://github.com/tinypell3ts)! - Adds reward facet contract
+
 ## 0.0.7
 
 ### Patch Changes

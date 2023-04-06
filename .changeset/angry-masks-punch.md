@@ -1,5 +1,0 @@
----
-"@openformat/contracts": minor
----
-
-- Deployments
