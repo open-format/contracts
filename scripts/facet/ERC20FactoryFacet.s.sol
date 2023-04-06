@@ -41,6 +41,20 @@ contract Deploy is Script, Utils {
     }
 }
 
+contract Create is Script, Utils {
+    function run() external {
+        uint256 deployerPrivateKey = vm.envUint("PRIVATE_KEY");
+        address appId = vm.envAddress("APP_ID");
+        vm.startBroadcast(deployerPrivateKey);
+
+        ERC20FactoryFacet erc20FactoryFacet = ERC20FactoryFacet(appId);
+
+        erc20FactoryFacet.createERC20("TEST", "TEST", 18, 1000, "Base");
+
+        vm.stopBroadcast();
+    }
+}
+
 contract Update is Script, Utils {
     function run() external {
         uint256 deployerPrivateKey = vm.envUint("PRIVATE_KEY");
