@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: Apache-2.0
+// SPDX-License-Identifier: BUSL-1.1
 pragma solidity ^0.8.16;
 
 // The following tests ERC20Base integration with Globals ERC20FactoryFacet and platform fees

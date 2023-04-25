@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: Apache-2.0
+// SPDX-License-Identifier: BUSL-1.1
 pragma solidity ^0.8.16;
 
 import {ReentrancyGuard} from "@solidstate/contracts/utils/ReentrancyGuard.sol";
