@@ -4,7 +4,7 @@
 
 ## Getting Started
 
-These instructions will give you a copy of the project up and running on your local machine for development and testing purposes. See deployment for notes on how to deploy the project on a live system.
+These instructions will give you a copy of the project up and running on your local machine for development and testing purposes.
 
 ## Installation
 
@@ -40,7 +40,29 @@ forge build
 forge test
 ```
 
-### Formatting (vscode only)
+### Deploying contracts locally
+
+Create a local testnet node for deploying and testing smart contracts:
+
+```
+anvil
+```
+
+Deploy all contracts:
+
+```
+make deploy
+```
+
+Deploy an app:
+
+```
+make CreateApp args="hello-world"
+```
+
+See the [MakeFile](Makefile) for more commands.
+
+## Formatting (vscode only)
 
 To enable the built-in formatter that comes with Foundry to automatically format your code on save, you can add the following settings to your .vscode/settings.json:
 
@@ -54,7 +76,7 @@ To enable the built-in formatter that comes with Foundry to automatically format
 }
 ```
 
-### Static Analyzers
+## Static Analyzers
 
 [Slither](https://github.com/crytic/slither) is a Solidity static analysis framework written in Python 3. It runs a suite of vulnerability detectors, prints visual information about contract details, and provides an API to easily write custom analyses. Slither enables developers to find vulnerabilities, enhance their code comprehension, and quickly prototype custom analyses.
 
@@ -68,9 +90,10 @@ slither .
 myth analyze src/*
 ```
 
-### Code Style Guide
+## Code Style Guide
 
-#### Errors
+### Errors
+
 Errors should be defined using [custom error syntax](https://blog.soliditylang.org/2021/04/21/custom-errors/) and follow the naming convention of `ContractName_errorDescriptionInCamelCase`.
 
 for example:
