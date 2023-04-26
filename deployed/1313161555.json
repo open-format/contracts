@@ -1,39 +1,35 @@
 {
-  "ERC20FactoryFacet": {
-    "startBlock": 122308834,
-    "address": "0xc21125b654a1071D9Bc8162C71A71Cd88fD99E85"
-  },
-  "Registry": {
-    "startBlock": 122308504,
-    "address": "0x3713395bd3c11E4D5A688b21cFa3f86D04288861"
-  },
-  "ERC20Base": {
-    "startBlock": 122308641,
-    "address": "0xaCde8917a4427DcE86aaDF7Bf853e730aa72A398"
+  "ERC721LazyDropFacet": {
+    "startBlock": 122308877,
+    "address": "0x47b5760dDba0D3D80d83fc689D3c5Cb45efe93B4"
   },
   "ERC721FactoryFacet": {
     "address": "0x19145dc9b36DDdd9a874195c6e51f4067aeb796a",
     "startBlock": 122308798
   },
-  "ERC721LazyMint": {
-    "address": "0x9E82e59058c4937cb523736255C15411cE707BcF",
-    "startBlock": 122308600
+  "ERC721Base": {
+    "address": "0x0Ac51EDA5fC88f5E9955f0F89A65b391C51CA141",
+    "startBlock": 122308568
   },
   "Globals": {
-    "startBlock": 122308484,
-    "address": "0x19781Af95cA4E113D5D1412452225D11A84ce992"
+    "address": "0x19781Af95cA4E113D5D1412452225D11A84ce992",
+    "startBlock": 122308484
   },
-  "Factory": {
-    "address": "0xCf48E89B7C7f7cE520eAE3DE871d1ed5c242e1A4",
-    "startBlock": 122308540
+  "RewardFacet": {
+    "startBlock": 124979718,
+    "address": "0x45683068899890A99a68d3946786d1288D03Ca26"
   },
   "Proxy": {
     "address": "0x1F2CD226AD558a362026FF7f64F8BE92Ee5Ed8Fd",
     "startBlock": 122308520
   },
-  "ERC721LazyDropFacet": {
-    "startBlock": 122308877,
-    "address": "0x47b5760dDba0D3D80d83fc689D3c5Cb45efe93B4"
+  "ERC20Base": {
+    "address": "0xaCde8917a4427DcE86aaDF7Bf853e730aa72A398",
+    "startBlock": 122308641
+  },
+  "SettingsFacet": {
+    "startBlock": 122308757,
+    "address": "0x3Fbe54Cc6B5f377830f6DE55a3A9B0f811AAfea9"
   },
   "doNotRemoveUsedToParseFile": [
     "Globals",
@@ -46,14 +42,23 @@
     "SettingsFacet",
     "ERC721FactoryFacet",
     "ERC20FactoryFacet",
-    "ERC721LazyDropFacet"
+    "ERC721LazyDropFacet",
+    "RewardFacet"
   ],
-  "SettingsFacet": {
-    "startBlock": 122308757,
-    "address": "0x3Fbe54Cc6B5f377830f6DE55a3A9B0f811AAfea9"
+  "ERC721LazyMint": {
+    "startBlock": 122308600,
+    "address": "0x9E82e59058c4937cb523736255C15411cE707BcF"
   },
-  "ERC721Base": {
-    "address": "0x0Ac51EDA5fC88f5E9955f0F89A65b391C51CA141",
-    "startBlock": 122308568
+  "Registry": {
+    "address": "0x3713395bd3c11E4D5A688b21cFa3f86D04288861",
+    "startBlock": 122308504
+  },
+  "ERC20FactoryFacet": {
+    "address": "0xc21125b654a1071D9Bc8162C71A71Cd88fD99E85",
+    "startBlock": 122308834
+  },
+  "Factory": {
+    "startBlock": 122308540,
+    "address": "0xCf48E89B7C7f7cE520eAE3DE871d1ed5c242e1A4"
   }
 }
