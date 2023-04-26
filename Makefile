@@ -26,6 +26,7 @@ deploy:; make \
 	deploy-ERC721Base \
 	deploy-ERC721LazyMint \
 	deploy-ERC20Base \
+	deploy-RewardsFacet \
 	deploy-SettingsFacet \
 	deploy-ERC721FactoryFacet \
 	deploy-ERC20FactoryFacet \
@@ -42,6 +43,7 @@ deploy-ERC721Base:; forge script scripts/tokens/ERC721Base.s.sol:Deploy --rpc-ur
 deploy-ERC721LazyMint:; forge script scripts/tokens/ERC721LazyMint.s.sol:Deploy --rpc-url $(rpc) --broadcast $(verbose) $(legacy) $(slow)
 deploy-ERC20Base:; forge script scripts/tokens/ERC20Base.s.sol:Deploy --rpc-url $(rpc) --broadcast $(verbose) $(legacy) $(slow)
 # facets
+deploy-RewardsFacet:; forge script scripts/facet/RewardsFacet.s.sol:Deploy --rpc-url $(rpc) --broadcast $(verbose) $(legacy) $(slow)
 deploy-SettingsFacet:; forge script scripts/facet/SettingsFacet.s.sol:Deploy --rpc-url $(rpc) --broadcast $(verbose) $(legacy) $(slow)
 deploy-ERC721FactoryFacet:; forge script scripts/facet/ERC721FactoryFacet.s.sol:Deploy --rpc-url $(rpc) --broadcast $(verbose) $(legacy) $(slow)
 deploy-ERC20FactoryFacet:; forge script scripts/facet/ERC20FactoryFacet.s.sol:Deploy --rpc-url $(rpc) --broadcast $(verbose) $(legacy) $(slow)
