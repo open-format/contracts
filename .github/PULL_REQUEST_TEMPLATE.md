@@ -1,42 +1,63 @@
 <!--
-Before creating a pull request:
+Before going any further:
 
 - Please update the name of the PR to `[TYPE]: [NAME]` e.g `Feature: Registration form`.
-- Please add at least two reviewers.
 - Please add yourself as an assignee.
 - Please add the correct label to your PR.
+
+
 -->
 
-<!-- What changes are being made? (What feature/bug is being fixed here?) -->
+Thank you for contributing to Open Format! Please follow this template to ensure a smooth pull request process. Make sure you have read and followed the guidelines in CONTRIBUTING.md before submitting your pull request.
 
-**What**:
+## Summary
 
-<!-- Why are these changes necessary? -->
+Please provide a brief summary of your changes, including the issue or bounty (if applicable) you're addressing.
 
-**Why**:
+Example: This pull request adds a new feature to handle new token types (Issue #123).
 
-<!-- How were these changes implemented? -->
+## Description
 
-**How**:
+Provide a detailed description of the changes you've made, explaining the rationale behind your changes and how they improve the project
 
-<!-- Have you done all of these things?  -->
+## Related Issue/Bounty
 
-**Checklist**:
+Link to the related issue or bounty on GitHub.
 
-<!-- add "N/A" to the end of each line that's irrelevant to your changes -->
-<!-- to check an item, place an "x" in the box like so: "- [x] Documentation" -->
+Example: Fixes #123 or Implements Bounty #456
 
-- [ ] Code complete
-- [ ] Branch name conforms to [these](https://dev.to/varbsan/a-simplified-convention-for-naming-branches-and-commits-in-git-il4) standards
-- [ ] Slither passing
-- [ ] Tests
-- [ ] Spelling mistakes and console.logs
-- [ ] Only necessary files changes committed <!-- Please check you haven't committed any unnecessary files. New folders and files may need to be added to .gitignore. -->
-- [ ] Commenting <!-- To help your future self and other developers please leave appropriate function and helper comments in the code -->
-- [ ] Changeset <!-- Run `yarn changeset` to create a changeset -->
+## Type of Change
 
-<!-- key points/stats that would be useful for marketing purposes -->
+Please check the boxes that apply to your pull request:
 
-**Marketing Nuggets**:
+- [ ] Bug fix (non-breaking change which fixes an issue)
+- [ ] New feature (non-breaking change which adds functionality)
+- [ ] Breaking change (fix or feature that would cause existing functionality to change)
+- [ ] Documentation update (changes to documentation only)
+- [ ] Code style update (formatting, renaming)
+- [ ] Refactoring (no functional changes)
+- [ ] Other (please describe):
 
-<!-- feel free to add additional comments -->
+## Testing
+
+Please describe the tests you've added or updated to cover your changes, and provide instructions on how to run the tests.
+
+## Checklist
+
+- [ ] I have read the [CONTRIBUTING.md](CONTRIBUTING.md) document
+- [ ] I have followed the project's [style guide](CONTRIBUTING.md#style-guide)
+- [ ] I have added or updated tests to cover my changes
+- [ ] All new and existing tests passed
+- [ ] My changes generate no new warnings or errors
+- [ ] I have made corresponding changes to the documentation
+- [ ] I have checked that my changes do not introduce any new security vulnerabilities
+- [ ] I have provided a clear and concise description of my changes
+- [ ] I have linked to the related issue or bounty, if applicable
+
+## Additional Information
+
+<!-- If you have any additional information or comments related to your pull request, please include them here -->
+
+---
+
+Once again, thank you for your contribution! We appreciate your effort and dedication to improving the Open Format.
