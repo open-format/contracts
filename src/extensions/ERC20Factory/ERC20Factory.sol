@@ -24,7 +24,7 @@ interface CompatibleERC20Implementation {
 
 /**
  * @title   "ERC20Factory Extension"
- * @notice  (WIP) a factory contract for creating ECR20 contracts
+ * @notice  A factory contract for creating ECR20 contracts
  * @dev     deploys minimal proxies that point to ERC20Base implementation
  *          compatible to be inherited by facet contract
  *          there is an internal dependency on the globals extension.
