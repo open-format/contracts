@@ -22,11 +22,11 @@ cp .env.example .env
 
 #### Environment variable configuration
 
-| Variable                     | Description                                                                                                                                      |
-| ---------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `PRIVATE_KEY`                | Private key of wallet for deploying and interacting with scripts                                                                                 |
-| `POLYGONSCAN_MUMBAI_API_KEY` | This is used for verifying contracts. You can generate a key for Mumbai testnet here - https://polygonscan.com/myapikey                          |
-| `DIAMOND_CONTRACT_ADDRESS`   | This is used in the Makefile when running scripts that interact with a deployed diamond contract. e.g 0x86935f11c86623dec8a25696e1c19a8659cbf95d |
+| Variable          | Description                                                                                                    |
+| ----------------- | -------------------------------------------------------------------------------------------------------------- |
+| `PRIVATE_KEY`     | Private key of wallet for deploying and interacting with scripts                                               |
+| `POLYGON_RPC_URL` | The POLYGON_RPC_URL is the endpoint for interacting with the Polygon blockchain network.                       |
+| `APP_ID`          | Used in scripts that engage with a particular app. An App ID can be generated at https://apps.openformat.tech/ |
 
 ### Compile contracts
 
@@ -71,6 +71,7 @@ myth analyze src/*
 ### Code Style Guide
 
 #### Errors
+
 Errors should be defined using [custom error syntax](https://blog.soliditylang.org/2021/04/21/custom-errors/) and follow the naming convention of `ContractName_errorDescriptionInCamelCase`.
 
 for example:
