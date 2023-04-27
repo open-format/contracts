@@ -9,7 +9,7 @@ import {ERC721LazyDropInternal} from "./ERC721LazyDropInternal.sol";
 
 /**
  * @title   "ERC721LazyDrop extension"
- * @notice  (WIP) Allows nft contract owners to setup a drop on an app
+ * @notice  Allows nft contract owners to setup a drop on an app
  *          See ICompatibleERC721.sol for necessary interface.
  *          The inheriting contract must be given minter access to perform the mintTo and batchMintTo functions
  *

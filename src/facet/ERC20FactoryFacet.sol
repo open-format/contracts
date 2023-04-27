@@ -9,7 +9,10 @@ import {ApplicationAccess} from "../extensions/applicationAccess/ApplicationAcce
 
 /**
  * @title   "ERC20Factory Facet"
- * @notice  (WIP)
+ * @notice  A facet of the ERC20Factory contract that provides functionality for creating new ERC20 tokens.
+ *          This contract also includes extensions for Ownable, PlatformFee, and ApplicationAccess, which allow for ownership management,
+ *          platform fee collection, and restricted access to contract creation, respectively.
+ *          Before creating a new contract, a platform fee is added, which must be paid in ether.
  */
 
 contract ERC20FactoryFacet is ERC20Factory, Ownable, PlatformFee, ApplicationAccess {

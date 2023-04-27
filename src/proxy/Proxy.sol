@@ -15,7 +15,7 @@ import {Initializable} from "../extensions/initializable/Initializable.sol";
 
 /**
  * @title   "Open Format Proxy" contract
- * @notice  used to interact with open-format
+ * @notice  used to interact with Open Format
  * @dev     is intended to not to be called directly but via a minimal proxy https://eips.ethereum.org/EIPS/eip-1167
  */
 contract Proxy is IProxy, Readable, Upgradable, Global, ERC165Base, Initializable, SafeOwnable {
