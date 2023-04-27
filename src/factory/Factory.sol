@@ -6,13 +6,12 @@ import {MinimalProxyFactory} from "@solidstate/contracts/factory/MinimalProxyFac
 
 import {IFactory} from "./IFactory.sol";
 import {Proxy} from "../proxy/Proxy.sol";
-// WIP experimenting with minimal clone factory to see how to use it
 
 /**
  * @title "App Factory"
- * @notice (WIP) a factory contract for creating proxy(app) contracts
- * @dev    deploys minimal proxies that point to Proxy implementation/template
- *         is designed to be deployed separately from the registry and managed by open-format
+ * @notice  A contract for creating proxy (app) contracts.
+ *          This contract deploys minimal proxies that point to a Proxy implementation/template
+ *          and is designed to be deployed separately from the registry and managed by Open Format.
  */
 contract Factory is IFactory, MinimalProxyFactory, Ownable {
     address public template;
