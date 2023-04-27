@@ -8,7 +8,10 @@ import {PlatformFee} from "../extensions/platformFee/PlatformFee.sol";
 
 /**
  * @title   "Settings Facet"
- * @notice  (WIP) allows app owner to manage application wide settings
+ * @notice  A facet of the Settings contract that allows the application owner to manage application-wide settings.
+ *          This contract includes extensions for ApplicationFee, PlatformFee, SafeOwnable, and ApplicationAccess,
+ *          which provide functionality for managing application and platform fees, ownership management, and restricted
+ *          access to contract creation.
  */
 
 contract SettingsFacet is ApplicationFee, PlatformFee, SafeOwnable, ApplicationAccess {

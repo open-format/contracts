@@ -9,7 +9,10 @@ import {PlatformFee} from "../extensions/platformFee/PlatformFee.sol";
 
 /**
  * @title   "ERC721Factory Facet"
- * @notice  (WIP)
+ * @notice  A facet of the ERC721Factory contract that provides functionality for creating new ERC721 tokens.
+ *          This contract also includes extensions for Ownable, PlatformFee, and ApplicationAccess, which allow for ownership management,
+ *          platform fee collection, and restricted access to contract creation, respectively.
+ *          Before creating a new contract, a platform fee is added, which must be paid in ether.
  */
 
 contract ERC721FactoryFacet is ERC721Factory, Ownable, PlatformFee, ApplicationAccess {
