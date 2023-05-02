@@ -1,0 +1,13 @@
+{
+  "remappings": [
+    "@erc721a-upgradeable/=lib/ERC721A-Upgradeable/",
+    "ds-test/=lib/forge-std/lib/ds-test/src/",
+    "forge-std/=lib/forge-std/src/",
+    "@solidstate/=lib/solidstate-solidity/",
+    "@extensions/=src/extensions/"
+  ],
+  "optimizer": {
+    "enabled": true,
+    "runs": 200
+  }
+}
