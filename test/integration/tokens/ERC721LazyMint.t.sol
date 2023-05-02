@@ -225,13 +225,14 @@ contract ERC721LazyMint__integration_batchMintTo is ERC721LazyMint_Setup {
     function test_pays_platform_fee() public {
         // set platform base fee to 0.001 ether
         uint256 basePlatformFee = 0.001 ether;
+        uint256 quantity = 3;
         globals.setPlatformFee(basePlatformFee, 0, socialConscious);
 
         vm.prank(creator);
-        lazyMint.batchMintTo{value: basePlatformFee}(creator, 3);
+        lazyMint.batchMintTo{value: basePlatformFee * quantity}(creator, quantity);
 
         // check platform fee has been received
-        assertEq(socialConscious.balance, basePlatformFee);
+        assertEq(socialConscious.balance, basePlatformFee * quantity);
     }
 
     function test_reverts_if_platform_fee_not_supplied() public {
