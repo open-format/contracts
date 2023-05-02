@@ -90,7 +90,7 @@ contract ERC721Base is
      * @dev override ERC721AUpgradeable to use solidstates ERC165BaseInternal
      */
 
-    function supportsInterface(bytes4 interfaceId) public view override(ERC721AUpgradeable, IERC165) returns (bool) {
+    function supportsInterface(bytes4 interfaceId) public view override (ERC721AUpgradeable, IERC165) returns (bool) {
         return _supportsInterface(interfaceId);
     }
 
@@ -163,7 +163,7 @@ contract ERC721Base is
 
         emit BatchMinted(_to, _quantity, _baseURI);
 
-        _payPlatformFee(platformFeeRecipient, platformFeeAmount);
+        _payPlatformFee(platformFeeRecipient, platformFeeAmount * _quantity);
     }
 
     /**
@@ -210,7 +210,7 @@ contract ERC721Base is
     /// @dev See {ERC721-setApprovalForAll}.
     function setApprovalForAll(address operator, bool approved)
         public
-        override(ERC721AUpgradeable)
+        override (ERC721AUpgradeable)
         onlyAllowedOperatorApproval(operator)
     {
         super.setApprovalForAll(operator, approved);
@@ -220,7 +220,7 @@ contract ERC721Base is
     function approve(address operator, uint256 tokenId)
         public
         payable
-        override(ERC721AUpgradeable)
+        override (ERC721AUpgradeable)
         onlyAllowedOperatorApproval(operator)
     {
         super.approve(operator, tokenId);
@@ -230,7 +230,7 @@ contract ERC721Base is
     function transferFrom(address from, address to, uint256 tokenId)
         public
         payable
-        override(ERC721AUpgradeable)
+        override (ERC721AUpgradeable)
         onlyAllowedOperator(from)
     {
         super.transferFrom(from, to, tokenId);
@@ -240,7 +240,7 @@ contract ERC721Base is
     function safeTransferFrom(address from, address to, uint256 tokenId)
         public
         payable
-        override(ERC721AUpgradeable)
+        override (ERC721AUpgradeable)
         onlyAllowedOperator(from)
     {
         super.safeTransferFrom(from, to, tokenId);
@@ -250,7 +250,7 @@ contract ERC721Base is
     function safeTransferFrom(address from, address to, uint256 tokenId, bytes memory data)
         public
         payable
-        override(ERC721AUpgradeable)
+        override (ERC721AUpgradeable)
         onlyAllowedOperator(from)
     {
         super.safeTransferFrom(from, to, tokenId, data);
