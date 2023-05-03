@@ -1,39 +1,39 @@
 {
   "Factory": {
-    "startBlock": 88429733,
-    "address": "0x716fd6975bcbD388fE0c0d7919190EC4492B5703"
+    "address": "0xC4d53838f4D54f1A44116b3109BfA1bf064a8301",
+    "startBlock": 90985936
   },
   "Globals": {
-    "startBlock": 87868399,
-    "address": "0x7aFE68988db5158B68ce64cEFBe750E5D3539e71"
+    "startBlock": 90985905,
+    "address": "0x92b7B01445aa46a523eB9423F660750D92e78A19"
   },
   "ERC721LazyMint": {
-    "startBlock": 88429771,
-    "address": "0xc2CBbb014C0dEd2b5c342a48eA8B6f7f541c6D95"
+    "address": "0x7CAD8456FAC88bcf06C01c515976A64ECdcb0F16",
+    "startBlock": 90985963
   },
   "Proxy": {
-    "startBlock": 87868429,
-    "address": "0x3713395bd3c11E4D5A688b21cFa3f86D04288861"
+    "address": "0x5A7a31A487457e1a3a812a065cC017Ebc23a8E88",
+    "startBlock": 90985925
   },
   "Registry": {
-    "startBlock": 87868413,
-    "address": "0x19781Af95cA4E113D5D1412452225D11A84ce992"
+    "startBlock": 90985915,
+    "address": "0x6377Eb1b6339A558D243D68B0A58DA6aAc7A604F"
   },
   "ERC20Base": {
-    "startBlock": 88429790,
-    "address": "0x495a9FEA8F842f5daC84894e4bC3F5Dd8f258AEf"
+    "address": "0x525908075E8C3B42f2A44473A06de7E79d118F13",
+    "startBlock": 90985984
   },
   "RewardFacet": {
-    "address": "0x6F36f7A3CD912F284bc13f85ee04c57Da14319c1",
-    "startBlock": 90468028
+    "address": "0xC3e7a9B81B23c25651A23661859f032262861aa4",
+    "startBlock": 90986004
   },
   "SettingsFacet": {
-    "address": "0x58d82389CaedB0323660D98F2CadE93D365a38a3",
-    "startBlock": 88429853
+    "address": "0x6EdF1DF336bbbbFa06c2DcC4330C57ABFb49dC9e",
+    "startBlock": 90986020
   },
   "ERC721FactoryFacet": {
-    "address": "0xA22eeFa2C34C8F1C547ADd3A6E8B6c8562E388aC",
-    "startBlock": 88429814
+    "startBlock": 90986038,
+    "address": "0xe106aD3B21A62721B543CC072c3065ed7D2Ccf63"
   },
   "doNotRemoveUsedToParseFile": [
     "Globals",
@@ -50,15 +50,15 @@
     "RewardFacet"
   ],
   "ERC721Base": {
-    "address": "0xF961DF607F31916a4fA210F2513Acd9D2d09bFd5",
-    "startBlock": 88429745
+    "address": "0xfa6C233AC8ccB28509079380E733141173c41EA3",
+    "startBlock": 90985945
   },
   "ERC721LazyDropFacet": {
-    "address": "0x0a2DcA79a0FB77f706DF2af7541e00543393174D",
-    "startBlock": 87869842
+    "address": "0x24FEdc64981C3ccD789AF7e695e3070Dc7006389",
+    "startBlock": 90986079
   },
   "ERC20FactoryFacet": {
-    "startBlock": 88429834,
-    "address": "0x513eD7B2Bb3Cd26F09ec267b24bd6FAAF2D55b2b"
+    "address": "0xA00e0291d6a0ab3Da359532AB4C08B95BcCF193a",
+    "startBlock": 90986056
   }
 }
