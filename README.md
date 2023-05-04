@@ -1,6 +1,32 @@
-# 📜 Open Format Contracts
+# Open Format Smart Contracts
 
-**The main smart contracts used in the Open Format ecosystem**
+The Open Format Smart Contracts are the core of the Open Format ecosystem.
+
+## Features
+
+✅ Diamond proxy pattern
+
+✅ ERC20 and ERC721A
+
+✅ Creation, minting, transferring and burning functionality across multiple token types
+
+✅ NFT lazy mint and drop mechanism
+
+✅ NFT royalty support
+
+✅ NFT Drop mechanism
+
+✅ Reward mechanism
+
+✅ Multi-chain support
+
+✅ Multicall support
+
+✅ Automated audit support
+
+🔨 Revenue share mechanism
+
+🔨 ERC-4626 - Tokenised vaults
 
 ## Getting Started
 
@@ -22,11 +48,10 @@ cp .env.example .env
 
 #### Environment variable configuration
 
-| Variable          | Description                                                                                                    |
-| ----------------- | -------------------------------------------------------------------------------------------------------------- |
-| `PRIVATE_KEY`     | Private key of wallet for deploying and interacting with scripts                                               |
-| `POLYGON_RPC_URL` | The POLYGON_RPC_URL is the endpoint for interacting with the Polygon blockchain network.                       |
-| `APP_ID`          | Used in scripts that engage with a particular app. An App ID can be generated at https://apps.openformat.tech/ |
+| Variable      | Description                                                                                                              |
+| ------------- | ------------------------------------------------------------------------------------------------------------------------ |
+| `PRIVATE_KEY` | Private key of wallet for deploying and interacting with scripts                                                         |
+| `APP_ID`      | Used in scripts that engage with a particular app. An App ID can be created using the `CreateApp` script in the Makefile |
 
 ### Compile contracts
 
