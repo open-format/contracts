@@ -203,6 +203,27 @@ contract ERC721Base__setContractURI is Setup {
     }
 }
 
+contract ERC721Base__owner is Setup {
+    function test_owner() public {
+        vm.prank(creator);
+        assertEq(creator, erc721Base.owner());
+    }
+}
+
+contract ERC721Base__setOwner is Setup {
+    function test_sets_owner() public {
+        vm.prank(creator);
+        erc721Base.setOwner(other);
+        assertEq(other, erc721Base.owner());
+    }
+
+    function test_only_admin_can_set_owner() public {
+        vm.prank(other);
+        vm.expectRevert();
+        erc721Base.setOwner(other);
+    }
+}
+
 contract ERC721Base__transferFrom is Setup {
     function setUpAfter() public override {
         vm.prank(creator);

@@ -40,11 +40,15 @@ contract ERC721LazyMint is
     PlatformFee,
     ReentrancyGuard
 {
+    //  @dev Owner of the contract (purpose: OpenSea compatibility, etc.)
+    address private _contractOwner;
+
     error ERC721LazyMint_notAuthorized();
     error ERC721LazyMint_insufficientLazyMintedTokens();
 
     event Minted(address to, string tokenURI);
     event BatchMinted(address to, uint256 quantity, string baseURI);
+    event OwnerUpdated(address prevOwner, address newOwner);
 
     /**
      * @dev this contract is meant to be an implementation for a factory contract
@@ -77,6 +81,7 @@ contract ERC721LazyMint is
     ) public initializerERC721A {
         __ERC721A_init(_name, _symbol);
         _grantRole(ADMIN_ROLE, _owner);
+        _contractOwner = _owner;
         _setDefaultRoyaltyInfo(_royaltyRecipient, _royaltyBps);
         _registerToDefaultOperatorFilterer(DEFAULT_SUBSCRIPTION, true);
 
@@ -225,6 +230,25 @@ contract ERC721LazyMint is
         return _nextTokenId();
     }
 
+    /**
+     * @dev Returns the address of the current contract owner.
+     */
+
+    function owner() public view returns (address) {
+        return _contractOwner;
+    }
+
+    function setOwner(address _newOwner) external {
+        if (!_canSetOwner()) {
+            revert ERC721LazyMint_notAuthorized();
+        }
+
+        address _prevOwner = _contractOwner;
+        _contractOwner = _newOwner;
+
+        emit OwnerUpdated(_prevOwner, _newOwner);
+    }
+
     /// @notice Returns whether a given address is the owner, or approved to transfer an NFT.
     function isApprovedOrOwner(address _operator, uint256 _tokenId)
         public
@@ -302,6 +326,11 @@ contract ERC721LazyMint is
     /// @dev Returns whether a token can be minted in the given execution context.
     function _canMint() internal view virtual returns (bool) {
         return _hasRole(ADMIN_ROLE, msg.sender) || _hasRole(MINTER_ROLE, msg.sender);
+    }
+
+    /// @dev Returns whether contract owner can be set in the given execution context.
+    function _canSetOwner() internal view virtual returns (bool) {
+        return _hasRole(ADMIN_ROLE, msg.sender);
     }
 
     /// @dev Returns whether royalty info can be set in the given execution context.

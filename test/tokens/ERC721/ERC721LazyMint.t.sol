@@ -303,6 +303,27 @@ contract ERC721LazyMint__setContractURI is Setup {
     }
 }
 
+contract ERC721LazyMint__owner is Setup {
+    function test_owner() public {
+        vm.prank(creator);
+        assertEq(creator, erc721LazyMint.owner());
+    }
+}
+
+contract ERC721LazyMint__setOwner is Setup {
+    function test_sets_owner() public {
+        vm.prank(creator);
+        erc721LazyMint.setOwner(other);
+        assertEq(other, erc721LazyMint.owner());
+    }
+
+    function test_only_admin_can_set_owner() public {
+        vm.prank(other);
+        vm.expectRevert();
+        erc721LazyMint.setOwner(other);
+    }
+}
+
 contract ERC721LazyMint__transferFrom is Setup {
     function afterSetup() public override {
         vm.prank(creator);
