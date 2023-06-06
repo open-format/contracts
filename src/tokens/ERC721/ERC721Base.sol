@@ -9,6 +9,7 @@ import {Multicall} from "@solidstate/contracts/utils/Multicall.sol";
 import {ERC165BaseInternal} from "@solidstate/contracts/introspection/ERC165/base/ERC165BaseInternal.sol";
 import {UintUtils} from "@solidstate/contracts/utils/UintUtils.sol";
 import {ReentrancyGuard} from "@solidstate/contracts/utils/ReentrancyGuard.sol";
+import {Ownable} from "@solidstate/contracts/access/ownable/Ownable.sol";
 
 import {ERC721AUpgradeable} from "@erc721a-upgradeable/contracts/ERC721AUpgradeable.sol";
 
@@ -40,16 +41,13 @@ contract ERC721Base is
     Multicall,
     Global,
     PlatformFee,
-    ReentrancyGuard
+    ReentrancyGuard,
+    Ownable
 {
-    //  @dev Owner of the contract (purpose: OpenSea compatibility, etc.)
-    address private _contractOwner;
-
     error ERC721Base_notAuthorized();
 
     event Minted(address to, string tokenURI);
     event BatchMinted(address to, uint256 quantity, string baseURI);
-    event OwnerUpdated(address prevOwner, address newOwner);
 
     function initialize(
         address _owner,
@@ -61,7 +59,7 @@ contract ERC721Base is
     ) public initializerERC721A {
         __ERC721A_init(_name, _symbol);
         _grantRole(ADMIN_ROLE, _owner);
-        _contractOwner = _owner;
+        _setOwner(_owner);
         _setDefaultRoyaltyInfo(_royaltyRecipient, _royaltyBps);
         _registerToDefaultOperatorFilterer(DEFAULT_SUBSCRIPTION, true);
 
@@ -189,25 +187,6 @@ contract ERC721Base is
     /// @notice The tokenId assigned to the next new NFT to be minted.
     function nextTokenIdToMint() public view virtual returns (uint256) {
         return _nextTokenId();
-    }
-
-    /**
-     * @dev Returns the address of the current contract owner.
-     */
-
-    function owner() public view returns (address) {
-        return _contractOwner;
-    }
-
-    function setOwner(address _newOwner) external {
-        if (!_canSetOwner()) {
-            revert ERC721Base_notAuthorized();
-        }
-
-        address _prevOwner = _contractOwner;
-        _contractOwner = _newOwner;
-
-        emit OwnerUpdated(_prevOwner, _newOwner);
     }
 
     /// @notice Returns whether a given address is the owner, or approved to transfer an NFT.
