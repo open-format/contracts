@@ -268,11 +268,6 @@ contract ERC721Base is
         return _hasRole(ADMIN_ROLE, msg.sender) || _hasRole(MINTER_ROLE, msg.sender);
     }
 
-    /// @dev Returns whether contract owner can be set in the given execution context.
-    function _canSetOwner() internal view virtual returns (bool) {
-        return _hasRole(ADMIN_ROLE, msg.sender);
-    }
-
     /// @dev Returns whether royalty info can be set in the given execution context.
     function _canSetRoyaltyInfo() internal view virtual override returns (bool) {
         return _hasRole(ADMIN_ROLE, msg.sender);
