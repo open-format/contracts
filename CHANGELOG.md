@@ -1,5 +1,11 @@
 # @openformat/contracts
 
+## 1.0.0
+
+### Major Changes
+
+- [#101](https://github.com/open-format/contracts/pull/101) [`615ca13`](https://github.com/open-format/contracts/commit/615ca13e638ff8e47a196b049baaf0435d2934a3) Thanks [@tinypell3ts](https://github.com/tinypell3ts)! - Release v1.0.0 🚀
+
 ## 0.1.0
 
 ### Minor Changes
