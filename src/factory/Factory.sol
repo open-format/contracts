@@ -6,6 +6,11 @@ import {MinimalProxyFactory} from "@solidstate/contracts/factory/MinimalProxyFac
 
 import {IFactory} from "./IFactory.sol";
 import {Proxy} from "../proxy/Proxy.sol";
+import {ERC20Constellation} from "../tokens/ERC20/ERC20Constellation.sol";
+import {AddressUtils} from "@solidstate/contracts/utils/AddressUtils.sol";
+import {ERC20Factory} from "../extensions/ERC20Factory/ERC20Factory.sol";
+
+bytes32 constant ADMIN_ROLE = bytes32(uint256(0));
 
 /**
  * @title "App Factory"
@@ -31,8 +36,25 @@ contract Factory is IFactory, MinimalProxyFactory, Ownable {
     /**
      * @dev _salt param can be thought as the app id
      */
-    function create(bytes32 _name) external returns (address id) {
-        bytes32 salt = keccak256(abi.encode(msg.sender, _name));
+
+    function create(bytes32 _name, address _constellation_id, address _owner) external returns (address id) {
+        bytes32 salt = keccak256(abi.encode(_owner, _name));
+        bytes32 implementationId = keccak256(abi.encodePacked("Constellation"));
+
+        // check if _owner is the _owner of the given Constellation
+        if (!ERC20Constellation(_constellation_id).hasRole(ADMIN_ROLE, _owner)) {
+            revert Factory_NotConstellationOwner();
+        }
+
+        // check if _constellation_id is a contract not a EOA
+        if (!AddressUtils.isContract(_constellation_id)) {
+            revert Factory_NotAContractAddress();
+        }
+
+        // check if _constellation_id is a valid constellation implementation
+        if (!ERC20Constellation(_constellation_id).validConstellation(implementationId)) {
+            revert Factory_InvalidConstellationContract();
+        }
 
         // check proxy not already deployed
         if (apps[salt] != address(0)) {
@@ -43,9 +65,9 @@ contract Factory is IFactory, MinimalProxyFactory, Ownable {
         id = _deployMinimalProxy(template, salt);
         apps[salt] = id;
 
-        Proxy(payable(id)).init(msg.sender, registry, globals);
+        Proxy(payable(id)).init(_owner, registry, globals);
 
-        emit Created(id, msg.sender, string(abi.encodePacked(_name)));
+        emit Created(id, _owner, string(abi.encodePacked(_name)), _constellation_id);
     }
 
     /**
