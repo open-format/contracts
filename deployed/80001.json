@@ -8,8 +8,8 @@
     "startBlock": 35125244
   },
   "ERC721Base": {
-    "startBlock": 35125185,
-    "address": "0xfDDe79be610E01fB4d7daf478C7063B58A889641"
+    "address": "0x4Cc7908290Ce73efe6D9FAAc011a14A514394ec3",
+    "startBlock": 36509251
   },
   "Registry": {
     "address": "0x68625eC64120af566e87e487AF71AB9eE800Bf91",
@@ -28,8 +28,8 @@
     "startBlock": 35125231
   },
   "ERC721LazyMint": {
-    "address": "0xeCAa77Ff32cfB4913f59a21Ed07D81E448209960",
-    "startBlock": 35125197
+    "address": "0x60B04a2137C080cF80F2B66b0140A0DF4EA737F7",
+    "startBlock": 36509289
   },
   "doNotRemoveUsedToParseFile": [
     "Globals",

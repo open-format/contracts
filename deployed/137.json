@@ -16,8 +16,8 @@
     "startBlock": 42245949
   },
   "ERC721LazyMint": {
-    "address": "0xfa6C233AC8ccB28509079380E733141173c41EA3",
-    "startBlock": 42245967
+    "startBlock": 43669715,
+    "address": "0x678EbcD0Aa50e04b6BED89efe752D7a7C75b462d"
   },
   "RewardFacet": {
     "address": "0x525908075E8C3B42f2A44473A06de7E79d118F13",
@@ -58,7 +58,7 @@
     "startBlock": 42246082
   },
   "ERC721Base": {
-    "startBlock": 42245955,
-    "address": "0x5A7a31A487457e1a3a812a065cC017Ebc23a8E88"
+    "address": "0xfDDe79be610E01fB4d7daf478C7063B58A889641",
+    "startBlock": 43669735
   }
 }
