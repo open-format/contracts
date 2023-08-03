@@ -9,6 +9,7 @@ import {Multicall} from "@solidstate/contracts/utils/Multicall.sol";
 import {ERC165BaseInternal} from "@solidstate/contracts/introspection/ERC165/base/ERC165BaseInternal.sol";
 import {UintUtils} from "@solidstate/contracts/utils/UintUtils.sol";
 import {ReentrancyGuard} from "@solidstate/contracts/utils/ReentrancyGuard.sol";
+import {Ownable} from "@solidstate/contracts/access/ownable/Ownable.sol";
 
 import {ERC721AUpgradeable} from "@erc721a-upgradeable/contracts/ERC721AUpgradeable.sol";
 
@@ -38,7 +39,8 @@ contract ERC721LazyMint is
     Multicall,
     Global,
     PlatformFee,
-    ReentrancyGuard
+    ReentrancyGuard,
+    Ownable
 {
     error ERC721LazyMint_notAuthorized();
     error ERC721LazyMint_insufficientLazyMintedTokens();
@@ -77,6 +79,7 @@ contract ERC721LazyMint is
     ) public initializerERC721A {
         __ERC721A_init(_name, _symbol);
         _grantRole(ADMIN_ROLE, _owner);
+        _setOwner(_owner);
         _setDefaultRoyaltyInfo(_royaltyRecipient, _royaltyBps);
         _registerToDefaultOperatorFilterer(DEFAULT_SUBSCRIPTION, true);
 
