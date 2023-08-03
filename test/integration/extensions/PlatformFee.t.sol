@@ -15,8 +15,11 @@ import {CurrencyTransferLib} from "src/lib/CurrencyTransferLib.sol";
 import {Proxy} from "src/proxy/Proxy.sol";
 import {Upgradable} from "src/proxy/upgradable/Upgradable.sol";
 import {RegistryMock} from "src/registry/RegistryMock.sol";
-import {Factory} from "src/factory/Factory.sol";
+import {StarFactory} from "src/factories/Star.sol";
+import {ConstellationFactory} from "src/factories/Constellation.sol";
 import {Globals} from "src/globals/Globals.sol";
+
+import {ERC20Base} from "src/tokens/ERC20/ERC20Base.sol";
 
 import {PlatformFee, IPlatformFee} from "src/extensions/platformFee/PlatformFee.sol";
 
@@ -70,12 +73,14 @@ contract Setup is Test, Helpers {
     address creator;
     address socialConscious;
 
-    Factory appFactory;
+    StarFactory starFactory;
+    ConstellationFactory constellationFactory;
     Proxy template;
     Proxy app;
     RegistryMock registry;
     DummyFacet facet;
     Globals globals;
+    ERC20Base erc20Implementation;
 
     function setUp() public {
         creator = address(0x10);
@@ -84,8 +89,11 @@ contract Setup is Test, Helpers {
         globals = new Globals();
         registry = new RegistryMock();
         template = new  Proxy(true);
-        appFactory = new Factory(address(template), address(registry), address(globals));
+        starFactory = new StarFactory(address(template), address(registry), address(globals));
         facet = new DummyFacet();
+
+        erc20Implementation = new ERC20Base();
+        constellationFactory = new ConstellationFactory(address(erc20Implementation), address(globals));
 
         // add facet to registry
         bytes4[] memory selectors = new bytes4[](2);
@@ -100,8 +108,11 @@ contract Setup is Test, Helpers {
         // setup platform fee to be base 0.01 ether and reciever to be social Conscious
         globals.setPlatformFee(0.1 ether, 0, socialConscious);
 
+        // create constellation
+        address constellation = constellationFactory.create("Constellation", "CSN", 18, 1000);
+
         // create app
-        app = Proxy(payable(appFactory.create("platformFeeTest")));
+        app = Proxy(payable(starFactory.create("platformFeeTest", constellation, address(0))));
     }
 }
 

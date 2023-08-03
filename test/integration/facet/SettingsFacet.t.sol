@@ -14,8 +14,10 @@ import {IOwnableInternal} from "@solidstate/contracts/access/ownable/IOwnableInt
 import {Proxy} from "src/proxy/Proxy.sol";
 import {Upgradable} from "src/proxy/upgradable/Upgradable.sol";
 import {RegistryMock} from "src/registry/RegistryMock.sol";
-import {Factory} from "src/factory/Factory.sol";
+import {StarFactory} from "src/factories/Star.sol";
+import {ConstellationFactory} from "src/factories/Constellation.sol";
 import {Globals} from "src/globals/Globals.sol";
+import {ERC20Base} from "src/tokens/ERC20/ERC20Base.sol";
 
 import {SettingsFacet, IApplicationAccess} from "src/facet/SettingsFacet.sol";
 
@@ -37,7 +39,9 @@ contract Setup is Test, Helpers {
 
     uint16 tenPercentBPS = 1000;
 
-    Factory appFactory;
+    StarFactory starFactory;
+    ConstellationFactory constellationFactory;
+    ERC20Base erc20Implementation;
     Proxy appImplementation;
     Proxy app;
     RegistryMock registry;
@@ -54,7 +58,10 @@ contract Setup is Test, Helpers {
         globals = new Globals();
         registry = new RegistryMock();
         appImplementation = new  Proxy(true);
-        appFactory = new Factory(address(appImplementation), address(registry), address(globals));
+        starFactory = new StarFactory(address(appImplementation), address(registry), address(globals));
+
+        erc20Implementation = new ERC20Base();
+        constellationFactory = new ConstellationFactory(address(erc20Implementation), address(globals));
 
         settingsFacet = new SettingsFacet();
 
@@ -74,9 +81,13 @@ contract Setup is Test, Helpers {
             ""
         );
 
+        // create constellation
+        vm.prank(appOwner);
+        address constellation = constellationFactory.create("Constellation", "CSN", 18, 1000);
+
         // create app
         vm.prank(appOwner);
-        app = Proxy(payable(appFactory.create("SettingsTest")));
+        app = Proxy(payable(starFactory.create("SettingsTest", constellation, appOwner)));
 
         _afterSetUp();
     }
