@@ -75,6 +75,10 @@ abstract contract ERC721LazyDropInternal is IERC721LazyDrop {
         if (claimCondition.startTimestamp > block.timestamp) {
             revert ERC721LazyDrop_cantClaimYet();
         }
+
+        if (claimCondition.endTimestamp < block.timestamp) {
+            revert ERC721LazyDrop_claimPeriodEnded();
+        }
     }
 
     /**

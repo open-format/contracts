@@ -13,10 +13,12 @@ import {
 import {Proxy} from "src/proxy/Proxy.sol";
 import {Upgradable} from "src/proxy/upgradable/Upgradable.sol";
 import {RegistryMock} from "src/registry/RegistryMock.sol";
-import {Factory} from "src/factory/Factory.sol";
+import {StarFactory} from "src/factories/Star.sol";
+import {ConstellationFactory} from "src/factories/Constellation.sol";
 import {Globals} from "src/globals/Globals.sol";
 
 import {ERC20BaseMock} from "src/tokens/ERC20/ERC20BaseMock.sol";
+import {ERC20Base} from "src/tokens/ERC20/ERC20Base.sol";
 import {ERC721LazyMint} from "src/tokens/ERC721/ERC721LazyMint.sol";
 
 import {ERC721LazyDropFacet, ERC721LazyDropStorage} from "src/facet/ERC721LazyDropFacet.sol";
@@ -40,6 +42,7 @@ abstract contract Helpers is Test {
         ERC721LazyDropStorage.ClaimCondition memory _B
     ) public {
         assertEq(_A.startTimestamp, _B.startTimestamp);
+        assertEq(_A.endTimestamp, _B.endTimestamp);
         assertEq(_A.supplyClaimed, _B.supplyClaimed);
         assertEq(_A.maxClaimableSupply, _B.maxClaimableSupply);
         assertEq(_A.quantityLimitPerWallet, _B.quantityLimitPerWallet);
@@ -56,7 +59,9 @@ contract Setup is Test, Helpers {
 
     uint16 tenPercentBPS = 1000;
 
-    Factory appFactory;
+    StarFactory starFactory;
+    ConstellationFactory constellationFactory;
+
     Proxy appImplementation;
     Proxy app;
     RegistryMock registry;
@@ -67,6 +72,7 @@ contract Setup is Test, Helpers {
 
     ERC721LazyMint erc721;
     ERC20BaseMock erc20;
+    ERC20Base erc20Implementation;
 
     function setUp() public {
         // assign addresses
@@ -81,7 +87,10 @@ contract Setup is Test, Helpers {
         globals = new Globals();
         registry = new RegistryMock();
         appImplementation = new  Proxy(true);
-        appFactory = new Factory(address(appImplementation), address(registry), address(globals));
+        starFactory = new StarFactory(address(appImplementation), address(registry), address(globals));
+
+        erc20Implementation = new ERC20Base();
+        constellationFactory = new ConstellationFactory(address(erc20Implementation), address(globals));
 
         {
             settingsFacet = new SettingsFacet();
@@ -120,9 +129,13 @@ contract Setup is Test, Helpers {
         erc20 = new ERC20BaseMock("name", "symbol", 18, 100 ether);
         erc20.transfer(other, 1 ether);
 
+        // create constellation
+        vm.prank(appOwner);
+        address constellation = constellationFactory.create("Constellation", "CSN", 18, 1000);
+
         // create app
         vm.prank(appOwner);
-        app = Proxy(payable(appFactory.create("App Name")));
+        app = Proxy(payable(starFactory.create("ERC721LazyMintTest", constellation, appOwner)));
 
         // Add NATIVE_TOKEN and ERC20 to accepted currencies
         {
@@ -154,6 +167,7 @@ contract ERC721LazyDropFacet_ERC721LazyDrop_ERC721LazyDrop_getClaimCondition is 
     function _afterSetUp() internal override {
         testClaimCondition = ERC721LazyDropStorage.ClaimCondition({
             startTimestamp: 100,
+            endTimestamp: 200,
             maxClaimableSupply: 100,
             supplyClaimed: 0,
             quantityLimitPerWallet: 10,
@@ -176,6 +190,7 @@ contract ERC721LazyDropFacet_ERC721LazyDrop_ERC721LazyDrop_getClaimCondition is 
             ERC721LazyDropFacet(address(app)).ERC721LazyDrop_getClaimCondition(address(0)),
             ERC721LazyDropStorage.ClaimCondition({
                 startTimestamp: 0,
+                endTimestamp: 0,
                 maxClaimableSupply: 0,
                 supplyClaimed: 0,
                 quantityLimitPerWallet: 0,
@@ -192,6 +207,7 @@ contract ERC721LazyDropFacet_ERC721LazyDrop_verifyClaim is Setup {
     function _afterSetUp() internal override {
         testClaimCondition = ERC721LazyDropStorage.ClaimCondition({
             startTimestamp: 0,
+            endTimestamp: 100,
             maxClaimableSupply: 100,
             supplyClaimed: 0,
             quantityLimitPerWallet: 10,
@@ -255,6 +271,17 @@ contract ERC721LazyDropFacet_ERC721LazyDrop_verifyClaim is Setup {
             address(erc721), other, 10, address(erc20), 1 ether
         );
     }
+
+    function test_reverts_after_end_timestamp() public {
+        testClaimCondition.endTimestamp = block.timestamp - 1;
+        vm.prank(nftOwner);
+        ERC721LazyDropFacet(address(app)).ERC721LazyDrop_setClaimCondition(address(erc721), testClaimCondition, false);
+
+        vm.expectRevert(IERC721LazyDrop.ERC721LazyDrop_claimPeriodEnded.selector);
+        ERC721LazyDropFacet(address(app)).ERC721LazyDrop_verifyClaim(
+            address(erc721), other, 10, address(erc20), 1 ether
+        );
+    }
 }
 
 contract ERC721LazyDropFacet_ERC721LazyDrop_removeClaimCondition is Setup {
@@ -263,6 +290,7 @@ contract ERC721LazyDropFacet_ERC721LazyDrop_removeClaimCondition is Setup {
     function _afterSetUp() internal override {
         testClaimCondition = ERC721LazyDropStorage.ClaimCondition({
             startTimestamp: 0,
+            endTimestamp: 100,
             maxClaimableSupply: 100,
             supplyClaimed: 0,
             quantityLimitPerWallet: 10,
@@ -282,6 +310,7 @@ contract ERC721LazyDropFacet_ERC721LazyDrop_removeClaimCondition is Setup {
             ERC721LazyDropFacet(address(app)).ERC721LazyDrop_getClaimCondition(address(erc721)),
             ERC721LazyDropStorage.ClaimCondition({
                 startTimestamp: 0,
+                endTimestamp: 0,
                 maxClaimableSupply: 0,
                 supplyClaimed: 0,
                 quantityLimitPerWallet: 0,
@@ -308,6 +337,7 @@ contract ERC721LazyDropFacet_ERC721LazyDrop_setClaimCondition is Setup {
     function _afterSetUp() internal override {
         testClaimCondition = ERC721LazyDropStorage.ClaimCondition({
             startTimestamp: 0,
+            endTimestamp: 100,
             maxClaimableSupply: 10,
             supplyClaimed: 0,
             quantityLimitPerWallet: 1,
@@ -351,9 +381,10 @@ contract ERC721LazyDropFacet_ERC721LazyDrop_setClaimCondition is Setup {
         vm.prank(nftOwner);
         ERC721LazyDropFacet(address(app)).ERC721LazyDrop_setClaimCondition(address(erc721), testClaimCondition, false);
 
-        // create a new claim condition with updated startTimestamp and pricePerToken
+        // create a new claim condition with updated startTimestamp, endTimestamp and pricePerToken
         ERC721LazyDropStorage.ClaimCondition memory newClaimCondition = testClaimCondition;
         newClaimCondition.startTimestamp = 1000;
+        newClaimCondition.endTimestamp = 2000;
         newClaimCondition.pricePerToken = 1 ether;
 
         // update
@@ -382,6 +413,7 @@ contract ERC721LazyDropFacet_ERC721LazyDrop_claim is Setup {
     function _afterSetUp() internal override {
         testClaimCondition = ERC721LazyDropStorage.ClaimCondition({
             startTimestamp: 0,
+            endTimestamp: 100,
             maxClaimableSupply: 10,
             supplyClaimed: 0,
             quantityLimitPerWallet: 2,

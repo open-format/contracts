@@ -126,6 +126,7 @@ abstract contract ERC721LazyDrop is IERC721LazyDrop, ERC721LazyDropInternal, Ree
             _tokenContract,
             ERC721LazyDropStorage.ClaimCondition({
                 startTimestamp: _condition.startTimestamp,
+                endTimestamp: _condition.endTimestamp,
                 maxClaimableSupply: _condition.maxClaimableSupply,
                 supplyClaimed: supplyClaimedAlready,
                 quantityLimitPerWallet: _condition.quantityLimitPerWallet,

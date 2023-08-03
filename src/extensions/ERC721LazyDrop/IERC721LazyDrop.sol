@@ -10,6 +10,7 @@ interface IERC721LazyDrop {
     error ERC721LazyDrop_quantityZeroOrExceededWalletLimit();
     error ERC721LazyDrop_exceededMaxSupply();
     error ERC721LazyDrop_cantClaimYet();
+    error ERC721LazyDrop_claimPeriodEnded();
 
     event ClaimConditionUpdated(
         address tokenContract, ERC721LazyDropStorage.ClaimCondition condition, bool resetEligibility
