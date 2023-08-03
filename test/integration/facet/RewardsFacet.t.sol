@@ -10,17 +10,20 @@ import {
     IDiamondWritableInternal
 } from "@solidstate/contracts/proxy/diamond/writable/IDiamondWritable.sol";
 
+import {IERC20} from "@solidstate/contracts/interfaces/IERC20.sol";
+
 import {Proxy} from "src/proxy/Proxy.sol";
 import {Upgradable} from "src/proxy/upgradable/Upgradable.sol";
 import {RegistryMock} from "src/registry/RegistryMock.sol";
 import {StarFactory} from "src/factories/Star.sol";
-import {ConstellationFactory} from "src/factories/Constellation.sol";
 import {Globals} from "src/globals/Globals.sol";
 
 import {ERC20Base, ADMIN_ROLE, MINTER_ROLE} from "src/tokens/ERC20/ERC20Base.sol";
 import {IERC20Factory} from "@extensions/ERC20Factory/IERC20Factory.sol";
 import {ERC20FactoryFacet} from "src/facet/ERC20FactoryFacet.sol";
+import {RewardsFacet} from "src/facet/RewardsFacet.sol";
 import {SettingsFacet, IApplicationAccess} from "src/facet/SettingsFacet.sol";
+import {ConstellationFactory} from "src/factories/Constellation.sol";
 
 import {Deploy} from "scripts/core/Globals.s.sol";
 
@@ -60,6 +63,7 @@ contract Setup is Test, Helpers {
     Globals globals;
 
     SettingsFacet settingsFacet;
+    RewardsFacet rewardsFacet;
 
     ERC20Base erc20Implementation;
     bytes32 erc20ImplementationId;
@@ -76,7 +80,7 @@ contract Setup is Test, Helpers {
         // deploy contracts
         globals = new Globals();
         registry = new RegistryMock();
-        appImplementation = new  Proxy(true);
+        appImplementation = new Proxy(true);
         starFactory = new StarFactory(address(appImplementation), address(registry), address(globals));
 
         erc20Implementation = new ERC20Base();
@@ -85,13 +89,12 @@ contract Setup is Test, Helpers {
 
         constellationFactory = new ConstellationFactory(address(erc20Implementation), address(globals));
 
-        // create constellation
         vm.prank(creator);
         address constellation = constellationFactory.create("Constellation", "CSN", 18, 1000);
 
         // create app
         vm.prank(creator);
-        app = Proxy(payable(starFactory.create("platformFeeTest", constellation, creator)));
+        app = Proxy(payable(starFactory.create("RewardFacetTest", address(constellation), creator)));
 
         // setup globals
         globals.setPlatformFee(0, 0, socialConscious);
@@ -105,6 +108,23 @@ contract Setup is Test, Helpers {
 
             registry.diamondCut(
                 prepareSingleFacetCut(address(settingsFacet), IDiamondWritableInternal.FacetCutAction.ADD, selectors),
+                address(0),
+                ""
+            );
+        }
+
+        rewardsFacet = new RewardsFacet();
+        {
+            // add RewardsFacet to registry
+            bytes4[] memory selectors = new bytes4[](5);
+            selectors[0] = rewardsFacet.mintERC20.selector;
+            selectors[1] = rewardsFacet.transferERC20.selector;
+            selectors[2] = rewardsFacet.mintERC721.selector;
+            selectors[3] = rewardsFacet.transferERC721.selector;
+            selectors[4] = rewardsFacet.multicall.selector;
+
+            registry.diamondCut(
+                prepareSingleFacetCut(address(rewardsFacet), IDiamondWritableInternal.FacetCutAction.ADD, selectors),
                 address(0),
                 ""
             );
@@ -166,33 +186,12 @@ contract ERC20Base_Setup is Setup {
     }
 }
 
-contract ERC20Base__integration_mintTo is ERC20Base_Setup {
-    function test_mints_nft() public {
+contract RewardsFacet__integration_mintERC20 is ERC20Base_Setup {
+    function test_mints_erc20() public {
         vm.prank(creator);
         base.mintTo(creator, 1000);
 
         // check nft is minted to creator
-        assertEq(base.balanceOf(creator), 1000);
-    }
-
-    function test_pays_platform_fee() public {
-        // set platform base fee to 0.001 ether
-        uint256 basePlatformFee = 0.001 ether;
-        globals.setPlatformFee(basePlatformFee, 0, socialConscious);
-
-        vm.prank(creator);
-        base.mintTo{value: basePlatformFee}(creator, 1000);
-
-        // check platform fee has been received
-        assertEq(socialConscious.balance, basePlatformFee);
-    }
-
-    function test_does_not_pay_platform_fee_when_called_from_contract() public {
-        // set platform base fee to 0.001 ether
-        uint256 basePlatformFee = 0.001 ether;
-        globals.setPlatformFee(basePlatformFee, 0, socialConscious);
-
-        minter.mintTo(address(base), creator, 1000);
         assertEq(base.balanceOf(creator), 1000);
     }
 }

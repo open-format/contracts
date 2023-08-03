@@ -20,10 +20,12 @@ import {IERC20, SafeERC20} from "@solidstate/contracts/utils/SafeERC20.sol";
 import {Proxy} from "src/proxy/Proxy.sol";
 import {Upgradable} from "src/proxy/upgradable/Upgradable.sol";
 import {RegistryMock} from "src/registry/RegistryMock.sol";
-import {Factory} from "src/factory/Factory.sol";
+import {StarFactory} from "src/factories/Star.sol";
+import {ConstellationFactory} from "src/factories/Constellation.sol";
 import {Globals} from "src/globals/Globals.sol";
 import {SettingsFacet} from "src/facet/SettingsFacet.sol";
 import {ERC20BaseMock} from "src/tokens/ERC20/ERC20BaseMock.sol";
+import {ERC20Base} from "src/tokens/ERC20/ERC20Base.sol";
 import {CurrencyTransferLib} from "src/lib/CurrencyTransferLib.sol";
 
 import {PlatformFee, IPlatformFee, PlatformFeeInternal} from "src/extensions/platformFee/PlatformFee.sol";
@@ -94,12 +96,14 @@ contract Setup is Test, Helpers {
     address other;
     address socialConscious;
 
-    Factory appFactory;
+    StarFactory starFactory;
+    ConstellationFactory constellationFactory;
     Proxy template;
     Proxy app;
     RegistryMock registry;
     Globals globals;
     ERC20BaseMock erc20;
+    ERC20Base erc20Implementation;
 
     SettingsFacet settingsFacet;
     DummyDonateFacet facet;
@@ -114,8 +118,11 @@ contract Setup is Test, Helpers {
         globals = new Globals();
         registry = new RegistryMock();
         template = new  Proxy(true);
-        appFactory = new Factory(address(template), address(registry), address(globals));
+        starFactory = new StarFactory(address(template), address(registry), address(globals));
         erc20 = new ERC20BaseMock("Dummy", "D", 18, 1000);
+
+        erc20Implementation = new ERC20Base();
+        constellationFactory = new ConstellationFactory(address(erc20Implementation), address(globals));
 
         // Add Facets
         {
@@ -143,9 +150,13 @@ contract Setup is Test, Helpers {
         // setup platform fee to be base 0.01 ether and receiver to be social Conscious
         globals.setPlatformFee(0.1 ether, 0, socialConscious);
 
+        // create constellation
+        vm.prank(appOwner);
+        address constellation = constellationFactory.create("Constellation", "CSN", 18, 1000);
+
         // create app
         vm.prank(appOwner);
-        app = Proxy(payable(appFactory.create("SCLTest")));
+        app = Proxy(payable(starFactory.create("ERC721LazyMintTest", constellation, appOwner)));
 
         // set application fee
         vm.prank(appOwner);
