@@ -32,7 +32,7 @@ contract Deploy is Script, Utils {
         // construct and ADD facet cut
         IDiamondWritableInternal.FacetCut[] memory cuts = new IDiamondWritableInternal.FacetCut[](1);
         cuts[0] = IDiamondWritableInternal.FacetCut(
-            address(rewardsFacet), IDiamondWritableInternal.FacetCutAction.REPLACE, selectors
+            address(rewardsFacet), IDiamondWritableInternal.FacetCutAction.ADD, selectors
         );
 
         // add to registry
