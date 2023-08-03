@@ -13,7 +13,9 @@ import {
 import {Proxy} from "../../src/proxy/Proxy.sol";
 import {Upgradable} from "../../src/proxy/upgradable/Upgradable.sol";
 import {RegistryMock} from "../../src/registry/RegistryMock.sol";
-import {Factory} from "../../src/factory/Factory.sol";
+import {StarFactory} from "../../src/factories/Star.sol";
+import {ConstellationFactory} from "src/factories/Constellation.sol";
+import {ERC20Base} from "src/tokens/ERC20/ERC20Base.sol";
 
 contract MessageFacet {
     string public message = "";
@@ -40,7 +42,9 @@ abstract contract Helpers {
 }
 
 contract Factory__intergration is Test, Helpers {
-    Factory appFactory;
+    StarFactory starFactory;
+    ConstellationFactory constellationFactory;
+    ERC20Base erc20Implementation;
     Proxy template;
     RegistryMock registry;
     MessageFacet message;
@@ -52,7 +56,9 @@ contract Factory__intergration is Test, Helpers {
         address globals = address(0); // TODO: add globals contract
         registry = new RegistryMock();
         template = new  Proxy(true);
-        appFactory = new Factory(address(template), address(registry), globals);
+        starFactory = new StarFactory(address(template), address(registry), globals);
+        erc20Implementation = new ERC20Base();
+        constellationFactory = new ConstellationFactory(address(erc20Implementation), address(globals));
         message = new MessageFacet();
 
         // add hello facet to registry
@@ -67,16 +73,18 @@ contract Factory__intergration is Test, Helpers {
     }
 
     function test_factory_registry_is_correct() public {
-        assertEq(appFactory.registry(), address(registry));
+        assertEq(starFactory.registry(), address(registry));
     }
 
     function test_factory_template_is_correct() public {
-        assertEq(appFactory.template(), address(template));
+        assertEq(starFactory.template(), address(template));
     }
 
     function test_proxys_sketch() public {
-        address cloneAddress1 = appFactory.create(bytes32("saltyA"));
-        address cloneAddress2 = appFactory.create(bytes32("saltyB"));
+        address constellation = constellationFactory.create("Constellation", "CSN", 18, 1000);
+
+        address cloneAddress1 = starFactory.create(bytes32("saltyA"), address(constellation), address(0));
+        address cloneAddress2 = starFactory.create(bytes32("saltyB"), address(constellation), address(0));
 
         // create instances
         Proxy clone1 = Proxy(payable(cloneAddress1));
