@@ -1,5 +1,11 @@
 # @openformat/contracts
 
+## 1.1.0
+
+### Minor Changes
+
+- [#103](https://github.com/open-format/contracts/pull/103) [`2686467`](https://github.com/open-format/contracts/commit/268646731a4f975a6a6d625d69d49a01bc5eb056) Thanks [@tinypell3ts](https://github.com/tinypell3ts)! - add Ownable to ERC721 tokens
+
 ## 1.0.0
 
 ### Major Changes
