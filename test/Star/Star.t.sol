@@ -31,6 +31,7 @@ contract Setup is Test {
     ERC20Base erc20Implementation;
     DummyImplementation implementation;
     address constellation;
+    address constellationB;
 
     function setUp() public {
         creator = address(0x10);
@@ -40,8 +41,11 @@ contract Setup is Test {
         erc20Implementation = new ERC20Base();
         constellationFactory = new ConstellationFactory(address(erc20Implementation), address(globals));
 
-        // create constellation
+        // create constellations
         constellation = constellationFactory.create("Constellation", "CSN", 18, 1000);
+
+        vm.prank(creator);
+        constellationB = constellationFactory.create("ConstellationB", "CSN", 18, 1000);
 
         implementation = new DummyImplementation();
         factory = new StarFactory(address(implementation), address(0), address(0));
@@ -57,10 +61,8 @@ contract Factory__create is Setup, IStar {
     function test_can_create_with_the_same_name_from_different_accounts() public {
         factory.create("app_name", constellation, address(0));
 
-        vm.startPrank(creator);
-        constellation = constellationFactory.create("Constellation", "CSN", 18, 1000);
-        factory.create("app_name", constellation, address(0));
-        vm.stopPrank();
+        vm.prank(creator);
+        factory.create("app_name", constellationB, creator);
     }
 
     function test_emits_created_event() public {
@@ -71,11 +73,10 @@ contract Factory__create is Setup, IStar {
         string memory zeroPaddedAppName = string(abi.encodePacked(bytes32("app_name")));
 
         vm.expectEmit(true, true, true, true);
-        emit Created(id, address(0), creator, zeroPaddedAppName);
+        emit Created(id, constellationB, creator, zeroPaddedAppName);
 
         vm.startPrank(creator);
-        constellation = constellationFactory.create("Constellation", "CSN", 18, 1000);
-        factory.create("app_name", constellation, address(0));
+        factory.create("app_name", constellationB, creator);
         vm.stopPrank();
     }
 
@@ -90,9 +91,7 @@ contract Factory__create is Setup, IStar {
 contract Factory__apps is Setup {
     function test_can_get_address_via_hash_of_address_and_name() public {
         vm.prank(creator);
-        constellation = constellationFactory.create("Constellation", "CSN", 18, 1000);
-        address minimalProxy = factory.create("app_name", constellation, address(0));
-        vm.stopPrank();
+        address minimalProxy = factory.create("app_name", constellationB, creator);
 
         bytes32 id = keccak256(abi.encode(creator, bytes32("app_name")));
         assertEq(factory.stars(id), minimalProxy);
@@ -105,20 +104,20 @@ contract Factory__apps is Setup {
 
 contract Factory__calculateDeploymentAddress is Setup {
     function test_can_get_address_of_deployment() public {
-        vm.prank(creator);
+        vm.startPrank(creator);
         address expectedAddress = factory.calculateDeploymentAddress(creator, "app_name");
+        address minimalProxy = factory.create("app_name", constellationB, creator);
+        vm.stopPrank();
 
-        vm.prank(creator);
-        address minimalProxy = factory.create("app_name", constellation, address(0));
         assertEq(expectedAddress, minimalProxy);
     }
 
     function test_reverts_when_name_is_already_used() public {
-        vm.prank(creator);
-        address minimalProxy = factory.create("app_name", constellation, address(0));
+        vm.startPrank(creator);
+        address minimalProxy = factory.create("app_name", constellationB, creator);
 
         vm.expectRevert(IStar.Factory_nameAlreadyUsed.selector);
-        vm.prank(creator);
         factory.calculateDeploymentAddress(creator, "app_name");
+        vm.stopPrank();
     }
 }
