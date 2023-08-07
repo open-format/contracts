@@ -203,6 +203,13 @@ contract ERC721Base__setContractURI is Setup {
     }
 }
 
+contract ERC721Base__owner is Setup {
+    function test_owner() public {
+        vm.prank(creator);
+        assertEq(creator, erc721Base.owner());
+    }
+}
+
 contract ERC721Base__transferFrom is Setup {
     function setUpAfter() public override {
         vm.prank(creator);
