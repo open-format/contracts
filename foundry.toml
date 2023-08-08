@@ -19,5 +19,3 @@ polygon = "${POLYGON_RPC_URL}"
 aurora = "https://mainnet.aurora.dev"
 aurora-testnet = "https://testnet.aurora.dev"
 
-[etherscan]
-mumbai = {key = "${POLYGONSCAN_MUMBAI_API_KEY}", url = "https://api-testnet.polygonscan.com/api/"}

@@ -31,7 +31,7 @@ contract ConstellationFactory is IConstellation, MinimalProxyFactory, Ownable {
     /**
      * @dev _salt param can be thought as the constellation id
      */
-    function create(string memory _name, string memory _symbol, uint8 _decimals, uint256 _supply)
+    function create(bytes32 _name, string memory _symbol, uint8 _decimals, uint256 _supply)
         external
         returns (address id)
     {
@@ -46,12 +46,14 @@ contract ConstellationFactory is IConstellation, MinimalProxyFactory, Ownable {
         id = _deployMinimalProxy(template, salt);
         constellations[salt] = id;
 
-        ERC20Base(payable(id)).initialize(msg.sender, _name, _symbol, _decimals, _supply, "");
+        ERC20Base(payable(id)).initialize(
+            msg.sender, string(abi.encodePacked(bytes32(_name))), _symbol, _decimals, _supply, ""
+        );
 
-        emit Created(id, msg.sender, string(abi.encodePacked(_name)));
+        emit Created(id, msg.sender, string(abi.encodePacked(bytes32(_name))));
     }
 
-    function updateToken(string memory _name, address _oldTokenAddress, address _newTokenAddress) external {
+    function updateToken(bytes32 _name, address _oldTokenAddress, address _newTokenAddress) external {
         bytes32 salt = keccak256(abi.encode(msg.sender, _name));
         address oldTokenAddress = constellations[salt];
 

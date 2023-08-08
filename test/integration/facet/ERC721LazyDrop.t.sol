@@ -61,7 +61,6 @@ contract Setup is Test, Helpers {
 
     StarFactory starFactory;
     ConstellationFactory constellationFactory;
-
     Proxy appImplementation;
     Proxy app;
     RegistryMock registry;
@@ -136,7 +135,6 @@ contract Setup is Test, Helpers {
         // create app
         vm.prank(appOwner);
         app = Proxy(payable(starFactory.create("ERC721LazyMintTest", constellation, appOwner)));
-
         // Add NATIVE_TOKEN and ERC20 to accepted currencies
         {
             address[] memory currencies = new address[](2);
