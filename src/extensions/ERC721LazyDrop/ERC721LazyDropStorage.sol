@@ -4,6 +4,7 @@ pragma solidity ^0.8.16;
 library ERC721LazyDropStorage {
     struct ClaimCondition {
         uint256 startTimestamp;
+        uint256 endTimestamp;
         uint256 supplyClaimed;
         uint256 maxClaimableSupply;
         uint256 quantityLimitPerWallet;
