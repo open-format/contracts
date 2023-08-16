@@ -1,5 +1,16 @@
 # @openformat/contracts
 
+## 1.2.0
+
+### Minor Changes
+
+- [#104](https://github.com/open-format/contracts/pull/104) [`a574791`](https://github.com/open-format/contracts/commit/a574791d034ac35b17386c3cd3c79bc336f71be9) Thanks [@tinypell3ts](https://github.com/tinypell3ts)! - - Adds ConstellationFactory and StarFactory
+  - Refactor RewardsFacet to handle more use cases
+
+### Patch Changes
+
+- [#105](https://github.com/open-format/contracts/pull/105) [`c902bb3`](https://github.com/open-format/contracts/commit/c902bb36ba79eea42b7e09696637ed6751c47fa9) Thanks [@tinypell3ts](https://github.com/tinypell3ts)! - Adds endTimestamp to the ERC721LazyDrop claimConditions
+
 ## 1.1.0
 
 ### Minor Changes
