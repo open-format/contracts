@@ -63,7 +63,7 @@
     "address": "0x265A242Bcf4CFd9021A666B427e2d4dce2F5eF54"
   },
   "RewardFacet": {
-    "address": "0x79a414D9778F5b2353943a9E6b6e3B3026ec932B",
-    "startBlock": 38765629
+    "startBlock": 40828433,
+    "address": "0xaCC7A3782DFb20c0e08b58D3420662B9805D76AE"
   }
 }
