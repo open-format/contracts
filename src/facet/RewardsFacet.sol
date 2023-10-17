@@ -9,6 +9,7 @@ import {Multicall} from "@solidstate/contracts/utils/Multicall.sol";
 
 interface NFT {
     function mintTo(address to, string memory tokenURI) external;
+    function batchMintTo(address to, uint256 quantity, string memory baseURI) external;
     function transferFrom(address from, address to, uint256 tokenId) external;
     function ownerOf(uint256 tokenId) external returns (address);
 }
@@ -27,7 +28,7 @@ bytes32 constant MINTER_ROLE = bytes32(uint256(1));
 contract RewardsFacet is Multicall, SafeOwnable {
     event TokenMinted(address token, address to, uint256 amount, bytes32 id, string uri);
     event TokenTransferred(address token, address to, uint256 amount, bytes32 id, string uri);
-    event BadgeMinted(address token, address to, bytes32 id, string uri);
+    event BadgeMinted(address token, uint256 quantity, address to, bytes32 id, string uri);
     event BadgeTransferred(address token, address to, uint256 tokenId, bytes32 id, string uri);
 
     error RewardsFacet_NotAuthorized();
@@ -54,15 +55,20 @@ contract RewardsFacet is Multicall, SafeOwnable {
         emit TokenTransferred(_token, _to, _amount, _id, _uri);
     }
 
-    function mintERC721(address _token, address _to, string calldata _tokenURI, bytes32 _id, string calldata _uri)
-        public
-    {
+    function mintERC721(
+        address _token,
+        address _to,
+        uint256 _quantity,
+        string calldata _baseURI,
+        bytes32 _id,
+        string calldata _uri
+    ) public {
         if (!_canMint(_token)) {
             revert RewardsFacet_NotAuthorized();
         }
 
-        NFT(_token).mintTo(_to, _tokenURI);
-        emit BadgeMinted(_token, _to, _id, _uri);
+        NFT(_token).batchMintTo(_to, _quantity, _baseURI);
+        emit BadgeMinted(_token, _quantity, _to, _id, _uri);
     }
 
     function transferERC721(
