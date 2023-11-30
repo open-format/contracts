@@ -145,13 +145,13 @@ contract ERC721Base__batchMintTo is Setup {
         assertEq(other, erc721Base.ownerOf(2));
     }
 
-    function test_appends_token_id_to_baseURI() public {
+    function test_returns_baseURI() public {
         vm.prank(creator);
         erc721Base.batchMintTo(other, 3, baseURI);
 
-        assertEq(erc721Base.tokenURI(0), string.concat(baseURI, "0"));
-        assertEq(erc721Base.tokenURI(1), string.concat(baseURI, "1"));
-        assertEq(erc721Base.tokenURI(2), string.concat(baseURI, "2"));
+        assertEq(erc721Base.tokenURI(0), baseURI);
+        assertEq(erc721Base.tokenURI(1), baseURI);
+        assertEq(erc721Base.tokenURI(2), baseURI);
     }
 
     function test_can_be_mixed_with_mintTo() public {
@@ -162,8 +162,8 @@ contract ERC721Base__batchMintTo is Setup {
         erc721Base.batchMintTo(other, 2, baseURI);
 
         assertEq(erc721Base.tokenURI(0), tokenURI);
-        assertEq(erc721Base.tokenURI(1), string.concat(baseURI, "1"));
-        assertEq(erc721Base.tokenURI(2), string.concat(baseURI, "2"));
+        assertEq(erc721Base.tokenURI(1), baseURI);
+        assertEq(erc721Base.tokenURI(2), baseURI);
     }
 
     function test_reverts_if_not_authorised() public {
