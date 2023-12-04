@@ -1,5 +1,11 @@
 # @openformat/contracts
 
+## 1.2.1
+
+### Patch Changes
+
+- [#114](https://github.com/open-format/contracts/pull/114) [`ec929a8`](https://github.com/open-format/contracts/commit/ec929a86302768a29e9d091598d06baceee7d5b4) Thanks [@tinypell3ts](https://github.com/tinypell3ts)! - Fix: Only return batchUri when calling tokenURI function on ERC721Base
+
 ## 1.2.0
 
 ### Minor Changes
