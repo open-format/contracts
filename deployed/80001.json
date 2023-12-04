@@ -39,8 +39,8 @@
     "address": "0x60a0AAbDeb54c37b3dB67251Ad8b3A8Fbb53cAAf"
   },
   "ERC721Base": {
-    "startBlock": 38765609,
-    "address": "0x0547FD7Ca54f49501c1aa2c4058B0AFA48eaE7Af"
+    "address": "0x91C69c996AE0Dc285f4e1BCf8b282703C24CD5cb",
+    "startBlock": 43171250
   },
   "StarFactory": {
     "address": "0x429cB2c2A030952D3F5e10B534584aB49c303763",
