@@ -116,7 +116,7 @@ contract ERC721Base is
 
         // tokenURI was stored using batchMintTo
         string memory batchUri = _getBaseURI(_tokenId);
-        return string.concat(batchUri, UintUtils.toString(_tokenId));
+        return batchUri;
     }
 
     /*//////////////////////////////////////////////////////////////
