@@ -1,7 +1,6 @@
 -include .env
 
-rpc ?= 'https://testnet.hashio.io/api'
-#rpc ?= 'http://127.0.0.1:7546'
+rpc ?= 'http://127.0.0.1:7546'
 verbose ?= -vvvv
 args ?= ""
 legacy ?= --legacy
@@ -18,7 +17,12 @@ remappings :; forge remappings > remappings.txt
 
 # deploy
 # to run: `make deploy rpc="<chain>"` e.g `make deploy rpc="anvil"`
-#	deploy-ERC721LazyMint \
+#
+# WARNING:
+#	Remove deploy-ERC721LazyMint  when deploying to Hedera version < v0.46.0
+#	Check versions in https://status.hedera.com/
+#
+# TODO: Remove warning when all Hedera versions >= 0.46.0
 # TODO: compile all contracts at start then run scripts
 deploy:; make \
 	deploy-Globals \
@@ -28,6 +32,7 @@ deploy:; make \
 	deploy-ERC20Base \
 	deploy-ConstellationFactory \
 	deploy-ERC721Base \
+	deploy-ERC721LazyMint \
 	deploy-RewardsFacet \
 	deploy-SettingsFacet \
 	deploy-ERC721FactoryFacet \
@@ -35,26 +40,26 @@ deploy:; make \
 	deploy-ERC721LazyDropFacet \
 
 # core
-deploy-Globals:; forge script scripts/core/Globals.s.sol:Deploy --rpc-url $(rpc) --broadcast $(verbose) $(legacy) $(slow) --gas-price 1330000000000 --with-gas-price 1330000000000 
-deploy-Registry:; forge script scripts/core/Registry.s.sol:Deploy --rpc-url $(rpc) --broadcast $(verbose) $(legacy) $(slow) --gas-price 1330000000000 --with-gas-price 1330000000000 
-deploy-Proxy:; forge script scripts/core/Proxy.s.sol:Deploy --rpc-url $(rpc) --broadcast $(verbose) $(legacy) $(slow) --gas-price 1330000000000 --with-gas-price 1330000000000 
-deploy-StarFactory:; forge script scripts/core/StarFactory.s.sol:Deploy --rpc-url $(rpc) --broadcast $(verbose) $(legacy) $(slow) --gas-price 1330000000000 --with-gas-price 1330000000000 
-deploy-ConstellationFactory:; forge script scripts/core/ConstellationFactory.s.sol:Deploy --rpc-url $(rpc) --broadcast $(verbose) $(legacy) $(slow) --gas-price 1330000000000 --with-gas-price 1330000000000 
+deploy-Globals:; forge script scripts/core/Globals.s.sol:Deploy --rpc-url $(rpc) --broadcast $(verbose) $(legacy) $(slow) 
+deploy-Registry:; forge script scripts/core/Registry.s.sol:Deploy --rpc-url $(rpc) --broadcast $(verbose) $(legacy) $(slow) 
+deploy-Proxy:; forge script scripts/core/Proxy.s.sol:Deploy --rpc-url $(rpc) --broadcast $(verbose) $(legacy) $(slow) 
+deploy-StarFactory:; forge script scripts/core/StarFactory.s.sol:Deploy --rpc-url $(rpc) --broadcast $(verbose) $(legacy) $(slow) 
+deploy-ConstellationFactory:; forge script scripts/core/ConstellationFactory.s.sol:Deploy --rpc-url $(rpc) --broadcast $(verbose) $(legacy) $(slow) 
 
 
 # token implementations
-deploy-ERC721Base:; forge script scripts/tokens/ERC721Base.s.sol:Deploy --rpc-url $(rpc) --broadcast $(verbose) $(legacy) $(slow) --gas-price 1330000000000 --with-gas-price 1330000000000 
-deploy-ERC721LazyMint:; forge script scripts/tokens/ERC721LazyMint.s.sol:Deploy --rpc-url $(rpc) --broadcast $(verbose) $(legacy) $(slow) --gas-price 1330000000000 --with-gas-price 1330000000000 
-deploy-ERC20Base:; forge script scripts/tokens/ERC20Base.s.sol:Deploy --rpc-url $(rpc) --broadcast $(verbose) $(legacy) $(slow) --gas-price 1330000000000 --with-gas-price 1330000000000 
+deploy-ERC721Base:; forge script scripts/tokens/ERC721Base.s.sol:Deploy --rpc-url $(rpc) --broadcast $(verbose) $(legacy) $(slow) 
+deploy-ERC721LazyMint:; forge script scripts/tokens/ERC721LazyMint.s.sol:Deploy --rpc-url $(rpc) --broadcast $(verbose) $(legacy) $(slow) 
+deploy-ERC20Base:; forge script scripts/tokens/ERC20Base.s.sol:Deploy --rpc-url $(rpc) --broadcast $(verbose) $(legacy) $(slow) 
 # facets
-deploy-RewardsFacet:; forge script scripts/facet/RewardsFacet.s.sol:Deploy --rpc-url $(rpc) --broadcast $(verbose) $(legacy) $(slow) --gas-price 1330000000000 --with-gas-price 1330000000000 
-deploy-SettingsFacet:; forge script scripts/facet/SettingsFacet.s.sol:Deploy --rpc-url $(rpc) --broadcast $(verbose) $(legacy) $(slow) --gas-price 1330000000000 --with-gas-price 1330000000000 
-deploy-ERC721FactoryFacet:; forge script scripts/facet/ERC721FactoryFacet.s.sol:Deploy --rpc-url $(rpc) --broadcast $(verbose) $(legacy) $(slow) --gas-price 1330000000000 --with-gas-price 1330000000000 
-deploy-ERC20FactoryFacet:; forge script scripts/facet/ERC20FactoryFacet.s.sol:Deploy --rpc-url $(rpc) --broadcast $(verbose) $(legacy) $(slow) --gas-price 1330000000000 --with-gas-price 1330000000000 
-deploy-ERC721LazyDropFacet:; forge script scripts/facet/ERC721LazyDropFacet.s.sol:Deploy --rpc-url $(rpc) --broadcast $(verbose) $(legacy) $(slow) --gas-price 1330000000000 --with-gas-price 1330000000000 
+deploy-RewardsFacet:; forge script scripts/facet/RewardsFacet.s.sol:Deploy --rpc-url $(rpc) --broadcast $(verbose) $(legacy) $(slow) 
+deploy-SettingsFacet:; forge script scripts/facet/SettingsFacet.s.sol:Deploy --rpc-url $(rpc) --broadcast $(verbose) $(legacy) $(slow) 
+deploy-ERC721FactoryFacet:; forge script scripts/facet/ERC721FactoryFacet.s.sol:Deploy --rpc-url $(rpc) --broadcast $(verbose) $(legacy) $(slow) 
+deploy-ERC20FactoryFacet:; forge script scripts/facet/ERC20FactoryFacet.s.sol:Deploy --rpc-url $(rpc) --broadcast $(verbose) $(legacy) $(slow) 
+deploy-ERC721LazyDropFacet:; forge script scripts/facet/ERC721LazyDropFacet.s.sol:Deploy --rpc-url $(rpc) --broadcast $(verbose) $(legacy) $(slow) 
 
 # patch
-patch-SettingsFacet:; forge script scripts/facet/SettingsFacet.s.sol:Patch --rpc-url $(rpc) --broadcast $(verbose) $(legacy) $(slow)  --gas-price 1330000000000 --with-gas-price 1330000000000 
+patch-SettingsFacet:; forge script scripts/facet/SettingsFacet.s.sol:Patch --rpc-url $(rpc) --broadcast $(verbose) $(legacy) $(slow)  
 
 # helpers
 
@@ -68,10 +73,6 @@ CreateApp:; forge script \
 	$(legacy) \
 	$(slow) \
 	$(verbose) \
-	--gas-price 1330000000000 \
-	--with-gas-price 1330000000000 \
-	--skip-simulation \
-	--gas-limit 9999999999999 \
 	`cast --format-bytes32-string $(args)`
 
 # example: `make CreateConstellation args="constellation name" rpc=anvil`
@@ -84,10 +85,6 @@ CreateConstellation:; forge script \
 	$(legacy) \
 	$(slow) \
 	$(verbose) \
-	--gas-price 1330000000000 \
-	--with-gas-price 1330000000000 \
-	--skip-simulation \
-	--gas-limit 9999999999999 \
 	`cast --format-bytes32-string $(args)`
 
 # example: `make SetPlatformFee args="0.01 0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266" rpc=anvil`
@@ -110,8 +107,8 @@ update:; make \
 	update-SettingsFacet-ExposeGlobals
 
 # update
-update-ERC721FactoryFacet:; forge script scripts/facet/ERC721FactoryFacet.s.sol:Update --rpc-url $(rpc) --broadcast $(verbose) $(legacy) $(slow) --gas-price 1330000000000 --with-gas-price 1330000000000 
-update-ERC20FactoryFacet:; forge script scripts/facet/ERC20FactoryFacet.s.sol:Update --rpc-url $(rpc) --broadcast $(verbose) $(legacy) $(slow) --gas-price 1330000000000 --with-gas-price 1330000000000 
+update-ERC721FactoryFacet:; forge script scripts/facet/ERC721FactoryFacet.s.sol:Update --rpc-url $(rpc) --broadcast $(verbose) $(legacy) $(slow) 
+update-ERC20FactoryFacet:; forge script scripts/facet/ERC20FactoryFacet.s.sol:Update --rpc-url $(rpc) --broadcast $(verbose) $(legacy) $(slow) 
 
 # Add platform fee to tokens
 # Date: 29.03.23
@@ -129,4 +126,4 @@ update-addPlatformFeeToTokens:; make \
 # deploys a new settings facet, replaces exisitng function selectors and adds new ones
 # Date: 30.03.23
 
-update-SettingsFacet-ExposeGlobals:; forge script scripts/facet/SettingsFacet.s.sol:Update_ExposeGlobals --rpc-url $(rpc) --broadcast $(verbose) $(legacy) $(slow) --gas-price 1330000000000 --with-gas-price 1330000000000 
+update-SettingsFacet-ExposeGlobals:; forge script scripts/facet/SettingsFacet.s.sol:Update_ExposeGlobals --rpc-url $(rpc) --broadcast $(verbose) $(legacy) $(slow) 
