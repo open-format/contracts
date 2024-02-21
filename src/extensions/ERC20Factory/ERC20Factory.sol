@@ -19,7 +19,7 @@ interface CompatibleERC20Implementation {
         uint8 _decimals,
         uint256 _supply,
         bytes memory _data
-    ) external;
+    ) external payable;
 }
 
 /**

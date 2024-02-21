@@ -4,3 +4,4 @@ forge-std/=lib/forge-std/src/
 @solidstate/=lib/solidstate-solidity/
 @erc721a-upgradeable/=lib/ERC721A-Upgradeable/
 @extensions/=src/extensions/
+@hashgraph/=lib/hedera-smart-contracts
