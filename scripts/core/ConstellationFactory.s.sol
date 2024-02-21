@@ -13,7 +13,7 @@ contract Deploy is Script, Utils {
         uint256 deployerPrivateKey = vm.envUint("PRIVATE_KEY");
         vm.startBroadcast(deployerPrivateKey);
 
-        address erc20Base = getContractDeploymentAddress("ERC20Base");
+        address erc20Base = getContractDeploymentAddress("ConstellationERC20Base");
         address globals = getContractDeploymentAddress("Globals");
 
         if (globals == address(0)) {

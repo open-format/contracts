@@ -18,11 +18,6 @@ remappings :; forge remappings > remappings.txt
 # deploy
 # to run: `make deploy rpc="<chain>"` e.g `make deploy rpc="anvil"`
 #
-# WARNING:
-#	Remove deploy-ERC721LazyMint  when deploying to Hedera version < v0.46.0
-#	Check versions in https://status.hedera.com/
-#
-# TODO: Remove warning when all Hedera versions >= 0.46.0
 # TODO: compile all contracts at start then run scripts
 deploy:; make \
 	deploy-Globals \
@@ -30,6 +25,7 @@ deploy:; make \
 	deploy-Proxy \
 	deploy-StarFactory \
 	deploy-ERC20Base \
+	deploy-ConstellationERC20Base \
 	deploy-ConstellationFactory \
 	deploy-ERC721Base \
 	deploy-ERC721LazyMint \
@@ -51,6 +47,7 @@ deploy-ConstellationFactory:; forge script scripts/core/ConstellationFactory.s.s
 deploy-ERC721Base:; forge script scripts/tokens/ERC721Base.s.sol:Deploy --rpc-url $(rpc) --broadcast $(verbose) $(legacy) $(slow) 
 deploy-ERC721LazyMint:; forge script scripts/tokens/ERC721LazyMint.s.sol:Deploy --rpc-url $(rpc) --broadcast $(verbose) $(legacy) $(slow) 
 deploy-ERC20Base:; forge script scripts/tokens/ERC20Base.s.sol:Deploy --rpc-url $(rpc) --broadcast $(verbose) $(legacy) $(slow) 
+deploy-ConstellationERC20Base:; forge script scripts/tokens/ConstellationERC20Base.s.sol:Deploy --rpc-url $(rpc) --broadcast $(verbose) $(legacy) $(slow) 
 # facets
 deploy-RewardsFacet:; forge script scripts/facet/RewardsFacet.s.sol:Deploy --rpc-url $(rpc) --broadcast $(verbose) $(legacy) $(slow) 
 deploy-SettingsFacet:; forge script scripts/facet/SettingsFacet.s.sol:Deploy --rpc-url $(rpc) --broadcast $(verbose) $(legacy) $(slow) 

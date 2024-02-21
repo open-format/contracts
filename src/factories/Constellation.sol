@@ -5,7 +5,7 @@ import {Ownable} from "@solidstate/contracts/access/ownable/Ownable.sol";
 import {MinimalProxyFactory} from "@solidstate/contracts/factory/MinimalProxyFactory.sol";
 
 import {IConstellation} from "./IConstellation.sol";
-import {ERC20Base} from "../tokens/ERC20/ERC20Base.sol";
+import {ConstellationERC20Base} from "../tokens/ERC20/ConstellationERC20Base.sol";
 import {IERC20} from "@solidstate/contracts/interfaces/IERC20.sol";
 import {IERC165} from "@solidstate/contracts/interfaces/IERC165.sol";
 
@@ -46,7 +46,7 @@ contract ConstellationFactory is IConstellation, MinimalProxyFactory, Ownable {
         id = _deployMinimalProxy(template, salt);
         constellations[salt] = id;
 
-        ERC20Base(payable(id)).initialize(
+        ConstellationERC20Base(payable(id)).initialize(
             msg.sender, string(abi.encodePacked(bytes32(_name))), _symbol, _decimals, _supply, ""
         );
 

@@ -8,7 +8,7 @@ import {IStar} from "./IStar.sol";
 import {Proxy} from "../proxy/Proxy.sol";
 import {IERC20} from "@solidstate/contracts/interfaces/IERC20.sol";
 import {IERC165} from "@solidstate/contracts/interfaces/IERC165.sol";
-import {ERC20Base} from "../tokens/ERC20/ERC20Base.sol";
+import {ConstellationERC20Base} from "../tokens/ERC20/ConstellationERC20Base.sol";
 
 /**
  * @title "Star Factory"
@@ -47,7 +47,7 @@ contract StarFactory is IStar, MinimalProxyFactory, Ownable {
             revert Factory_invalidConstellation();
         }
 
-        if (!ERC20Base(_constellation).hasRole(bytes32(uint256(0)), msg.sender)) {
+        if (!ConstellationERC20Base(_constellation).hasRole(bytes32(uint256(0)), msg.sender)) {
             revert Factory_notConstellationOwner();
         }
 
