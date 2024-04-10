@@ -4,9 +4,9 @@ pragma solidity ^0.8.16;
 import "forge-std/Script.sol";
 import "forge-std/console.sol";
 import {Utils} from "scripts/utils/Utils.sol";
-import {StarFactory} from "src/factories/Star.sol";
+import {AppFactory} from "src/factories/App.sol";
 
-string constant CONTRACT_NAME = "StarFactory";
+string constant CONTRACT_NAME = "AppFactory";
 
 contract Deploy is Script, Utils {
     function run() external {
@@ -21,7 +21,7 @@ contract Deploy is Script, Utils {
             revert("cannot find deployments, make sure to deploy Proxy, Registry, Globals first");
         }
 
-        StarFactory factory = new StarFactory(proxy, registry, globals);
+        AppFactory factory = new AppFactory(proxy, registry, globals);
 
         vm.stopBroadcast();
 
@@ -40,8 +40,7 @@ contract CreateApp is Script, Utils {
             revert("please provide an app name, make CreateApp args=appName");
         }
 
-        address appAddress =
-            StarFactory(getContractDeploymentAddress(CONTRACT_NAME)).create(appNameBytes32, address(0), address(0));
+        address appAddress = AppFactory(getContractDeploymentAddress(CONTRACT_NAME)).create(appNameBytes32, address(0));
 
         console.log("App:", appName);
         console.log("Deployed:", appAddress);

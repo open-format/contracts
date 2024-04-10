@@ -72,7 +72,7 @@ contract Factory__create is Setup, IApp {
     function test_reverts_if_name_already_used_by_same_account() public {
         factory.create("app_name", address(0));
 
-        vm.expectRevert(IApp.Factory_nameAlreadyUsed.selector);
+        vm.expectRevert(IApp.App_nameAlreadyUsed.selector);
         factory.create("app_name", address(0));
     }
 }
@@ -105,7 +105,7 @@ contract Factory__calculateDeploymentAddress is Setup {
         vm.startPrank(creator);
         factory.create("app_name", creator);
 
-        vm.expectRevert(IApp.Factory_nameAlreadyUsed.selector);
+        vm.expectRevert(IApp.App_nameAlreadyUsed.selector);
         factory.calculateDeploymentAddress(creator, "app_name");
         vm.stopPrank();
     }
