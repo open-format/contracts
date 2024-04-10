@@ -13,8 +13,7 @@ import {
 import {Proxy} from "src/proxy/Proxy.sol";
 import {Upgradable} from "src/proxy/upgradable/Upgradable.sol";
 import {RegistryMock} from "src/registry/RegistryMock.sol";
-import {StarFactory} from "src/factories/Star.sol";
-import {ConstellationFactory} from "src/factories/Constellation.sol";
+import {AppFactory} from "src/factories/App.sol";
 import {Globals} from "src/globals/Globals.sol";
 
 import {ERC20BaseMock} from "src/tokens/ERC20/ERC20BaseMock.sol";
@@ -59,8 +58,7 @@ contract Setup is Test, Helpers {
 
     uint16 tenPercentBPS = 1000;
 
-    StarFactory starFactory;
-    ConstellationFactory constellationFactory;
+    AppFactory appFactory;
     Proxy appImplementation;
     Proxy app;
     RegistryMock registry;
@@ -86,10 +84,9 @@ contract Setup is Test, Helpers {
         globals = new Globals();
         registry = new RegistryMock();
         appImplementation = new  Proxy(true);
-        starFactory = new StarFactory(address(appImplementation), address(registry), address(globals));
+        appFactory = new AppFactory(address(appImplementation), address(registry), address(globals));
 
         erc20Implementation = new ERC20Base();
-        constellationFactory = new ConstellationFactory(address(erc20Implementation), address(globals));
 
         {
             settingsFacet = new SettingsFacet();
@@ -128,13 +125,9 @@ contract Setup is Test, Helpers {
         erc20 = new ERC20BaseMock("name", "symbol", 18, 100 ether);
         erc20.transfer(other, 1 ether);
 
-        // create constellation
-        vm.prank(appOwner);
-        address constellation = constellationFactory.create("Constellation", "CSN", 18, 1000);
-
         // create app
         vm.prank(appOwner);
-        app = Proxy(payable(starFactory.create("ERC721LazyMintTest", constellation, appOwner)));
+        app = Proxy(payable(appFactory.create("ERC721LazyMintTest", appOwner)));
         // Add NATIVE_TOKEN and ERC20 to accepted currencies
         {
             address[] memory currencies = new address[](2);

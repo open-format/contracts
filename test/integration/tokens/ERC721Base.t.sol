@@ -13,8 +13,7 @@ import {
 import {Proxy} from "src/proxy/Proxy.sol";
 import {Upgradable} from "src/proxy/upgradable/Upgradable.sol";
 import {RegistryMock} from "src/registry/RegistryMock.sol";
-import {StarFactory} from "src/factories/Star.sol";
-import {ConstellationFactory} from "src/factories/Constellation.sol";
+import {AppFactory} from "src/factories/App.sol";
 import {Globals} from "src/globals/Globals.sol";
 
 import {ERC20Base} from "src/tokens/ERC20/ERC20Base.sol";
@@ -57,8 +56,7 @@ contract Setup is Test, Helpers {
     address other;
     address socialConscious;
 
-    StarFactory starFactory;
-    ConstellationFactory constellationFactory;
+    AppFactory appFactory;
     Proxy appImplementation;
     Proxy app;
     RegistryMock registry;
@@ -83,22 +81,15 @@ contract Setup is Test, Helpers {
         globals = new Globals();
         registry = new RegistryMock();
         appImplementation = new  Proxy(true);
-        starFactory = new StarFactory(address(appImplementation), address(registry), address(globals));
-
-        erc20Implementation = new ERC20Base();
-        constellationFactory = new ConstellationFactory(address(erc20Implementation), address(globals));
+        appFactory = new AppFactory(address(appImplementation), address(registry), address(globals));
 
         erc721Implementation = new ERC721Base();
         erc721ImplementationId = bytes32("Base");
         erc721FactoryFacet = new ERC721FactoryFacet();
 
-        // create constellation
-        vm.prank(creator);
-        address constellation = constellationFactory.create("Constellation", "CSN", 18, 1000);
-
         // create app
         vm.prank(creator);
-        app = Proxy(payable(starFactory.create("platformFeeTest", constellation, creator)));
+        app = Proxy(payable(appFactory.create("platformFeeTest", creator)));
 
         // setup globals
         globals.setPlatformFee(0, 0, socialConscious);
