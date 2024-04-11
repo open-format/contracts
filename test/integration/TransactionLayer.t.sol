@@ -20,8 +20,7 @@ import {IERC20, SafeERC20} from "@solidstate/contracts/utils/SafeERC20.sol";
 import {Proxy} from "src/proxy/Proxy.sol";
 import {Upgradable} from "src/proxy/upgradable/Upgradable.sol";
 import {RegistryMock} from "src/registry/RegistryMock.sol";
-import {StarFactory} from "src/factories/Star.sol";
-import {ConstellationFactory} from "src/factories/Constellation.sol";
+import {AppFactory} from "src/factories/App.sol";
 import {Globals} from "src/globals/Globals.sol";
 import {SettingsFacet} from "src/facet/SettingsFacet.sol";
 import {ERC20BaseMock} from "src/tokens/ERC20/ERC20BaseMock.sol";
@@ -96,8 +95,7 @@ contract Setup is Test, Helpers {
     address other;
     address socialConscious;
 
-    StarFactory starFactory;
-    ConstellationFactory constellationFactory;
+    AppFactory appFactory;
     Proxy template;
     Proxy app;
     RegistryMock registry;
@@ -118,11 +116,10 @@ contract Setup is Test, Helpers {
         globals = new Globals();
         registry = new RegistryMock();
         template = new  Proxy(true);
-        starFactory = new StarFactory(address(template), address(registry), address(globals));
+        appFactory = new AppFactory(address(template), address(registry), address(globals));
         erc20 = new ERC20BaseMock("Dummy", "D", 18, 1000);
 
         erc20Implementation = new ERC20Base();
-        constellationFactory = new ConstellationFactory(address(erc20Implementation), address(globals));
 
         // Add Facets
         {
@@ -150,13 +147,9 @@ contract Setup is Test, Helpers {
         // setup platform fee to be base 0.01 ether and receiver to be social Conscious
         globals.setPlatformFee(0.1 ether, 0, socialConscious);
 
-        // create constellation
-        vm.prank(appOwner);
-        address constellation = constellationFactory.create("Constellation", "CSN", 18, 1000);
-
         // create app
         vm.prank(appOwner);
-        app = Proxy(payable(starFactory.create("ERC721LazyMintTest", constellation, appOwner)));
+        app = Proxy(payable(appFactory.create("ERC721LazyMintTest", appOwner)));
 
         // set application fee
         vm.prank(appOwner);
