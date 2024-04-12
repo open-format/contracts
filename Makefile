@@ -5,6 +5,7 @@ verbose ?= -vvvv
 args ?= ""
 legacy ?= --legacy
 slow ?= --slow
+gasPrice ?= ""
 
 # Clean the repo
 clean  :; forge clean
@@ -22,9 +23,8 @@ deploy:; make \
 	deploy-Globals \
 	deploy-Registry \
 	deploy-Proxy \
-	deploy-StarFactory \
+	deploy-AppFactory \
 	deploy-ERC20Base \
-	deploy-ConstellationFactory \
 	deploy-ERC721Base \
 	deploy-ERC721LazyMint \
 	deploy-RewardsFacet \
@@ -34,23 +34,22 @@ deploy:; make \
 	deploy-ERC721LazyDropFacet \
 
 # core
-deploy-Globals:; forge script scripts/core/Globals.s.sol:Deploy --rpc-url $(rpc) --broadcast $(verbose) $(legacy) $(slow)
-deploy-Registry:; forge script scripts/core/Registry.s.sol:Deploy --rpc-url $(rpc) --broadcast $(verbose) $(legacy) $(slow)
-deploy-Proxy:; forge script scripts/core/Proxy.s.sol:Deploy --rpc-url $(rpc) --broadcast $(verbose) $(legacy) $(slow)
-deploy-StarFactory:; forge script scripts/core/StarFactory.s.sol:Deploy --rpc-url $(rpc) --broadcast $(verbose) $(legacy) $(slow)
-deploy-ConstellationFactory:; forge script scripts/core/ConstellationFactory.s.sol:Deploy --rpc-url $(rpc) --broadcast $(verbose) $(legacy) $(slow)
+deploy-Globals:; forge script scripts/core/Globals.s.sol:Deploy --rpc-url $(rpc) --broadcast $(gasPrice) $(verbose) $(legacy) $(slow)
+deploy-Registry:; forge script scripts/core/Registry.s.sol:Deploy --rpc-url $(rpc) --broadcast $(verbose) $(gasPrice) $(legacy) $(slow)
+deploy-Proxy:; forge script scripts/core/Proxy.s.sol:Deploy --rpc-url $(rpc) --broadcast $(verbose) $(gasPrice) $(legacy) $(slow)
+deploy-AppFactory:; forge script scripts/core/AppFactory.s.sol:Deploy --rpc-url $(rpc) --broadcast $(verbose) $(gasPrice) $(legacy) $(slow)
 
 
 # token implementations
-deploy-ERC721Base:; forge script scripts/tokens/ERC721Base.s.sol:Deploy --rpc-url $(rpc) --broadcast $(verbose) $(legacy) $(slow)
-deploy-ERC721LazyMint:; forge script scripts/tokens/ERC721LazyMint.s.sol:Deploy --rpc-url $(rpc) --broadcast $(verbose) $(legacy) $(slow)
-deploy-ERC20Base:; forge script scripts/tokens/ERC20Base.s.sol:Deploy --rpc-url $(rpc) --broadcast $(verbose) $(legacy) $(slow)
+deploy-ERC721Base:; forge script scripts/tokens/ERC721Base.s.sol:Deploy --rpc-url $(rpc) --broadcast $(verbose) $(gasPrice) $(legacy) $(slow)
+deploy-ERC721LazyMint:; forge script scripts/tokens/ERC721LazyMint.s.sol:Deploy --rpc-url $(rpc) --broadcast $(verbose) $(gasPrice) $(legacy) $(slow)
+deploy-ERC20Base:; forge script scripts/tokens/ERC20Base.s.sol:Deploy --rpc-url $(rpc) --broadcast $(verbose) $(gasPrice) $(legacy) $(slow)
 # facets
-deploy-RewardsFacet:; forge script scripts/facet/RewardsFacet.s.sol:Deploy --rpc-url $(rpc) --broadcast $(verbose) $(legacy) $(slow)
-deploy-SettingsFacet:; forge script scripts/facet/SettingsFacet.s.sol:Deploy --rpc-url $(rpc) --broadcast $(verbose) $(legacy) $(slow)
-deploy-ERC721FactoryFacet:; forge script scripts/facet/ERC721FactoryFacet.s.sol:Deploy --rpc-url $(rpc) --broadcast $(verbose) $(legacy) $(slow)
-deploy-ERC20FactoryFacet:; forge script scripts/facet/ERC20FactoryFacet.s.sol:Deploy --rpc-url $(rpc) --broadcast $(verbose) $(legacy) $(slow)
-deploy-ERC721LazyDropFacet:; forge script scripts/facet/ERC721LazyDropFacet.s.sol:Deploy --rpc-url $(rpc) --broadcast $(verbose) $(legacy) $(slow)
+deploy-RewardsFacet:; forge script scripts/facet/RewardsFacet.s.sol:Deploy --rpc-url $(rpc) --broadcast $(verbose) $(gasPrice) $(legacy) $(slow)
+deploy-SettingsFacet:; forge script scripts/facet/SettingsFacet.s.sol:Deploy --rpc-url $(rpc) --broadcast $(verbose) $(gasPrice) $(legacy) $(slow)
+deploy-ERC721FactoryFacet:; forge script scripts/facet/ERC721FactoryFacet.s.sol:Deploy --rpc-url $(rpc) --broadcast $(verbose) $(gasPrice) $(legacy) $(slow)
+deploy-ERC20FactoryFacet:; forge script scripts/facet/ERC20FactoryFacet.s.sol:Deploy --rpc-url $(rpc) --broadcast $(verbose) $(gasPrice) $(legacy) $(slow)
+deploy-ERC721LazyDropFacet:; forge script scripts/facet/ERC721LazyDropFacet.s.sol:Deploy --rpc-url $(rpc) --broadcast $(verbose) $(gasPrice) $(legacy) $(slow)
 
 # patch
 patch-SettingsFacet:; forge script scripts/facet/SettingsFacet.s.sol:Patch --rpc-url $(rpc) --broadcast $(verbose) $(legacy) $(slow)
@@ -60,25 +59,14 @@ patch-SettingsFacet:; forge script scripts/facet/SettingsFacet.s.sol:Patch --rpc
 # example: `make CreateApp args="app name" rpc=anvil`
 # Note: Uses a cast command to format the app name args to bytes32
 CreateApp:; forge script \
-	scripts/core/StarFactory.s.sol:CreateApp \
+	scripts/core/AppFactory.s.sol:CreateApp \
 	--sig "run(string)" \
 	--rpc-url $(rpc) \
 	--broadcast \
 	$(legacy) \
 	$(slow) \
 	$(verbose) \
-	`cast --format-bytes32-string $(args)`
-
-# example: `make CreateConstellation args="constellation name" rpc=anvil`
-# Note: Uses a cast command to format the app name args to bytes32
-CreateConstellation:; forge script \
-	scripts/core/ConstellationFactory.s.sol:CreateConstellation \
-	--sig "run(string)" \
-	--rpc-url $(rpc) \
-	--broadcast \
-	$(legacy) \
-	$(slow) \
-	$(verbose) \
+	$(gasPrice) \
 	`cast --format-bytes32-string $(args)`
 
 # example: `make SetPlatformFee args="0.01 0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266" rpc=anvil`
