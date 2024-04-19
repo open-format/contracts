@@ -18,6 +18,7 @@ remappings :; forge remappings > remappings.txt
 
 # deploy
 # to run: `make deploy rpc="<chain>"` e.g `make deploy rpc="anvil"`
+# to specify a gas price:  make deploy rpc="anvil" gasPrice="--with-gas-price 45000000000 --skip-simulation
 # TODO: compile all contracts at start then run scripts
 deploy:; make \
 	deploy-Globals \
@@ -38,7 +39,6 @@ deploy-Globals:; forge script scripts/core/Globals.s.sol:Deploy --rpc-url $(rpc)
 deploy-Registry:; forge script scripts/core/Registry.s.sol:Deploy --rpc-url $(rpc) --broadcast $(verbose) $(gasPrice) $(legacy) $(slow)
 deploy-Proxy:; forge script scripts/core/Proxy.s.sol:Deploy --rpc-url $(rpc) --broadcast $(verbose) $(gasPrice) $(legacy) $(slow)
 deploy-AppFactory:; forge script scripts/core/AppFactory.s.sol:Deploy --rpc-url $(rpc) --broadcast $(verbose) $(gasPrice) $(legacy) $(slow)
-
 
 # token implementations
 deploy-ERC721Base:; forge script scripts/tokens/ERC721Base.s.sol:Deploy --rpc-url $(rpc) --broadcast $(verbose) $(gasPrice) $(legacy) $(slow)

@@ -19,4 +19,4 @@ polygon = "${POLYGON_RPC_URL}"
 aurora = "https://mainnet.aurora.dev"
 aurora-testnet = "https://testnet.aurora.dev"
 arbitrum-testnet = "https://sepolia-rollup.arbitrum.io/rpc"
-
+amoy = "https://rpc-amoy.polygon.technology/"
