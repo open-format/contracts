@@ -28,14 +28,15 @@ interface CompatibleERC721Implementation {
  *          compatible to be inherited by facet contract
  *          there is an internal dependency on the globals extension.
  * @dev     inheriting contracts must override the internal _canCreate function
+ * @dev     _baseTokenURI should be set to an empty string "" if not compatible with ERC721 implementation
  */
-
 abstract contract ERC721Factory is IERC721Factory, ERC721FactoryInternal, MinimalProxyFactory, ReentrancyGuard {
     /**
      * @notice creates an erc721 contract based on implementation
      * @dev the deployed contract is a minimal proxy that points to the implementation chosen
      * @param _name the name of the ERC721 contract
      * @param _symbol the symbol of the ERC721 contract
+     * @param _baseTokenURI the base token URI, only applicable for certain erc721 implementations
      * @param _royaltyRecipient the default address that royalties are sent to
      * @param _royaltyBps the default royalty percent in BPS
      * @param _implementationId the chosen implementation of ERC721 contract
@@ -43,6 +44,7 @@ abstract contract ERC721Factory is IERC721Factory, ERC721FactoryInternal, Minima
     function createERC721(
         string calldata _name,
         string calldata _symbol,
+        string calldata _baseTokenURI,
         address _royaltyRecipient,
         uint16 _royaltyBps,
         bytes32 _implementationId
@@ -65,7 +67,9 @@ abstract contract ERC721Factory is IERC721Factory, ERC721FactoryInternal, Minima
 
         // add the app address and globals as encoded data
         // this enables ERC721 contracts to grant minter role to the app and pay platform fee's
-        bytes memory data = abi.encode(address(this), _getGlobalsAddress());
+        bytes memory data = bytes(_baseTokenURI).length > 0
+            ? abi.encode(address(this), _getGlobalsAddress(), _baseTokenURI)
+            : abi.encode(address(this), _getGlobalsAddress());
 
         // initialize ERC721 contract
         try CompatibleERC721Implementation(payable(id)).initialize(

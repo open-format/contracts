@@ -19,6 +19,7 @@ interface IERC721Factory {
     function createERC721(
         string memory _name,
         string memory _symbol,
+        string memory _baseTokenURI,
         address _royaltyRecipient,
         uint16 _royaltyBps,
         bytes32 _implementationId
