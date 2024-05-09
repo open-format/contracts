@@ -68,7 +68,7 @@ contract Setup is Test, Helpers {
         // deploy contracts
         globals = new Globals();
         registry = new RegistryMock();
-        appImplementation = new  Proxy(true);
+        appImplementation = new Proxy(true);
         appFactory = new AppFactory(address(appImplementation), address(registry), address(globals));
 
         erc20Implementation = new ERC20Base();
@@ -136,7 +136,7 @@ contract ERC721FactoryFacet__integration_createERC721 is Setup {
     function test_can_create_erc721() public {
         vm.prank(creator);
         address erc721Address =
-            ERC721FactoryFacet(address(app)).createERC721("name", "symbol", creator, 1000, erc721ImplementationId);
+            ERC721FactoryFacet(address(app)).createERC721("name", "symbol", "", creator, 1000, erc721ImplementationId);
 
         assertEq(ERC721Base(erc721Address).name(), "name");
         assertEq(ERC721Base(erc721Address).symbol(), "symbol");
@@ -154,7 +154,7 @@ contract ERC721FactoryFacet__integration_createERC721 is Setup {
         // create nft and pay platform fee
         vm.prank(creator);
         address erc721Address = ERC721FactoryFacet(address(app)).createERC721{value: 1 ether}(
-            "name", "symbol", creator, 1000, erc721ImplementationId
+            "name", "symbol", "", creator, 1000, erc721ImplementationId
         );
         // check platform fee has been received
         assertEq(socialConscious.balance, 1 ether);
@@ -164,14 +164,15 @@ contract ERC721FactoryFacet__integration_createERC721 is Setup {
         _approveCreatorAccess(other);
 
         vm.prank(other);
-        ERC721FactoryFacet(address(app)).createERC721("name", "symbol", creator, 1000, erc721ImplementationId);
+        ERC721FactoryFacet(address(app)).createERC721("name", "symbol", "", creator, 1000, erc721ImplementationId);
     }
 
     function test_can_create_multiple_erc721_contracts() public {
         for (uint256 i = 0; i < 10; i++) {
             vm.prank(creator);
-            address deployed =
-                ERC721FactoryFacet(address(app)).createERC721("name", "symbol", creator, 1000, erc721ImplementationId);
+            address deployed = ERC721FactoryFacet(address(app)).createERC721(
+                "name", "symbol", "", creator, 1000, erc721ImplementationId
+            );
             if (deployments[deployed] == true) {
                 revert("ERC721 deployed to the same address");
             }
@@ -184,7 +185,7 @@ contract ERC721FactoryFacet__integration_createERC721 is Setup {
         _approveCreatorAccess(address(0));
 
         vm.prank(other);
-        ERC721FactoryFacet(address(app)).createERC721("name", "symbol", creator, 1000, erc721ImplementationId);
+        ERC721FactoryFacet(address(app)).createERC721("name", "symbol", "", creator, 1000, erc721ImplementationId);
     }
 
     function test_grants_minter_role_with_lazy_mint_implementation() public {
@@ -196,7 +197,7 @@ contract ERC721FactoryFacet__integration_createERC721 is Setup {
         // create lazy mint erc721
         vm.prank(creator);
         address lazyMint =
-            ERC721FactoryFacet(address(app)).createERC721("name", "symbol", creator, 1000, lazyMintImplementationId);
+            ERC721FactoryFacet(address(app)).createERC721("name", "symbol", "", creator, 1000, lazyMintImplementationId);
 
         assertTrue(ERC721LazyMint(lazyMint).hasRole(MINTER_ROLE, address(app)));
     }
@@ -211,20 +212,20 @@ contract ERC721FactoryFacet__integration_createERC721 is Setup {
 
         // create nft and pay platform fee
         vm.prank(creator);
-        ERC721FactoryFacet(address(app)).createERC721("name", "symbol", creator, 1000, erc721ImplementationId);
+        ERC721FactoryFacet(address(app)).createERC721("name", "symbol", "", creator, 1000, erc721ImplementationId);
     }
 
     function test_reverts_when_do_not_have_permission() public {
         vm.expectRevert(IERC721Factory.ERC721Factory_doNotHavePermission.selector);
         vm.prank(other);
-        ERC721FactoryFacet(address(app)).createERC721("name", "symbol", creator, 1000, erc721ImplementationId);
+        ERC721FactoryFacet(address(app)).createERC721("name", "symbol", "", creator, 1000, erc721ImplementationId);
     }
 
     function test_reverts_when_no_implementation_is_found() public {
         vm.expectRevert(IERC721Factory.ERC721Factory_noImplementationFound.selector);
         vm.prank(creator);
         ERC721FactoryFacet(address(app)).createERC721(
-            "name", "symbol", creator, 1000, bytes32("wrong implementation id")
+            "name", "symbol", "", creator, 1000, bytes32("wrong implementation id")
         );
     }
 
@@ -237,7 +238,7 @@ contract ERC721FactoryFacet__integration_createERC721 is Setup {
         vm.expectRevert(IERC721Factory.ERC721Factory_failedToInitialize.selector);
         vm.prank(creator);
         ERC721FactoryFacet(address(app)).createERC721{value: 1 ether}(
-            "name", "symbol", creator, 1000, badErc721ImplementationId
+            "name", "symbol", "", creator, 1000, badErc721ImplementationId
         );
     }
 
@@ -276,7 +277,7 @@ contract ERC721FactoryFacet__integration_calculateERC721DeploymentAddress is Set
 
         vm.prank(creator);
         address actualDeploymentAddress =
-            ERC721FactoryFacet(address(app)).createERC721("name", "symbol", creator, 1000, erc721ImplementationId);
+            ERC721FactoryFacet(address(app)).createERC721("name", "symbol", "", creator, 1000, erc721ImplementationId);
         assertEq(deploymentAddress, actualDeploymentAddress);
     }
 

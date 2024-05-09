@@ -41,7 +41,6 @@ abstract contract Helpers {
  * @dev dummy contract to test platform fee is not paid when called from a contract
  *      must first grant ADMIN_ROLE to this contract
  */
-
 contract ContractDummy {
     function mintTo(address _erc721, address _to) public {
         ERC721LazyMint(_erc721).mintTo(_to);
@@ -85,7 +84,7 @@ contract Setup is Test, Helpers {
         // deploy contracts
         globals = new Globals();
         registry = new RegistryMock();
-        appImplementation = new  Proxy(true);
+        appImplementation = new Proxy(true);
         appFactory = new AppFactory(address(appImplementation), address(registry), address(globals));
 
         erc20Implementation = new ERC20Base();
@@ -156,6 +155,7 @@ contract ERC721LazyMint_Setup is Setup {
             ERC721FactoryFacet(address(app)).createERC721(
                 "name",
                 "symbol",
+                "",
                 creator,
                 1000,
                 lazyMintImplementationId
