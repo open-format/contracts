@@ -20,6 +20,7 @@ import {ERC20Base} from "src/tokens/ERC20/ERC20Base.sol";
 import {IERC721Factory} from "@extensions/ERC721Factory/IERC721Factory.sol";
 import {ERC721Base, ADMIN_ROLE, MINTER_ROLE} from "src/tokens/ERC721/ERC721Base.sol";
 import {ERC721LazyMint} from "src/tokens/ERC721/ERC721LazyMint.sol";
+import {ERC721Badge} from "src/tokens/ERC721/ERC721Badge.sol";
 import {ERC721FactoryFacet} from "src/facet/ERC721FactoryFacet.sol";
 
 import {SettingsFacet, IApplicationAccess} from "src/facet/SettingsFacet.sol";
@@ -39,10 +40,15 @@ abstract contract Helpers {
     }
 }
 
+uint256 constant MAX_INT = 2 ** 256 - 1;
+
 contract Setup is Test, Helpers {
     address creator;
     address other;
     address socialConscious;
+
+    // ipfs uri taken from https://docs.ipfs.tech/how-to/best-practices-for-nft-data/#types-of-ipfs-links-and-when-to-use-them
+    string baseURI = "ipfs://bafybeibnsoufr2renqzsh347nrx54wcubt5lgkeivez63xvivplfwhtpym/";
 
     AppFactory appFactory;
     Proxy appImplementation;
@@ -202,6 +208,23 @@ contract ERC721FactoryFacet__integration_createERC721 is Setup {
         assertTrue(ERC721LazyMint(lazyMint).hasRole(MINTER_ROLE, address(app)));
     }
 
+    function test_sets_base_token_uri_with_badge_implementation() public {
+        // add badge implementation
+        ERC721Badge badgeImplementation = new ERC721Badge(false);
+        bytes32 badgeImplementationId = bytes32("Badge");
+        globals.setERC721Implementation(badgeImplementationId, address(badgeImplementation));
+
+        // create badge erc721
+        vm.prank(creator);
+        address badge = ERC721FactoryFacet(address(app)).createERC721(
+            "name", "symbol", baseURI, creator, 1000, badgeImplementationId
+        );
+
+        assertTrue(ERC721LazyMint(badge).hasRole(MINTER_ROLE, address(app)));
+        assertEq(baseURI, ERC721Badge(badge).tokenURI(0));
+        assertEq(baseURI, ERC721Badge(badge).tokenURI(MAX_INT - 1));
+    }
+
     function test_emits_Created_event() public {
         vm.prank(creator);
         address expectedAddress =
@@ -240,6 +263,18 @@ contract ERC721FactoryFacet__integration_createERC721 is Setup {
         ERC721FactoryFacet(address(app)).createERC721{value: 1 ether}(
             "name", "symbol", "", creator, 1000, badErc721ImplementationId
         );
+    }
+
+    function test_reverts_when_base_token_uri_is_empty_string_with_badge_implementation() public {
+        // add badge implementation
+        ERC721Badge badgeImplementation = new ERC721Badge(false);
+        bytes32 badgeImplementationId = bytes32("Badge");
+        globals.setERC721Implementation(badgeImplementationId, address(badgeImplementation));
+
+        vm.prank(creator);
+        vm.expectRevert(IERC721Factory.ERC721Factory_failedToInitialize.selector);
+        address badge =
+            ERC721FactoryFacet(address(app)).createERC721("name", "symbol", "", creator, 1000, badgeImplementationId);
     }
 
     function _approveCreatorAccess(address _account)
