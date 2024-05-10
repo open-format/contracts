@@ -28,6 +28,7 @@ deploy:; make \
 	deploy-ERC20Base \
 	deploy-ERC721Base \
 	deploy-ERC721LazyMint \
+	deploy-ERC721Badge \
 	deploy-RewardsFacet \
 	deploy-SettingsFacet \
 	deploy-ERC721FactoryFacet \
@@ -43,7 +44,9 @@ deploy-AppFactory:; forge script scripts/core/AppFactory.s.sol:Deploy --rpc-url 
 # token implementations
 deploy-ERC721Base:; forge script scripts/tokens/ERC721Base.s.sol:Deploy --rpc-url $(rpc) --broadcast $(verbose) $(gasPrice) $(legacy) $(slow)
 deploy-ERC721LazyMint:; forge script scripts/tokens/ERC721LazyMint.s.sol:Deploy --rpc-url $(rpc) --broadcast $(verbose) $(gasPrice) $(legacy) $(slow)
+deploy-ERC721Badge:; forge script scripts/tokens/ERC721Badge.s.sol:Deploy --rpc-url $(rpc) --broadcast $(verbose) $(gasPrice) $(legacy) $(slow)
 deploy-ERC20Base:; forge script scripts/tokens/ERC20Base.s.sol:Deploy --rpc-url $(rpc) --broadcast $(verbose) $(gasPrice) $(legacy) $(slow)
+
 # facets
 deploy-RewardsFacet:; forge script scripts/facet/RewardsFacet.s.sol:Deploy --rpc-url $(rpc) --broadcast $(verbose) $(gasPrice) $(legacy) $(slow)
 deploy-SettingsFacet:; forge script scripts/facet/SettingsFacet.s.sol:Deploy --rpc-url $(rpc) --broadcast $(verbose) $(gasPrice) $(legacy) $(slow)
@@ -81,6 +84,9 @@ SetPlatformFee:; forge script \
 	$(verbose) \
 	`cast --to-wei $(word 1, $(args))` $(word 2, $(args))
 
+# example `make createERC721Badge`
+# Note: make sure app is setup with correct permissions and APP_ID env is set.
+createERC721Badge:; forge script scripts/facet/ERC721FactoryFacet.s.sol:CreateBadge --rpc-url $(rpc) --broadcast $(verbose) $(legacy) $(slow)
 
 # Run all update scripts
 update:; make \
@@ -91,6 +97,18 @@ update:; make \
 # update
 update-ERC721FactoryFacet:; forge script scripts/facet/ERC721FactoryFacet.s.sol:Update --rpc-url $(rpc) --broadcast $(verbose) $(legacy) $(slow)
 update-ERC20FactoryFacet:; forge script scripts/facet/ERC20FactoryFacet.s.sol:Update --rpc-url $(rpc) --broadcast $(verbose) $(legacy) $(slow)
+
+# Add ERC721Badge contract
+# Date 10.05.24
+# updates ERC721FactoryFacet to change the createERC721 function to include a baseTokenURI paramerter
+# deploys and registers ERC721Badge contract
+# PR #122 https://github.com/open-format/contracts/pull/122
+update-ERC721Badge:; make \
+	update-ERC721FactoryFacet-addBaseTokenURI \
+	deploy-ERC721Badge
+
+update-ERC721FactoryFacet-addBaseTokenURI:; forge script scripts/facet/ERC721FactoryFacet.s.sol:UpdateAddBaseTokenURI --rpc-url $(rpc) --broadcast $(verbose) $(legacy) $(slow)
+
 
 # Add platform fee to tokens
 # Date: 29.03.23
