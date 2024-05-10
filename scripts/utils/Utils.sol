@@ -32,8 +32,8 @@ contract Utils is Script {
 
         string memory deploymentFile = _readDeploymentFile();
         bool fileExists = bytes(deploymentFile).length > 0;
-        bool isInJsonFile = fileExists ? (vm.parseJson(deploymentFile, _contractName)).length > 0 : false;
-
+        bool isInJsonFile =
+            fileExists ? (vm.parseJson(deploymentFile, string.concat(".", _contractName))).length > 0 : false;
         if (isInJsonFile) {
             // just update existing deployment address
             vm.writeJson(contractJson, path, string.concat(".", _contractName));
@@ -45,11 +45,11 @@ contract Utils is Script {
 
         if (fileExists) {
             // get all contract names from that file
-            contractNames = abi.decode(vm.parseJson(deploymentFile, namesKey), (string[]));
+            contractNames = abi.decode(vm.parseJson(deploymentFile, string.concat(".", namesKey)), (string[]));
             // parse and reconstruct entire file
             for (uint256 i = 0; i < contractNames.length; i++) {
                 (address contractAddress, uint256 startBlock) =
-                    abi.decode(vm.parseJson(deploymentFile, contractNames[i]), (address, uint256));
+                    abi.decode(vm.parseJson(deploymentFile, string.concat(".", contractNames[i])), (address, uint256));
                 tempContractJson = "";
                 tempContractJson = vm.serializeAddress(contractNames[i], "address", contractAddress);
                 tempContractJson = vm.serializeUint(contractNames[i], "startBlock", startBlock);
