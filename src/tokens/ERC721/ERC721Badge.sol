@@ -18,10 +18,6 @@ import {ERC721AUpgradeable} from "@erc721a-upgradeable/contracts/ERC721AUpgradea
 import {Royalty} from "@extensions/royalty/Royalty.sol";
 import {BatchMintMetadata} from "@extensions/batchMintMetadata/BatchMintMetadata.sol";
 import {ContractMetadata, IContractMetadata} from "@extensions/contractMetadata/ContractMetadata.sol";
-import {
-    DefaultOperatorFilterer,
-    DEFAULT_SUBSCRIPTION
-} from "@extensions/defaultOperatorFilterer/DefaultOperatorFilterer.sol";
 import {Global} from "@extensions/global/Global.sol";
 import {PlatformFee} from "@extensions/platformFee/PlatformFee.sol";
 
@@ -38,7 +34,6 @@ contract ERC721Badge is
     ERC165BaseInternal,
     ContractMetadata,
     BatchMintMetadata,
-    DefaultOperatorFilterer,
     Royalty,
     Multicall,
     Global,
@@ -85,7 +80,6 @@ contract ERC721Badge is
         _grantRole(ADMIN_ROLE, _owner);
         _setOwner(_owner);
         _setDefaultRoyaltyInfo(_royaltyRecipient, _royaltyBps);
-        _registerToDefaultOperatorFilterer(DEFAULT_SUBSCRIPTION, true);
 
         _setSupportsInterface(type(IERC165).interfaceId, true);
         _setSupportsInterface(type(IERC721).interfaceId, true);
@@ -245,41 +239,22 @@ contract ERC721Badge is
     //////////////////////////////////////////////////////////////*/
 
     /// @dev See {ERC721-setApprovalForAll}.
-    function setApprovalForAll(address operator, bool approved)
-        public
-        override(ERC721AUpgradeable)
-        onlyAllowedOperatorApproval(operator)
-    {
+    function setApprovalForAll(address operator, bool approved) public override(ERC721AUpgradeable) {
         super.setApprovalForAll(operator, approved);
     }
 
     /// @dev See {ERC721-approve}.
-    function approve(address operator, uint256 tokenId)
-        public
-        payable
-        override(ERC721AUpgradeable)
-        onlyAllowedOperatorApproval(operator)
-    {
+    function approve(address operator, uint256 tokenId) public payable override(ERC721AUpgradeable) {
         super.approve(operator, tokenId);
     }
 
     /// @dev See {ERC721-_transferFrom}.
-    function transferFrom(address from, address to, uint256 tokenId)
-        public
-        payable
-        override(ERC721AUpgradeable)
-        onlyAllowedOperator(from)
-    {
+    function transferFrom(address from, address to, uint256 tokenId) public payable override(ERC721AUpgradeable) {
         super.transferFrom(from, to, tokenId);
     }
 
     /// @dev See {ERC721-_safeTransferFrom}.
-    function safeTransferFrom(address from, address to, uint256 tokenId)
-        public
-        payable
-        override(ERC721AUpgradeable)
-        onlyAllowedOperator(from)
-    {
+    function safeTransferFrom(address from, address to, uint256 tokenId) public payable override(ERC721AUpgradeable) {
         super.safeTransferFrom(from, to, tokenId);
     }
 
@@ -288,7 +263,6 @@ contract ERC721Badge is
         public
         payable
         override(ERC721AUpgradeable)
-        onlyAllowedOperator(from)
     {
         super.safeTransferFrom(from, to, tokenId, data);
     }
