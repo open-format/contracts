@@ -155,7 +155,6 @@ contract ERC721LazyMint_Setup is Setup {
             ERC721FactoryFacet(address(app)).createERC721(
                 "name",
                 "symbol",
-                "",
                 creator,
                 1000,
                 lazyMintImplementationId
