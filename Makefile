@@ -69,7 +69,6 @@ CreateApp:; forge script \
 	$(legacy) \
 	$(slow) \
 	$(verbose) \
-	$(gasPrice) \
 	`cast --format-bytes32-string $(args)`
 
 # example: `make SetPlatformFee args="0.01 0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266" rpc=anvil`
@@ -83,6 +82,13 @@ SetPlatformFee:; forge script \
   $(slow) \
 	$(verbose) \
 	`cast --to-wei $(word 1, $(args))` $(word 2, $(args))
+
+
+hasCreatorAccess:; forge script scripts/facet/SettingsFacet.s.sol:hasCreatorAccess --rpc-url $(rpc) --broadcast $(verbose) $(legacy) $(slow)
+
+# example `make createERC721Base`
+# Note: make sure app is setup with correct permissions and APP_ID env is set.
+createERC721Base:; forge script scripts/facet/ERC721FactoryFacet.s.sol:CreateBase --rpc-url $(rpc) --broadcast $(verbose) $(legacy) $(slow)
 
 # example `make createERC721Badge`
 # Note: make sure app is setup with correct permissions and APP_ID env is set.
@@ -99,15 +105,15 @@ update-ERC721FactoryFacet:; forge script scripts/facet/ERC721FactoryFacet.s.sol:
 update-ERC20FactoryFacet:; forge script scripts/facet/ERC20FactoryFacet.s.sol:Update --rpc-url $(rpc) --broadcast $(verbose) $(legacy) $(slow)
 
 # Add ERC721Badge contract
-# Date 10.05.24
+# Date 14.05.24
 # updates ERC721FactoryFacet to change the createERC721 function to include a baseTokenURI paramerter
 # deploys and registers ERC721Badge contract
 # PR #122 https://github.com/open-format/contracts/pull/122
 update-ERC721Badge:; make \
-	update-ERC721FactoryFacet-addBaseTokenURI \
+	update-ERC721FactoryFacet-add-createERC721WithTokenURI \
 	deploy-ERC721Badge
 
-update-ERC721FactoryFacet-addBaseTokenURI:; forge script scripts/facet/ERC721FactoryFacet.s.sol:UpdateAddBaseTokenURI --rpc-url $(rpc) --broadcast $(verbose) $(legacy) $(slow)
+update-ERC721FactoryFacet-add-createERC721WithTokenURI:; forge script scripts/facet/ERC721FactoryFacet.s.sol:Update_Add_createERC721WithTokenURI --rpc-url $(rpc) --broadcast $(verbose) $(legacy) $(slow)
 
 
 # Add platform fee to tokens
