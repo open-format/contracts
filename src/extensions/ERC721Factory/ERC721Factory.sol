@@ -28,9 +28,59 @@ interface CompatibleERC721Implementation {
  *          compatible to be inherited by facet contract
  *          there is an internal dependency on the globals extension.
  * @dev     inheriting contracts must override the internal _canCreate function
+ * @dev     _baseTokenURI should be set to an empty string "" if not compatible with ERC721 implementation
  */
-
 abstract contract ERC721Factory is IERC721Factory, ERC721FactoryInternal, MinimalProxyFactory, ReentrancyGuard {
+    /**
+     * @notice creates an erc721 contract based on implementation, with option to add token URI
+     * @dev the deployed contract is a minimal proxy that points to the implementation chosen
+     * @param _name the name of the ERC721 contract
+     * @param _symbol the symbol of the ERC721 contract
+     * @param _tokenURI the token URI to initialize the erc721 contract with, use an empty string if not applicable
+     * @param _royaltyRecipient the default address that royalties are sent to
+     * @param _royaltyBps the default royalty percent in BPS
+     * @param _implementationId the chosen implementation of ERC721 contract
+     */
+    function createERC721WithTokenURI(
+        string calldata _name,
+        string calldata _symbol,
+        string calldata _tokenURI,
+        address _royaltyRecipient,
+        uint16 _royaltyBps,
+        bytes32 _implementationId
+    ) external payable virtual nonReentrant returns (address id) {
+        if (!_canCreate()) {
+            revert ERC721Factory_doNotHavePermission();
+        }
+
+        address implementation = _getImplementation(_implementationId);
+        if (implementation == address(0)) {
+            revert ERC721Factory_noImplementationFound();
+        }
+
+        // hook to add functionality before create
+        _beforeCreate();
+
+        // deploys new proxy using CREATE2
+        id = _deployMinimalProxy(implementation, _getSalt(msg.sender));
+        _increaseContractCount(msg.sender);
+
+        // add the app address and globals as encoded data
+        // this enables ERC721 contracts to grant minter role to the app and pay platform fee's
+        bytes memory data = bytes(_tokenURI).length > 0
+            ? abi.encode(address(this), _getGlobalsAddress(), _tokenURI)
+            : abi.encode(address(this), _getGlobalsAddress());
+
+        // initialize ERC721 contract
+        try CompatibleERC721Implementation(payable(id)).initialize(
+            msg.sender, _name, _symbol, _royaltyRecipient, _royaltyBps, data
+        ) {
+            emit Created(id, msg.sender, _name, _symbol, _royaltyRecipient, _royaltyBps, _implementationId);
+        } catch {
+            revert ERC721Factory_failedToInitialize();
+        }
+    }
+
     /**
      * @notice creates an erc721 contract based on implementation
      * @dev the deployed contract is a minimal proxy that points to the implementation chosen
@@ -63,7 +113,6 @@ abstract contract ERC721Factory is IERC721Factory, ERC721FactoryInternal, Minima
         id = _deployMinimalProxy(implementation, _getSalt(msg.sender));
         _increaseContractCount(msg.sender);
 
-        // add the app address and globals as encoded data
         // this enables ERC721 contracts to grant minter role to the app and pay platform fee's
         bytes memory data = abi.encode(address(this), _getGlobalsAddress());
 

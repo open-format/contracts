@@ -24,5 +24,14 @@ interface IERC721Factory {
         bytes32 _implementationId
     ) external payable returns (address id);
 
+    function createERC721WithTokenURI(
+        string memory _name,
+        string memory _symbol,
+        string memory _tokenURI,
+        address _royaltyRecipient,
+        uint16 _royaltyBps,
+        bytes32 _implementationId
+    ) external payable returns (address id);
+
     function getERC721FactoryImplementation(bytes32 _implementationId) external view returns (address);
 }

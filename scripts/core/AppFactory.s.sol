@@ -32,6 +32,7 @@ contract Deploy is Script, Utils {
 contract CreateApp is Script, Utils {
     function run(string memory appName) external {
         uint256 deployerPrivateKey = vm.envUint("PRIVATE_KEY");
+        address deployerAddress = vm.addr(deployerPrivateKey);
         vm.startBroadcast(deployerPrivateKey);
 
         bytes32 appNameBytes32 = vm.parseBytes32(appName);
@@ -40,7 +41,8 @@ contract CreateApp is Script, Utils {
             revert("please provide an app name, make CreateApp args=appName");
         }
 
-        address appAddress = AppFactory(getContractDeploymentAddress(CONTRACT_NAME)).create(appNameBytes32, address(0));
+        address appAddress =
+            AppFactory(getContractDeploymentAddress(CONTRACT_NAME)).create(appNameBytes32, deployerAddress);
 
         console.log("App:", appName);
         console.log("Deployed:", appAddress);

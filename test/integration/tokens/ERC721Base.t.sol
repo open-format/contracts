@@ -40,7 +40,6 @@ abstract contract Helpers {
  * @dev dummy contract to test platform fee is not paid when called from a contract
  *      must first grant ADMIN_ROLE to this contract
  */
-
 contract ContractDummy {
     function mintTo(address _erc721, address _to, string memory _tokenURI) public {
         ERC721Base(_erc721).mintTo(_to, _tokenURI);
@@ -80,7 +79,7 @@ contract Setup is Test, Helpers {
         // deploy contracts
         globals = new Globals();
         registry = new RegistryMock();
-        appImplementation = new  Proxy(true);
+        appImplementation = new Proxy(true);
         appFactory = new AppFactory(address(appImplementation), address(registry), address(globals));
 
         erc721Implementation = new ERC721Base();
