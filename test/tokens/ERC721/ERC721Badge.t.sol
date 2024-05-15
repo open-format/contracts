@@ -11,6 +11,9 @@ import {IBatchMintMetadata} from "src/extensions/batchMintMetadata/IBatchMintMet
 uint256 constant MAX_INT = 2 ** 256 - 1;
 
 contract Setup is Test {
+    event UpdatedBaseURI(string baseURIForTokens);
+    event BatchMetadataUpdate(uint256 fromTokenId, uint256 toTokenId);
+
     address creator = address(0x10);
     address other = address(0x11);
     address globals = address(0x12);
@@ -62,6 +65,17 @@ contract ERC721Badge_initialise is Setup {
         emptyString.mintTo(creator);
     }
 
+    function test_emits_updated_base_uri_event() public {
+        // global and minter address but baseTokenURI is an empty string
+        bytes memory data = abi.encode(address(0), address(0), baseURI);
+
+        vm.expectEmit(true, true, true, true);
+        emit UpdatedBaseURI(baseURI);
+
+        vm.prank(creator);
+        new ERC721BadgeMock("Name", "Symbol", creator, uint16(tenPercentBPS), data);
+    }
+
     function test_should_revert_when_initialised_without_base_token_URI() public {
         vm.prank(creator);
         // global and minter address but no baseTokenURI in data
@@ -93,6 +107,14 @@ contract ERC721Badge__setBaseURI is Setup {
 
         assertEq(baseURI, erc721Badge.tokenURI(0));
         assertEq(baseURI, erc721Badge.tokenURI(MAX_INT - 1));
+    }
+
+    function test_emits_updated_base_uri_event() public {
+        vm.expectEmit(true, true, true, true);
+        emit UpdatedBaseURI(differentBaseURI);
+
+        vm.prank(creator);
+        erc721Badge.setBaseURI(differentBaseURI);
     }
 
     function test_reverts_when_access_is_invalid() public {
