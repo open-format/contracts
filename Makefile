@@ -107,6 +107,13 @@ ERC721Badge.setBaseURI:; forge script \
  	--rpc-url $(rpc) --broadcast $(verbose) $(legacy) $(slow) \
 	$(word 1, $(args)) $(word 2, $(args))
 
+# example: make ERC721Base.setBaseURI args="0xaf4c80136581212185f37c5e8809120d8fbf6224 sometokenuri"
+ERC721Base.mintTo:; forge script \
+	scripts/tokens/ERC721Base.s.sol:MintTo \
+	--sig "run(address,string)" \
+ 	--rpc-url $(rpc) --broadcast $(verbose) $(legacy) $(slow) \
+	$(word 1, $(args)) $(word 2, $(args))
+
 # Run all update scripts
 update:; make \
 	update-ERC721FactoryFacet \
