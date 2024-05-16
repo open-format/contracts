@@ -14,6 +14,13 @@ interface NFT {
     function ownerOf(uint256 tokenId) external returns (address);
 }
 
+interface Badge {
+    function mintTo(address to) external;
+    function batchMintTo(address to, uint256 quantity) external;
+    function transferFrom(address from, address to, uint256 tokenId) external;
+    function ownerOf(uint256 tokenId) external returns (address);
+}
+
 interface Token {
     function mintTo(address to, uint256 amount) external;
     function transferFrom(address holder, address receipient, uint256 amount) external;
@@ -76,6 +83,22 @@ contract RewardsFacet is Multicall, SafeOwnable {
         }
 
         NFT(_token).batchMintTo(_to, _quantity, _baseURI);
+        emit BadgeMinted(_token, _quantity, _to, _id, _activityType, _uri);
+    }
+
+    function mintBadge(
+        address _token,
+        address _to,
+        uint256 _quantity,
+        bytes32 _id,
+        bytes32 _activityType,
+        string calldata _uri
+    ) public {
+        if (!_canMint(_token)) {
+            revert RewardsFacet_NotAuthorized();
+        }
+
+        Badge(_token).batchMintTo(_to, _quantity);
         emit BadgeMinted(_token, _quantity, _to, _id, _activityType, _uri);
     }
 
