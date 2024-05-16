@@ -94,6 +94,19 @@ createERC721Base:; forge script scripts/facet/ERC721FactoryFacet.s.sol:CreateBas
 # Note: make sure app is setup with correct permissions and APP_ID env is set.
 createERC721Badge:; forge script scripts/facet/ERC721FactoryFacet.s.sol:CreateBadge --rpc-url $(rpc) --broadcast $(verbose) $(legacy) $(slow)
 
+# example: make ERC721Badge.mintTo args="0xaf4c80136581212185f37c5e8809120d8fbf6224"
+ERC721Badge.mintTo:; forge script \
+	scripts/tokens/ERC721Badge.s.sol:MintTo \
+	--sig "run(address)" \
+ 	--rpc-url $(rpc) --broadcast $(verbose) $(legacy) $(slow) $(args)
+
+# example: make ERC721Badge.setBaseURI args="0xaf4c80136581212185f37c5e8809120d8fbf6224 someotherurl"
+ERC721Badge.setBaseURI:; forge script \
+	scripts/tokens/ERC721Badge.s.sol:SetBaseURI \
+	--sig "run(address,string)" \
+ 	--rpc-url $(rpc) --broadcast $(verbose) $(legacy) $(slow) \
+	$(word 1, $(args)) $(word 2, $(args))
+
 # Run all update scripts
 update:; make \
 	update-ERC721FactoryFacet \

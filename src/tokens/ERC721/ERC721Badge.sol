@@ -46,6 +46,8 @@ contract ERC721Badge is
 
     event Minted(address to, string tokenURI);
     event BatchMinted(address to, uint256 quantity, string baseURI);
+    event UpdatedBaseURI(string baseURIForTokens);
+    event BatchMetadataUpdate(uint256 fromTokenId, uint256 toTokenId);
 
     /**
      * @dev this contract is meant to be an implementation for a factory contract
@@ -103,6 +105,8 @@ contract ERC721Badge is
 
         if (bytes(baseURIForTokens).length > 0) {
             _batchMintMetadata(0, MAX_INT, baseURIForTokens);
+            emit BatchMetadataUpdate(0, MAX_INT);
+            emit UpdatedBaseURI(baseURIForTokens);
         }
     }
 
@@ -154,6 +158,9 @@ contract ERC721Badge is
         } else {
             _batchMintMetadata(0, MAX_INT, _baseURIForTokens);
         }
+
+        emit BatchMetadataUpdate(0, MAX_INT);
+        emit UpdatedBaseURI(_baseURIForTokens);
 
         _payPlatformFee(platformFeeRecipient, platformFeeAmount);
     }
