@@ -749,57 +749,6 @@ contract Billing__all is Setup {
         vm.stopPrank();
     }
     
-    /*
-    function test_app_has_paid_true() public {
-        uint256 amount = 1;
-        uint256 deadline = 1000000001;
-
-        vm.startPrank(user1);
-        App testApp = new App(user1, address(billing));
-        testApp.incrementCounter(); // No bills
-        assertEq(testApp.counter(), 1);
-        vm.stopPrank();
-        
-        vm.startPrank(collector);
-        vm.warp(deadline - 5);
-        billing.createBill(address(testApp), amount, deadline);
-        testApp.incrementCounter(); // Not expired
-        assertEq(testApp.counter(), 2);
-        vm.stopPrank();
-
-        vm.startPrank(user1);
-        billing.deposit(address(testApp), amount);
-        testApp.incrementCounter(); // Paid bill
-        assertEq(testApp.counter(), 3);
-        vm.stopPrank();
-    }
-    function test_app_has_paid_false() public {
-        uint256 amount = 1;
-        uint256 deadline = 1000000001;
-
-        vm.startPrank(user1);
-        App testApp = new App(user1, address(billing));
-        vm.stopPrank();
-
-        vm.startPrank(collector);
-        vm.warp(deadline - 5);
-        billing.createBill(address(testApp), amount, deadline);
-        vm.stopPrank();
-
-        vm.startPrank(user1);
-        vm.warp(deadline + 5);
-        vm.expectRevert("This app has not paid");
-        testApp.incrementCounter(); // Unpaid and expired
-        vm.stopPrank();
-
-        vm.startPrank(user1);
-        billing.deposit(address(testApp), amount);
-        testApp.incrementCounter(); // Paid
-        assertEq(testApp.counter(), 1);
-        vm.stopPrank();
-    }
-    */
-
     function test_get_token_ok() public {
         assertEq(address(oftToken), billing.getToken());       
     }

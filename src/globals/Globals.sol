@@ -26,6 +26,8 @@ contract Globals is Ownable {
     event ERC721ImplementationUpdated(bytes32 _implementationId, address _implementation);
     event ERC20ImplementationUpdated(bytes32 _implementationId, address _implementation);
 
+    event BillingContractUpdated(address _newContractAddress, address _oldContractAddress);
+
     struct PlatformFee {
         uint256 base;
         uint16 percentageBPS;
@@ -36,6 +38,8 @@ contract Globals is Ownable {
     mapping(bytes32 => address) ERC20Implementations;
 
     PlatformFee platformFee;
+
+    address private _billingContract;
 
     constructor() {
         _setOwner(msg.sender);
@@ -81,4 +85,15 @@ contract Globals is Ownable {
         recipient = platformFee.recipient;
         fee = (_price > 0) ? platformFee.base + (_price * platformFee.percentageBPS) / 10_000 : platformFee.base;
     }
+
+    function setBillingContract(address _contract) public onlyOwner {
+        address oldAddress = _billingContract;
+        _billingContract = _contract;
+        emit BillingContractUpdated(_billingContract, oldAddress);
+    }
+
+    function getBillingContract() public view returns (address) {
+        return _billingContract;
+    }
+
 }
