@@ -76,9 +76,20 @@ contract Setup is Test, Helpers {
     bytes32 erc20ImplementationId;
     ERC20FactoryFacet erc20FactoryFacet;
 
+    bytes32 badgeImplementationId = bytes32("Badge");
+    address badgeContract;
+    string name = "Name";
+    string symbol = "Symbol";
+    bytes32 activityId = "collected a berry";
+    bytes32 activityType = "action";
     // ipfs uri taken from https://docs.ipfs.tech/how-to/best-practices-for-nft-data/#types-of-ipfs-links-and-when-to-use-them
     string baseURI = "ipfs://bafybeibnsoufr2renqzsh347nrx54wcubt5lgkeivez63xvivplfwhtpym/";
     uint16 tenPercentBPS = 1000;
+
+    event ERC721Minted(address token, uint256 quantity, address to, bytes32 id, bytes32 activityType, string uri);
+    event BadgeMinted(
+        address token, uint256 quantity, address to, bytes32 activityId, bytes32 activityType, bytes data
+    );
 
     function setUp() public {
         // assign addresses
@@ -127,13 +138,14 @@ contract Setup is Test, Helpers {
         rewardsFacet = new RewardsFacet();
         {
             // add RewardsFacet to registry
-            bytes4[] memory selectors = new bytes4[](5);
+            bytes4[] memory selectors = new bytes4[](7);
             selectors[0] = rewardsFacet.mintERC20.selector;
             selectors[1] = rewardsFacet.transferERC20.selector;
             selectors[2] = rewardsFacet.mintERC721.selector;
             selectors[3] = rewardsFacet.transferERC721.selector;
             selectors[4] = rewardsFacet.multicall.selector;
-            selectors[0] = rewardsFacet.mintBadge.selector;
+            selectors[5] = rewardsFacet.mintBadge.selector;
+            selectors[6] = rewardsFacet.batchMintBadge.selector;
 
             registry.diamondCut(
                 prepareSingleFacetCut(address(rewardsFacet), IDiamondWritableInternal.FacetCutAction.ADD, selectors),
@@ -173,6 +185,12 @@ contract Setup is Test, Helpers {
             );
         }
 
+        // use app to create badge contract
+        vm.prank(creator);
+        badgeContract = ERC721FactoryFacet(address(app)).createERC721WithTokenURI(
+            name, symbol, baseURI, creator, uint16(tenPercentBPS), badgeImplementationId
+        );
+
         _afterSetup();
     }
 
@@ -183,25 +201,87 @@ contract Setup is Test, Helpers {
 }
 
 contract RewardFacet__integration_mintBadge is Setup {
-    address badgeContractAddress;
-
-    function _afterSetup() internal override {
-        vm.startPrank(creator);
-        badgeContractAddress = ERC721FactoryFacet(address(app)).createERC721WithTokenURI(
-            "Name", "Symbol", "tokenURI", creator, uint16(tenPercentBPS), bytes32("Badge")
-        );
-
-        // TODO: can this be done on initialisation to reduce transactions needed
-        ERC721Badge(badgeContractAddress).grantRole(MINTER_ROLE, address(app));
-
-        vm.stopPrank();
-    }
-
     function test_rewards_badge() public {
         vm.prank(creator);
-        RewardsFacet(address(app)).mintBadge(badgeContractAddress, creator, 1, "action id?", "mission?", "random data");
+        RewardsFacet(address(app)).mintBadge(badgeContract, other, activityId, activityType, "");
 
-        assertEq(ERC721Badge(badgeContractAddress).balanceOf(creator), 1);
+        assertEq(ERC721Badge(badgeContract).balanceOf(other), 1);
+    }
+
+    function test_emits_badge_minted_event() public {
+        vm.expectEmit(true, true, true, true);
+        emit BadgeMinted(badgeContract, 1, other, activityId, activityType, "");
+
+        vm.prank(creator);
+        RewardsFacet(address(app)).mintBadge(badgeContract, other, activityId, activityType, "");
+    }
+
+    function test_can_encode_string_in_data_emitted_in_badge_minted_event() public {
+        vm.expectEmit(true, true, true, true);
+        emit BadgeMinted(badgeContract, 1, other, activityId, activityType, abi.encode("testing 123"));
+
+        vm.prank(creator);
+        RewardsFacet(address(app)).mintBadge(badgeContract, other, activityId, activityType, abi.encode("testing 123"));
+    }
+}
+
+contract RewardFacet__integration_batchMintBadge is Setup {
+    function test_rewards_multiple_badges() public {
+        vm.prank(creator);
+        RewardsFacet(address(app)).batchMintBadge(badgeContract, other, 10, activityId, activityType, "");
+
+        assertEq(ERC721Badge(badgeContract).balanceOf(other), 10);
+    }
+
+    function test_emits_badge_minted_event() public {
+        vm.expectEmit(true, true, true, true);
+        emit BadgeMinted(badgeContract, 10, other, activityId, activityType, "");
+
+        vm.prank(creator);
+        RewardsFacet(address(app)).batchMintBadge(badgeContract, other, 10, activityId, activityType, "");
+    }
+
+    function test_can_encode_string_in_data_emitted_in_badge_minted_event() public {
+        vm.expectEmit(true, true, true, true);
+        emit BadgeMinted(badgeContract, 10, other, activityId, activityType, abi.encode("testing 123"));
+
+        vm.prank(creator);
+        RewardsFacet(address(app)).batchMintBadge(
+            badgeContract, other, 10, activityId, activityType, abi.encode("testing 123")
+        );
+    }
+
+    function test_reverts_when_sender_not_authorised() public {
+        vm.expectRevert(RewardsFacet.RewardsFacet_NotAuthorized.selector);
+
+        vm.prank(other);
+        RewardsFacet(address(app)).batchMintBadge(badgeContract, other, 10, activityId, activityType, "");
+    }
+
+    function test_reverts_when_app_not_granted_minter_role() public {
+        vm.startPrank(creator);
+        ERC721Badge(badgeContract).revokeRole(MINTER_ROLE, address(app));
+
+        vm.expectRevert();
+        RewardsFacet(address(app)).batchMintBadge(badgeContract, other, 10, activityId, activityType, "");
+        vm.stopPrank();
+    }
+}
+
+contract RewardFacet__integration_multicall is Setup {
+    function test_can_multicall_minting_badges() public {
+        bytes[] memory calls = new bytes[](2);
+        calls[0] =
+            abi.encodeCall(RewardsFacet(address(app)).mintBadge, (badgeContract, other, activityId, activityType, ""));
+        calls[1] = abi.encodeCall(
+            RewardsFacet(address(app)).batchMintBadge, (badgeContract, creator, 10, activityId, activityType, "")
+        );
+
+        vm.prank(creator);
+        RewardsFacet(address(app)).multicall(calls);
+
+        assertEq(ERC721Badge(badgeContract).balanceOf(other), 1);
+        assertEq(ERC721Badge(badgeContract).balanceOf(creator), 10);
     }
 }
 
