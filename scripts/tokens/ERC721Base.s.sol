@@ -25,3 +25,16 @@ contract Deploy is Script, Utils {
         exportContractDeployment(CONTRACT_NAME, address(erc721base), block.number);
     }
 }
+
+contract MintTo is Script, Utils {
+    function run(address _contractAddress, string memory _tokenURI) external {
+        uint256 deployerPrivateKey = vm.envUint("PRIVATE_KEY");
+        address deployerAddress = vm.addr(deployerPrivateKey);
+        vm.startBroadcast(deployerPrivateKey);
+
+        ERC721Base erc721Badge = ERC721Base(_contractAddress);
+        erc721Badge.mintTo(deployerAddress, _tokenURI);
+
+        vm.stopBroadcast();
+    }
+}
