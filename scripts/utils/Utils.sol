@@ -71,7 +71,9 @@ contract Utils is Script {
 
     function _getDeployedFilePath() internal view returns (string memory) {
         string memory inputDir = string.concat(vm.projectRoot(), "/deployed/");
-        string memory file = string.concat(vm.toString(block.chainid), ".json");
+        string memory file = isStaging() ?
+            string.concat(vm.toString(block.chainid), "-staging.json") :
+            string.concat(vm.toString(block.chainid), ".json");
 
         return string.concat(inputDir, file);
     }
@@ -81,6 +83,14 @@ contract Utils is Script {
             return result;
         } catch {
             return "";
+        }
+    }
+
+    function isStaging () internal view returns (bool) {
+        try vm.envBool("IS_STAGING") returns (bool value) {
+            return value;
+        } catch {
+            return false;
         }
     }
 }
