@@ -128,6 +128,18 @@ RewardsFacet.batchMintBadge:; forge script \
 	--sig "run(address)" \
  	--rpc-url $(rpc) --broadcast $(verbose) $(legacy) $(slow) $(args)
 
+# Simulate create new app and issues rewards
+# example: make SimulateAppAndRewards rpc="anvil" args="appName"
+SimulateAppAndRewards:; forge script \
+	scripts/utils/Simulate.s.sol:SimulateAppAndRewards \
+	--sig "run(string)" \
+	--rpc-url $(rpc) \
+	--broadcast \
+	$(legacy) \
+	$(slow) \
+	$(verbose) \
+	`cast --format-bytes32-string $(args)`
+
 # Run all update scripts
 update:; make \
 	update-ERC721FactoryFacet \
