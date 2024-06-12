@@ -1,5 +1,21 @@
 # @openformat/contracts
 
+## 1.3.0
+
+### Minor Changes
+
+- [#118](https://github.com/open-format/contracts/pull/118) [`abbfc89`](https://github.com/open-format/contracts/commit/abbfc897a33e45afcf94bb33468d9ef6600f9240) Thanks [@tinypell3ts](https://github.com/tinypell3ts)! - - Remove ConstellationFactory and ERC20Constellation
+
+  - Renames Star to App
+
+- [#122](https://github.com/open-format/contracts/pull/122) [`0d28910`](https://github.com/open-format/contracts/commit/0d28910fa267c720984e66278a85ef8a74dd8741) Thanks [@george-openformat](https://github.com/george-openformat)! - added ERC721Badge contract, updated ERC721FactoryFacet to add tokenURI on initialize
+
+- [#126](https://github.com/open-format/contracts/pull/126) [`b232e31`](https://github.com/open-format/contracts/commit/b232e314081ebe73387a83b39143cbcacd972f13) Thanks [@george-openformat](https://github.com/george-openformat)! - update rewards facet to mint badges
+
+### Patch Changes
+
+- [#124](https://github.com/open-format/contracts/pull/124) [`dfbb7fe`](https://github.com/open-format/contracts/commit/dfbb7fe90953e74f9f52750bd017408d8ab657f1) Thanks [@george-openformat](https://github.com/george-openformat)! - add metadata update events to ERC721Badge contract
+
 ## 1.2.1
 
 ### Patch Changes
