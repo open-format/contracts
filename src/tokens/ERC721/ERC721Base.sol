@@ -17,10 +17,6 @@ import {Royalty} from "@extensions/royalty/Royalty.sol";
 import {MintMetadata} from "@extensions/mintMetadata/MintMetadata.sol";
 import {BatchMintMetadata} from "@extensions/batchMintMetadata/BatchMintMetadata.sol";
 import {ContractMetadata, IContractMetadata} from "@extensions/contractMetadata/ContractMetadata.sol";
-import {
-    DefaultOperatorFilterer,
-    DEFAULT_SUBSCRIPTION
-} from "@extensions/defaultOperatorFilterer/DefaultOperatorFilterer.sol";
 import {Global} from "@extensions/global/Global.sol";
 import {PlatformFee} from "@extensions/platformFee/PlatformFee.sol";
 
@@ -36,7 +32,6 @@ contract ERC721Base is
     MintMetadata,
     BatchMintMetadata,
     ContractMetadata,
-    DefaultOperatorFilterer,
     Royalty,
     Multicall,
     Global,
@@ -61,7 +56,6 @@ contract ERC721Base is
         _grantRole(ADMIN_ROLE, _owner);
         _setOwner(_owner);
         _setDefaultRoyaltyInfo(_royaltyRecipient, _royaltyBps);
-        _registerToDefaultOperatorFilterer(DEFAULT_SUBSCRIPTION, true);
 
         _setSupportsInterface(type(IERC165).interfaceId, true);
         _setSupportsInterface(type(IERC721).interfaceId, true);
@@ -214,7 +208,6 @@ contract ERC721Base is
     function setApprovalForAll(address operator, bool approved)
         public
         override (ERC721AUpgradeable)
-        onlyAllowedOperatorApproval(operator)
     {
         super.setApprovalForAll(operator, approved);
     }
@@ -224,7 +217,6 @@ contract ERC721Base is
         public
         payable
         override (ERC721AUpgradeable)
-        onlyAllowedOperatorApproval(operator)
     {
         super.approve(operator, tokenId);
     }
@@ -234,7 +226,6 @@ contract ERC721Base is
         public
         payable
         override (ERC721AUpgradeable)
-        onlyAllowedOperator(from)
     {
         super.transferFrom(from, to, tokenId);
     }
@@ -244,7 +235,6 @@ contract ERC721Base is
         public
         payable
         override (ERC721AUpgradeable)
-        onlyAllowedOperator(from)
     {
         super.safeTransferFrom(from, to, tokenId);
     }
@@ -254,7 +244,6 @@ contract ERC721Base is
         public
         payable
         override (ERC721AUpgradeable)
-        onlyAllowedOperator(from)
     {
         super.safeTransferFrom(from, to, tokenId, data);
     }
