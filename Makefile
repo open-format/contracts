@@ -29,7 +29,7 @@ deploy:; make \
 	deploy-ERC721Base \
 	deploy-ERC721LazyMint \
 	deploy-ERC721Badge \
-	deploy-RewardsFacet \
+	deploy-EventFacet \
 	deploy-SettingsFacet \
 	deploy-ERC721FactoryFacet \
 	deploy-ERC20FactoryFacet \
@@ -48,6 +48,7 @@ deploy-ERC721Badge:; forge script scripts/tokens/ERC721Badge.s.sol:Deploy --rpc-
 deploy-ERC20Base:; forge script scripts/tokens/ERC20Base.s.sol:Deploy --rpc-url $(rpc) --broadcast $(verbose) $(gasPrice) $(legacy) $(slow)
 
 # facets
+deploy-EventFacet:; forge script scripts/facet/EventFacet.s.sol:Deploy --rpc-url $(rpc) --broadcast $(verbose) $(gasPrice) $(legacy) $(slow)
 deploy-RewardsFacet:; forge script scripts/facet/RewardsFacet.s.sol:Deploy --rpc-url $(rpc) --broadcast $(verbose) $(gasPrice) $(legacy) $(slow)
 deploy-SettingsFacet:; forge script scripts/facet/SettingsFacet.s.sol:Deploy --rpc-url $(rpc) --broadcast $(verbose) $(gasPrice) $(legacy) $(slow)
 deploy-ERC721FactoryFacet:; forge script scripts/facet/ERC721FactoryFacet.s.sol:Deploy --rpc-url $(rpc) --broadcast $(verbose) $(gasPrice) $(legacy) $(slow)
