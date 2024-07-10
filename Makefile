@@ -63,10 +63,10 @@ ops-setup:; make \
 	confirm-operations-wallet \
 	ops-CreateOpenFormatApp \
 	ops-DeployXP \
-	ops-DeployOFT \
+	ops-DeployOFT
 
 ops-CreateOpenFormatApp:; forge script scripts/operations/OpenFormatApp.s.sol:CreateApp --rpc-url $(rpc) --broadcast $(verbose) $(legacy) $(slow)
-ops-DeployOFT:; forge script scripts/operations/OpenFormatApp.s.sol:DeployXP --rpc-url $(rpc) --broadcast $(verbose) $(legacy) $(slow)
+ops-DeployXP:; forge script scripts/operations/OpenFormatApp.s.sol:DeployXP --rpc-url $(rpc) --broadcast $(verbose) $(legacy) $(slow)
 ops-DeployOFT:; forge script scripts/operations/OpenFormatApp.s.sol:DeployOFT --rpc-url $(rpc) --broadcast $(verbose) $(legacy) $(slow)
 
 # helpers
