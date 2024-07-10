@@ -57,6 +57,16 @@ deploy-ERC721LazyDropFacet:; forge script scripts/facet/ERC721LazyDropFacet.s.so
 # patch
 patch-SettingsFacet:; forge script scripts/facet/SettingsFacet.s.sol:Patch --rpc-url $(rpc) --broadcast $(verbose) $(legacy) $(slow)
 
+# Operations
+# All things relating to Open Formats app and $OFT
+ops-setup:; make \
+	confirm-operations-wallet \
+	ops-CreateOpenFormatApp \
+	ops-DeployOFT \
+
+ops-CreateOpenFormatApp:; forge script scripts/operations/OpenFormatApp.s.sol:CreateApp --rpc-url $(rpc) --broadcast $(verbose) $(legacy) $(slow)
+ops-DeployOFT:; forge script scripts/operations/OpenFormatApp.s.sol:DeployOFT --rpc-url $(rpc) --broadcast $(verbose) $(legacy) $(slow)
+
 # helpers
 
 # example: `make CreateApp args="app name" rpc=anvil`
@@ -186,3 +196,7 @@ update-addPlatformFeeToTokens:; make \
 # Date: 30.03.23
 
 update-SettingsFacet-ExposeGlobals:; forge script scripts/facet/SettingsFacet.s.sol:Update_ExposeGlobals --rpc-url $(rpc) --broadcast $(verbose) $(legacy) $(slow)
+
+# utils - bash scripts
+confirm-operations-wallet:; export WALLET_ADDRESS=$$(cast wallet address ${PRIVATE_KEY}) && \
+	bash bin/confirm-operations-wallet.sh
