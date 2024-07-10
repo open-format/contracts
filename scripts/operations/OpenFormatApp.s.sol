@@ -10,6 +10,7 @@ import {CONTRACT_NAME as APP_FACTORY} from "scripts/core/AppFactory.s.sol";
 
 string constant OPEN_FORMAT_APP = "Open_Format_App";
 string constant OFT = "OFT";
+string constant XP = "XP";
 
 contract CreateApp is Script, Utils {
     function run() external {
@@ -29,6 +30,34 @@ contract CreateApp is Script, Utils {
         vm.stopBroadcast();
 
         exportContractDeployment(OPEN_FORMAT_APP, openFormatApp, block.number);
+    }
+}
+
+contract DeployXP is Script, Utils {
+    function run() external {
+        uint256 deployerPrivateKey = vm.envUint("PRIVATE_KEY");
+        address deployerAddress = vm.addr(deployerPrivateKey);
+
+        address openFormatApp = getContractDeploymentAddress(OPEN_FORMAT_APP);
+
+        if (openFormatApp == address(0)) {
+           revert("Cannot find open format app, make sure it is created");
+        }
+
+        vm.startBroadcast(deployerPrivateKey);
+
+        // deploy XP
+        address xp = ERC20FactoryFacet(openFormatApp).createERC20(
+          "XP",
+          "XP",
+          18,
+          0,
+          "Base"
+        );
+
+        vm.stopBroadcast();
+
+        exportContractDeployment(XP, xp, block.number);
     }
 }
 

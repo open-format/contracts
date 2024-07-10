@@ -62,9 +62,11 @@ patch-SettingsFacet:; forge script scripts/facet/SettingsFacet.s.sol:Patch --rpc
 ops-setup:; make \
 	confirm-operations-wallet \
 	ops-CreateOpenFormatApp \
+	ops-DeployXP \
 	ops-DeployOFT \
 
 ops-CreateOpenFormatApp:; forge script scripts/operations/OpenFormatApp.s.sol:CreateApp --rpc-url $(rpc) --broadcast $(verbose) $(legacy) $(slow)
+ops-DeployOFT:; forge script scripts/operations/OpenFormatApp.s.sol:DeployXP --rpc-url $(rpc) --broadcast $(verbose) $(legacy) $(slow)
 ops-DeployOFT:; forge script scripts/operations/OpenFormatApp.s.sol:DeployOFT --rpc-url $(rpc) --broadcast $(verbose) $(legacy) $(slow)
 
 # helpers
