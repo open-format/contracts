@@ -28,6 +28,16 @@ The Open Format Smart Contracts are the core of the Open Format ecosystem.
 
 🔨 ERC-4626 - Tokenised vaults
 
+## Deployments
+### Arbitrum Sepolia (testnet)
+| Contract Name           | Contract Address                                                                                                             | Contract Type |
+| ----------------------- | ---------------------------------------------------------------------------------------------------------------------------- | ------------- |
+| App Factory             | [0x19781Af95cA4E113D5D1412452225D11A84ce992](https://sepolia.arbiscan.io/address/0x19781Af95cA4E113D5D1412452225D11A84ce992) | AppFactory    |
+| Open Format App         | [0x79d4763803A88e4963f4df9C2ebe493BD32Fbf56](https://sepolia.arbiscan.io/address/0x79d4763803A88e4963f4df9C2ebe493BD32Fbf56) | App           |
+| OFT (Open Format Token) | [0xEF2be11D2077724987c5D0A10A462B3cDcFCfB4d](https://sepolia.arbiscan.io/address/0xEF2be11D2077724987c5D0A10A462B3cDcFCfB4d) | ERC20Base     |
+| XP                      | [0xb2f9f79F166fDbB64445414fbEa3d9aD8fA348B5](https://sepolia.arbiscan.io/address/0xb2f9f79f166fdbb64445414fbea3d9ad8fa348b5) | ERC20Base     |
+
+
 ## Getting Started
 
 These instructions will give you a copy of the project up and running on your local machine for development and testing purposes.
