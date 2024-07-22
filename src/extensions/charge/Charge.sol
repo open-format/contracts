@@ -49,7 +49,7 @@ abstract contract Charge is ICharge, ChargeInternal {
      * @param credit The address of the ERC20 token.
      * @return bool True if the user has sufficient funds and allowance, otherwise false.
      */
-    function userHasFunds(address user, address credit) external view returns (bool) {
+    function hasFunds(address user, address credit) external view returns (bool) {
         return _hasFunds(user, credit, _getMinimumCreditBalance(credit));
     }
 
