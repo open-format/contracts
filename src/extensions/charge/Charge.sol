@@ -43,6 +43,16 @@ abstract contract Charge is ICharge, ChargeInternal {
     }
 
     /**
+     * @notice Get the minimum credit balance required for a specific token.
+     * @dev returns the minimum balance of `credit` tokens that users must maintain.
+     * @param credit The address of the ERC20 token.
+     * @return uint256 The set minimum balance.
+     */
+    function getMinimumCreditBalance(address credit) external view returns (uint256) {
+        return _getMinimumCreditBalance(credit);
+    }
+
+    /**
      * @notice Check if a user has sufficient funds.
      * @dev Returns true if the `user` has at least the minimum credit balance and allowance for the given `credit` token.
      * @param user The address of the user.
@@ -52,10 +62,4 @@ abstract contract Charge is ICharge, ChargeInternal {
     function hasFunds(address user, address credit) external view returns (bool) {
         return _hasFunds(user, credit, _getMinimumCreditBalance(credit));
     }
-
-    /**
-     * @dev Internal function to get the address of the operator.
-     * @return address The address of the operator.
-     */
-    function _operator() internal virtual returns (address) {}
 }
