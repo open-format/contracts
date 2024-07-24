@@ -3,6 +3,10 @@
     "address": "0x4174a9206A2213926fb74bA067Ea00e3E0EBEdbB",
     "startBlock": 53181340
   },
+  "ChargeFacet": {
+    "address": "0xcb80fE226bf533fdda8c19D0Aa9Be36124eAA5a5",
+    "startBlock": 66291305
+  },
   "ERC20Base": {
     "address": "0x6F36f7A3CD912F284bc13f85ee04c57Da14319c1",
     "startBlock": 53181398
@@ -79,6 +83,7 @@
     "ERC721LazyDropFacet",
     "Open_Format_App",
     "XP",
-    "OFT"
+    "OFT",
+    "ChargeFacet"
   ]
 }
