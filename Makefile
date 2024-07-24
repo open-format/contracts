@@ -34,6 +34,7 @@ deploy:; make \
 	deploy-ERC721FactoryFacet \
 	deploy-ERC20FactoryFacet \
 	deploy-ERC721LazyDropFacet \
+	deploy-ChargeFacet \
 
 # core
 deploy-Globals:; forge script scripts/core/Globals.s.sol:Deploy --rpc-url $(rpc) --broadcast $(gasPrice) $(verbose) $(legacy) $(slow)
@@ -48,6 +49,7 @@ deploy-ERC721Badge:; forge script scripts/tokens/ERC721Badge.s.sol:Deploy --rpc-
 deploy-ERC20Base:; forge script scripts/tokens/ERC20Base.s.sol:Deploy --rpc-url $(rpc) --broadcast $(verbose) $(gasPrice) $(legacy) $(slow)
 
 # facets
+deploy-ChargeFacet:; forge script scripts/facet/ChargeFacet.s.sol:Deploy --rpc-url $(rpc) --broadcast $(verbose) $(gasPrice) $(legacy) $(slow)
 deploy-RewardsFacet:; forge script scripts/facet/RewardsFacet.s.sol:Deploy --rpc-url $(rpc) --broadcast $(verbose) $(gasPrice) $(legacy) $(slow)
 deploy-SettingsFacet:; forge script scripts/facet/SettingsFacet.s.sol:Deploy --rpc-url $(rpc) --broadcast $(verbose) $(gasPrice) $(legacy) $(slow)
 deploy-ERC721FactoryFacet:; forge script scripts/facet/ERC721FactoryFacet.s.sol:Deploy --rpc-url $(rpc) --broadcast $(verbose) $(gasPrice) $(legacy) $(slow)
@@ -123,6 +125,27 @@ ERC721Badge.setBaseURI:; forge script \
 ERC721Base.mintTo:; forge script \
 	scripts/tokens/ERC721Base.s.sol:MintTo \
 	--sig "run(address,string)" \
+ 	--rpc-url $(rpc) --broadcast $(verbose) $(legacy) $(slow) \
+	$(word 1, $(args)) $(word 2, $(args))
+
+# example: make ChargeFacet.chargeUser args="0xaf4c80136581212185f37c5e8809120d8fbf6224 0xe182c3aaFF5AC9968Fb14bBa6f833A9530EeF904 1"
+ChargeFacet.chargeUser:; forge script \
+	scripts/facet/ChargeFacet.s.sol:ChargeUser \
+	--sig "run(address,address,uint256)" \
+ 	--rpc-url $(rpc) --broadcast $(verbose) $(legacy) $(slow) \
+	$(word 1, $(args)) $(word 2, $(args)) `cast --to-wei $(word 3, $(args))`
+
+# example: make ChargeFacet.setMinimumCreditBalance args="0xe182c3aaFF5AC9968Fb14bBa6f833A9530EeF904 1"
+ChargeFacet.setMinimumCreditBalance:; forge script \
+	scripts/facet/ChargeFacet.s.sol:SetMinimumCreditBalance \
+	--sig "run(address,uint256)" \
+ 	--rpc-url $(rpc) --broadcast $(verbose) $(legacy) $(slow) \
+	$(word 1, $(args)) `cast --to-wei $(word 2, $(args))`
+
+# example: make ChargeFacet.hasFunds args="0xaf4c80136581212185f37c5e8809120d8fbf6224 0xe182c3aaFF5AC9968Fb14bBa6f833A9530EeF904"
+ChargeFacet.hasFunds:; forge script \
+	scripts/facet/ChargeFacet.s.sol:HasFunds \
+	--sig "run(address,address)" \
  	--rpc-url $(rpc) --broadcast $(verbose) $(legacy) $(slow) \
 	$(word 1, $(args)) $(word 2, $(args))
 
