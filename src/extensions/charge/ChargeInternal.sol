@@ -5,19 +5,19 @@ import {ChargeStorage} from "./ChargeStorage.sol";
 import {IERC20, SafeERC20} from "@solidstate/contracts/utils/SafeERC20.sol";
 
 abstract contract ChargeInternal {
-    function _hasFunds(address user, address credit, uint256 minimumBalance) internal view returns (bool) {
+    function _hasFunds(address user, address token, uint256 requiredBalance) internal view returns (bool) {
         return (
-            IERC20(credit).balanceOf(user) >= minimumBalance
-                && IERC20(credit).allowance(user, address(this)) >= minimumBalance
+            IERC20(token).balanceOf(user) >= requiredBalance
+                && IERC20(token).allowance(user, address(this)) >= requiredBalance
         );
     }
 
-    function _getMinimumCreditBalance(address credit) internal view returns (uint256) {
-        return ChargeStorage.layout().minimumCreditBalance[credit];
+    function _getRequiredTokenBalance(address token) internal view returns (uint256) {
+        return ChargeStorage.layout().requiredTokenBalance[token];
     }
 
-    function _setMinimumCreditBalance(address credit, uint256 amount) internal {
-        ChargeStorage.layout().minimumCreditBalance[credit] = amount;
+    function _setRequiredTokenBalance(address token, uint256 amount) internal {
+        ChargeStorage.layout().requiredTokenBalance[token] = amount;
     }
 
     /**

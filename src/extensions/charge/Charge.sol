@@ -9,57 +9,57 @@ import {IERC2612} from "@solidstate/contracts/token/ERC20/permit/IERC2612.sol";
 abstract contract Charge is ICharge, ChargeInternal {
     /**
      * @notice Charge a user for a specific service.
-     * @dev Transfers the specified `amount` of `credit` tokens from the `user` to the operator.
+     * @dev Transfers the specified `amount` of `tokens` from the `user` to the operator.
      * @param user The address of the user to be charged.
-     * @param credit The address of the ERC20 token used for payment.
+     * @param token The address of the ERC20 token used for payment.
      * @param amount The amount of tokens to be transferred.
      * @param chargeId A unique identifier for the charge.
      * @param chargeType The type of charge.
      */
-    function chargeUser(address user, address credit, uint256 amount, bytes32 chargeId, bytes32 chargeType) external {
+    function chargeUser(address user, address token, uint256 amount, bytes32 chargeId, bytes32 chargeType) external {
         if (msg.sender != _operator()) {
             revert Charge_doNotHavePermission();
         }
 
-        IERC20(credit).transferFrom(user, _operator(), amount);
+        IERC20(token).transferFrom(user, _operator(), amount);
 
-        emit chargedUser(user, credit, amount, chargeId, chargeType);
+        emit ChargedUser(user, token, amount, chargeId, chargeType);
     }
 
     /**
-     * @notice Set the minimum credit balance required for a specific token.
-     * @dev Sets the minimum balance of `credit` tokens that users must maintain.
-     * @param credit The address of the ERC20 token.
-     * @param balance The minimum balance to be set.
+     * @notice Set the required token balance for a specific token.
+     * @dev Sets the required balance of tokens that users must maintain.
+     * @param token The address of the ERC20 token.
+     * @param balance The required balance to be set.
      */
-    function setMinimumCreditBalance(address credit, uint256 balance) external {
+    function setRequiredTokenBalance(address token, uint256 balance) external {
         if (msg.sender != _operator()) {
             revert Charge_doNotHavePermission();
         }
 
-        _setMinimumCreditBalance(credit, balance);
+        _setRequiredTokenBalance(token, balance);
 
-        emit minimumCreditBalanceUpdated(credit, balance);
+        emit RequiredTokenBalanceUpdated(token, balance);
     }
 
     /**
-     * @notice Get the minimum credit balance required for a specific token.
-     * @dev returns the minimum balance of `credit` tokens that users must maintain.
-     * @param credit The address of the ERC20 token.
-     * @return uint256 The set minimum balance.
+     * @notice Get the required token balance for a specific token.
+     * @dev returns the required balance of tokens that users must maintain.
+     * @param token The address of the ERC20 token.
+     * @return uint256 The set required balance.
      */
-    function getMinimumCreditBalance(address credit) external view returns (uint256) {
-        return _getMinimumCreditBalance(credit);
+    function getRequiredTokenBalance(address token) external view returns (uint256) {
+        return _getRequiredTokenBalance(token);
     }
 
     /**
      * @notice Check if a user has sufficient funds.
-     * @dev Returns true if the `user` has at least the minimum credit balance and allowance for the given `credit` token.
+     * @dev Returns true if the `user` has at least the required token balance and allowance for the given ERC20 token.
      * @param user The address of the user.
-     * @param credit The address of the ERC20 token.
-     * @return bool True if the user has sufficient funds and allowance, otherwise false.
+     * @param token The address of the ERC20 token.
+     * @return bool True if the user has sufficient balance and allowance, otherwise false.
      */
-    function hasFunds(address user, address credit) external view returns (bool) {
-        return _hasFunds(user, credit, _getMinimumCreditBalance(credit));
+    function hasFunds(address user, address token) external view returns (bool) {
+        return _hasFunds(user, token, _getRequiredTokenBalance(token));
     }
 }
