@@ -23,8 +23,8 @@ contract Deploy is Script, Utils {
         // construct array of function selectors
         bytes4[] memory selectors = new bytes4[](4);
         selectors[0] = chargeFacet.chargeUser.selector;
-        selectors[1] = chargeFacet.setMinimumCreditBalance.selector;
-        selectors[2] = chargeFacet.getMinimumCreditBalance.selector;
+        selectors[1] = chargeFacet.setRequiredTokenBalance.selector;
+        selectors[2] = chargeFacet.getRequiredTokenBalance.selector;
         selectors[3] = chargeFacet.hasFunds.selector;
 
         // construct and ADD facet cut
@@ -53,8 +53,8 @@ contract Update is Script, Utils {
         // construct array of function selectors
         bytes4[] memory selectors = new bytes4[](4);
         selectors[0] = chargeFacet.chargeUser.selector;
-        selectors[1] = chargeFacet.setMinimumCreditBalance.selector;
-        selectors[2] = chargeFacet.getMinimumCreditBalance.selector;
+        selectors[1] = chargeFacet.setRequiredTokenBalance.selector;
+        selectors[2] = chargeFacet.getRequiredTokenBalance.selector;
         selectors[3] = chargeFacet.hasFunds.selector;
 
         // construct and REPLACE facet cut
@@ -73,40 +73,88 @@ contract Update is Script, Utils {
 }
 
 contract ChargeUser is Script, Utils {
-    function run(address user, address credit, uint256 amount) public {
+    function run(address user, address token, uint256 amount) public {
         uint256 deployerPrivateKey = vm.envUint("PRIVATE_KEY");
         address deployerAddress = vm.addr(deployerPrivateKey);
         address appId = vm.envAddress("APP_ID");
 
         vm.startBroadcast(deployerPrivateKey);
         ChargeFacet chargeFacet = ChargeFacet(appId);
-        chargeFacet.chargeUser(user, credit, amount, "OFT-001", "batch");
+        chargeFacet.chargeUser(user, token, amount, "OFT-001", "batch");
         vm.stopBroadcast();
     }
 }
 
-contract SetMinimumCreditBalance is Script, Utils {
-    function run(address credit, uint256 balance) public {
+contract SetRequiredTokenBalance is Script, Utils {
+    function run(address token, uint256 balance) public {
         uint256 deployerPrivateKey = vm.envUint("PRIVATE_KEY");
         address deployerAddress = vm.addr(deployerPrivateKey);
         address appId = vm.envAddress("APP_ID");
 
         vm.startBroadcast(deployerPrivateKey);
         ChargeFacet chargeFacet = ChargeFacet(appId);
-        chargeFacet.setMinimumCreditBalance(credit, balance);
+        chargeFacet.setRequiredTokenBalance(token, balance);
         vm.stopBroadcast();
     }
 }
 
 contract HasFunds is Script, Utils {
-    function run(address user, address credit) public {
+    function run(address user, address token) public {
         uint256 deployerPrivateKey = vm.envUint("PRIVATE_KEY");
         address deployerAddress = vm.addr(deployerPrivateKey);
         address appId = vm.envAddress("APP_ID");
 
         vm.startBroadcast(deployerPrivateKey);
         ChargeFacet chargeFacet = ChargeFacet(appId);
-        chargeFacet.hasFunds(user, credit);
+        chargeFacet.hasFunds(user, token);
         vm.stopBroadcast();
+    }
+}
+
+/**
+ * @dev updates charge facet to use tokens naming convention instead of credits
+ * @dev should only be run on staging env
+ */
+contract Update_useTokensNamingConvention is Script, Utils {
+    function run() external {
+        uint256 deployerPrivateKey = vm.envUint("PRIVATE_KEY");
+        vm.startBroadcast(deployerPrivateKey);
+
+        // deploy
+        ChargeFacet chargeFacet = new ChargeFacet();
+
+        // construct array of function selectors to remove
+        bytes4[] memory removeSelectors = new bytes4[](2);
+        removeSelectors[0] = bytes4(keccak256(bytes("setMinimumCreditBalance(address,uint256)")));
+        removeSelectors[1] = bytes4(keccak256(bytes("getMinimumCreditBalance(address)")));
+
+        // construct array of function selectors to add
+        bytes4[] memory addSelectors = new bytes4[](2);
+        addSelectors[0] = chargeFacet.setRequiredTokenBalance.selector;
+        addSelectors[1] = chargeFacet.getRequiredTokenBalance.selector;
+
+        // construct array of function selectors to replace
+        bytes4[] memory replaceSelectors = new bytes4[](2);
+        replaceSelectors[0] = chargeFacet.chargeUser.selector;
+        replaceSelectors[1] = chargeFacet.hasFunds.selector;
+
+        // construct the facet cuts
+        IDiamondWritableInternal.FacetCut[] memory cuts = new IDiamondWritableInternal.FacetCut[](3);
+        cuts[0] = IDiamondWritableInternal.FacetCut(
+            address(0), IDiamondWritableInternal.FacetCutAction.REMOVE, removeSelectors
+        );
+        cuts[1] = IDiamondWritableInternal.FacetCut(
+            address(chargeFacet), IDiamondWritableInternal.FacetCutAction.ADD, addSelectors
+        );
+        cuts[2] = IDiamondWritableInternal.FacetCut(
+            address(chargeFacet), IDiamondWritableInternal.FacetCutAction.REPLACE, replaceSelectors
+        );
+
+        // add to registry
+        RegistryMock(payable(getContractDeploymentAddress("Registry"))).diamondCut(cuts, address(0), "");
+
+        vm.stopBroadcast();
+
+        exportContractDeployment(CONTRACT_NAME, address(chargeFacet), block.number);
     }
 }

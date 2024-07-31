@@ -216,6 +216,11 @@ update-addPlatformFeeToTokens:; make \
 	deploy-ERC721LazyMint \
 	deploy-ERC20Base \
 
+# Rename functions in charge facet on staging contracts
+# Date 30.07.24
+# updates ChargeFacet to rename functions and use token naming convention instead of credits
+update-ChargeFacet_useTokensNamingConvention:; forge script scripts/facet/ChargeFacet.s.sol:Update_useTokensNamingConvention --rpc-url $(rpc) --broadcast $(verbose) $(legacy) $(slow)
+
 # Expose globals
 # deploys a new settings facet, replaces exisitng function selectors and adds new ones
 # Date: 30.03.23

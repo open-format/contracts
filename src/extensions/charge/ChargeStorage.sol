@@ -3,7 +3,7 @@ pragma solidity ^0.8.16;
 
 library ChargeStorage {
     struct Layout {
-        mapping(address => uint256) minimumCreditBalance; // credit => minimum balance required to conduct actions.
+        mapping(address => uint256) requiredTokenBalance; // ERC20 token address => required balance.
     }
 
     bytes32 internal constant STORAGE_SLOT = keccak256("openformat.contracts.storage.Charge");
