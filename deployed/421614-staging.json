@@ -39,6 +39,14 @@
     "address": "0x9a8cCA505317A7583105BfCF4e3045a762Ea5635",
     "startBlock": 61279656
   },
+  "OFT": {
+    "address": "0xa51132d47d948a795782a50B8a0FB65Ad3601Bb6",
+    "startBlock": 62963504
+  },
+  "Open_Format_App": {
+    "address": "0xCC103a90F00bA5fee98E0cA89EaF98E8225a2d53",
+    "startBlock": 62963409
+  },
   "Proxy": {
     "address": "0xAeffCb409D45c6ffB7E9C339E9105DB6Af877443",
     "startBlock": 61279820
@@ -55,6 +63,10 @@
     "address": "0xdB5293740307a2f6f334cb317C34034bfB62f3af",
     "startBlock": 61280557
   },
+  "XP": {
+    "address": "0x77507D3F8727e640f469b41DaebBC767De055b16",
+    "startBlock": 62963455
+  },
   "doNotRemoveUsedToParseFile": [
     "Globals",
     "Registry",
@@ -69,6 +81,9 @@
     "ERC721FactoryFacet",
     "ERC20FactoryFacet",
     "ERC721LazyDropFacet",
-    "EventFacet"
+    "EventFacet",
+    "Open_Format_App",
+    "XP",
+    "OFT"
   ]
 }
