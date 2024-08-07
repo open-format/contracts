@@ -152,19 +152,6 @@ contract ERC20FactoryFacet__integration_createERC20 is Setup {
         }
     }
 
-    function test_can_create_erc20_and_pay_platform_fee() public {
-        // set platform base fee to 1 ether
-        globals.setPlatformFee(1 ether, 0, socialConscious);
-
-        // create nft and pay platform fee
-        vm.prank(creator);
-        address erc20Address = ERC20FactoryFacet(address(app)).createERC20{value: 1 ether}(
-            "name", "symbol", 18, 1000, erc20ImplementationId
-        );
-        // check platform fee has been received
-        assertEq(socialConscious.balance, 1 ether);
-    }
-
     function test_can_create_erc721_when_approved_creator() public {
         _approveCreatorAccess(other);
 
@@ -188,7 +175,6 @@ contract ERC20FactoryFacet__integration_createERC20 is Setup {
         vm.expectEmit(false, true, true, true);
         emit Created(expectedAddress, creator, "name", "symbol", 18, 1000, erc20ImplementationId);
 
-        // create nft and pay platform fee
         vm.prank(creator);
         ERC20FactoryFacet(address(app)).createERC20("name", "symbol", 18, 1000, erc20ImplementationId);
     }

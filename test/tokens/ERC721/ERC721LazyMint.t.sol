@@ -44,8 +44,8 @@ contract ERC721LazyMint__initialize is Setup {
         erc721LazyMint.initialize(creator, "Name", "Symbol", creator, uint16(tenPercentBPS), "");
     }
 
-    function test_sets_minter_role_and_global_when_passed_encoded_data() public {
-        bytes memory data = abi.encode(other, globals);
+    function test_sets_minter_role_when_passed_encoded_data() public {
+        bytes memory data = abi.encode(other);
         erc721LazyMint = new ERC721LazyMintMock(
           "Name",
           "Symbol",
@@ -55,11 +55,10 @@ contract ERC721LazyMint__initialize is Setup {
         );
 
         assertTrue(erc721LazyMint.hasRole(MINTER_ROLE, other));
-        assertEq(erc721LazyMint._globals(), globals);
     }
 
     function test_does_not_grant_minter_role_when_passed_encoded_zero_address() public {
-        bytes memory data = abi.encode(address(0), globals);
+        bytes memory data = abi.encode(address(0));
         erc721LazyMint = new ERC721LazyMintMock(
           "Name",
           "Symbol",
@@ -71,7 +70,7 @@ contract ERC721LazyMint__initialize is Setup {
         assertFalse(erc721LazyMint.hasRole(MINTER_ROLE, address(0)));
     }
 
-    function test_minter_role_and_globals_are_set_with_extra_data() public {
+    function test_minter_role_are_set_with_extra_data() public {
         bytes memory data = abi.encode(other, globals, 12356789);
 
         erc721LazyMint = new ERC721LazyMintMock(
@@ -83,7 +82,6 @@ contract ERC721LazyMint__initialize is Setup {
         );
 
         assertTrue(erc721LazyMint.hasRole(MINTER_ROLE, other));
-        assertEq(erc721LazyMint._globals(), globals);
     }
 }
 

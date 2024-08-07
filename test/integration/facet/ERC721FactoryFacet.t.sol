@@ -1,8 +1,6 @@
 // SPDX-License-Identifier: BUSL-1.1
 pragma solidity ^0.8.16;
 
-// The following tests that the platform fee extension works as intended within the ecosystem
-
 import "forge-std/Test.sol";
 
 import {
@@ -154,19 +152,6 @@ contract ERC721FactoryFacet__integration_createERC721 is Setup {
         assertTrue(ERC721Base(erc721Address).hasRole(MINTER_ROLE, address(app)));
     }
 
-    function test_can_create_erc721_and_pay_platform_fee() public {
-        // set platform base fee to 1 ether
-        globals.setPlatformFee(1 ether, 0, socialConscious);
-
-        // create nft and pay platform fee
-        vm.prank(creator);
-        address erc721Address = ERC721FactoryFacet(address(app)).createERC721{value: 1 ether}(
-            "name", "symbol", creator, 1000, erc721ImplementationId
-        );
-        // check platform fee has been received
-        assertEq(socialConscious.balance, 1 ether);
-    }
-
     function test_can_create_erc721_when_approved_creator() public {
         _approveCreatorAccess(other);
 
@@ -216,7 +201,6 @@ contract ERC721FactoryFacet__integration_createERC721 is Setup {
         vm.expectEmit(false, true, true, true);
         emit Created(expectedAddress, creator, "name", "symbol", creator, 1000, erc721ImplementationId);
 
-        // create nft and pay platform fee
         vm.prank(creator);
         ERC721FactoryFacet(address(app)).createERC721("name", "symbol", creator, 1000, erc721ImplementationId);
     }
@@ -320,19 +304,6 @@ contract ERC721FactoryFacet_integration_createERC721WithTokenURI is Setup {
         assertTrue(ERC721Badge(erc721Address).hasRole(MINTER_ROLE, address(app)));
     }
 
-    function test_can_create_erc721_and_pay_platform_fee() public {
-        // set platform base fee to 1 ether
-        globals.setPlatformFee(1 ether, 0, socialConscious);
-
-        // create nft and pay platform fee
-        vm.prank(creator);
-        address erc721Address = ERC721FactoryFacet(address(app)).createERC721WithTokenURI{value: 1 ether}(
-            "name", "symbol", tokenURI, creator, 1000, erc721BadgeImplementationId
-        );
-        // check platform fee has been received
-        assertEq(socialConscious.balance, 1 ether);
-    }
-
     function test_can_create_erc721_when_approved_creator() public {
         _approveCreatorAccess(other);
 
@@ -388,7 +359,6 @@ contract ERC721FactoryFacet_integration_createERC721WithTokenURI is Setup {
         vm.expectEmit(false, true, true, true);
         emit Created(expectedAddress, creator, "name", "symbol", creator, 1000, erc721BadgeImplementationId);
 
-        // create nft and pay platform fee
         vm.prank(creator);
         ERC721FactoryFacet(address(app)).createERC721WithTokenURI(
             "name", "symbol", tokenURI, creator, 1000, erc721BadgeImplementationId
