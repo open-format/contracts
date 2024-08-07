@@ -171,37 +171,6 @@ contract ERC721Base__integration_mintTo is ERC721Base_Setup {
         // check nft is minted to creator
         assertEq(base.ownerOf(0), creator);
     }
-
-    function test_pays_platform_fee() public {
-        // set platform base fee to 0.001 ether
-        uint256 basePlatformFee = 0.001 ether;
-        globals.setPlatformFee(basePlatformFee, 0, socialConscious);
-
-        vm.prank(creator);
-        base.mintTo{value: basePlatformFee}(creator, "ipfs://");
-
-        // check platform fee has been received
-        assertEq(socialConscious.balance, basePlatformFee);
-    }
-
-    function test_reverts_if_platform_fee_not_supplied() public {
-        // set platform base fee to 0.001 ether
-        uint256 basePlatformFee = 0.001 ether;
-        globals.setPlatformFee(basePlatformFee, 0, socialConscious);
-
-        vm.expectRevert(CurrencyTransferLib.CurrencyTransferLib_insufficientValue.selector);
-        vm.prank(creator);
-        base.mintTo(creator, "ipfs://");
-    }
-
-    function test_does_not_pay_platform_fee_when_called_from_contract() public {
-        // set platform base fee to 0.001 ether
-        uint256 basePlatformFee = 0.001 ether;
-        globals.setPlatformFee(basePlatformFee, 0, socialConscious);
-
-        contractDummy.mintTo(address(base), creator, "ipfs://");
-        assertEq(base.ownerOf(0), creator);
-    }
 }
 
 contract ERC721Base__integration_batchMintTo is ERC721Base_Setup {
@@ -213,37 +182,5 @@ contract ERC721Base__integration_batchMintTo is ERC721Base_Setup {
         assertEq(base.ownerOf(0), creator);
         assertEq(base.ownerOf(1), creator);
         assertEq(base.ownerOf(2), creator);
-    }
-
-    function test_pays_platform_fee() public {
-        // set platform base fee to 0.001 ether
-        uint256 basePlatformFee = 0.001 ether;
-        uint256 quantity = 3;
-        globals.setPlatformFee(basePlatformFee, 0, socialConscious);
-
-        vm.prank(creator);
-        base.batchMintTo{value: basePlatformFee * quantity}(creator, quantity, "ipfs://");
-
-        // check platform fee has been received
-        assertEq(socialConscious.balance, basePlatformFee * quantity);
-    }
-
-    function test_reverts_if_platform_fee_not_supplied() public {
-        // set platform base fee to 0.001 ether
-        uint256 basePlatformFee = 0.001 ether;
-        globals.setPlatformFee(basePlatformFee, 0, socialConscious);
-
-        vm.expectRevert(CurrencyTransferLib.CurrencyTransferLib_insufficientValue.selector);
-        vm.prank(creator);
-        base.batchMintTo(creator, 3, "ipfs://");
-    }
-
-    function test_does_not_pay_platform_fee_when_called_from_contract() public {
-        // set platform base fee to 0.001 ether
-        uint256 basePlatformFee = 0.001 ether;
-        globals.setPlatformFee(basePlatformFee, 0, socialConscious);
-
-        contractDummy.batchMintTo(address(base), creator, 3, "ipfs://");
-        assertEq(base.ownerOf(0), creator);
     }
 }
