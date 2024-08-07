@@ -89,21 +89,6 @@ contract Setup is Test, Helpers {
         erc20Implementation = new ERC20Base();
 
         {
-            settingsFacet = new SettingsFacet();
-            // add facet to registry
-            bytes4[] memory selectors = new bytes4[](3);
-            selectors[0] = settingsFacet.setApplicationFee.selector;
-            selectors[1] = settingsFacet.setAcceptedCurrencies.selector;
-            selectors[2] = settingsFacet.applicationFeeInfo.selector;
-
-            registry.diamondCut(
-                prepareSingleFacetCut(address(settingsFacet), IDiamondWritableInternal.FacetCutAction.ADD, selectors),
-                address(0),
-                ""
-            );
-        }
-
-        {
             dropFacet = new ERC721LazyDropFacet();
 
             // add facet to registry
@@ -128,17 +113,6 @@ contract Setup is Test, Helpers {
         // create app
         vm.prank(appOwner);
         app = Proxy(payable(appFactory.create("ERC721LazyMintTest", appOwner)));
-        // Add NATIVE_TOKEN and ERC20 to accepted currencies
-        {
-            address[] memory currencies = new address[](2);
-            currencies[0] = address(0);
-            currencies[1] = address(erc20);
-            bool[] memory approvals = new bool[](2);
-            approvals[0] = true;
-            approvals[1] = true;
-            vm.prank(appOwner);
-            SettingsFacet(address(app)).setAcceptedCurrencies(currencies, approvals);
-        }
 
         // Note: just deploy a erc721 for testing no need to do factory facet biz yet
         // TODO: deploy from factory
@@ -347,20 +321,6 @@ contract ERC721LazyDropFacet_ERC721LazyDrop_setClaimCondition is Setup {
         assertEqClaimCondition(claimCondition, testClaimCondition);
     }
 
-    function test_pays_platform_fee() public {
-        // set platform fee
-        globals.setPlatformFee(0.1 ether, 0, socialConscienceLayer);
-
-        vm.deal(nftOwner, 0.1 ether);
-
-        vm.prank(nftOwner);
-        ERC721LazyDropFacet(address(app)).ERC721LazyDrop_setClaimCondition{value: 0.1 ether}(
-            address(erc721), testClaimCondition, false
-        );
-
-        assertEq(socialConscienceLayer.balance, 0.1 ether);
-    }
-
     function test_only_token_contract_owner_can_set_claim_condition() public {
         vm.expectRevert(IERC721LazyDrop.ERC721LazyDrop_notAuthorised.selector);
         vm.prank(other);
@@ -460,69 +420,6 @@ contract ERC721LazyDropFacet_ERC721LazyDrop_claim is Setup {
         assertEq(nftOwner.balance, 1 ether);
     }
 
-    function test_pays_application_fee_with_native_token() public {
-        // set application fee
-        vm.prank(appOwner);
-        SettingsFacet(address(app)).setApplicationFee(tenPercentBPS, appOwner);
-
-        // update claim condition price per token
-        testClaimCondition.pricePerToken = 1 ether;
-        vm.prank(nftOwner);
-        ERC721LazyDropFacet(address(app)).ERC721LazyDrop_setClaimCondition(address(erc721), testClaimCondition, false);
-
-        // make claim with ether
-        vm.prank(other);
-        ERC721LazyDropFacet(address(app)).ERC721LazyDrop_claim{value: 1 ether}(
-            address(erc721), other, 1, testClaimCondition.currency, testClaimCondition.pricePerToken
-        );
-
-        assertEq(nftOwner.balance, 0.9 ether);
-        assertEq(appOwner.balance, 0.1 ether);
-    }
-
-    function test_pays_platform_fee_with_native_token() public {
-        // update claim condition price per token
-        testClaimCondition.pricePerToken = 1 ether;
-        vm.prank(nftOwner);
-        ERC721LazyDropFacet(address(app)).ERC721LazyDrop_setClaimCondition(address(erc721), testClaimCondition, false);
-
-        // set platform fee
-        globals.setPlatformFee(0.1 ether, 0, socialConscienceLayer);
-
-        // make claim with ether
-        vm.prank(other);
-        ERC721LazyDropFacet(address(app)).ERC721LazyDrop_claim{value: 1.1 ether}(
-            address(erc721), other, 1, testClaimCondition.currency, testClaimCondition.pricePerToken
-        );
-
-        assertEq(nftOwner.balance, 1 ether);
-        assertEq(socialConscienceLayer.balance, 0.1 ether);
-    }
-
-    function test_pays_platform_and_application_fee_with_native_token() public {
-        // update claim condition price per token
-        testClaimCondition.pricePerToken = 1 ether;
-        vm.prank(nftOwner);
-        ERC721LazyDropFacet(address(app)).ERC721LazyDrop_setClaimCondition(address(erc721), testClaimCondition, false);
-
-        // set platform fee
-        globals.setPlatformFee(0.1 ether, 0, socialConscienceLayer);
-
-        // set application fee
-        vm.prank(appOwner);
-        SettingsFacet(address(app)).setApplicationFee(tenPercentBPS, appOwner);
-
-        // make claim with ether
-        vm.prank(other);
-        ERC721LazyDropFacet(address(app)).ERC721LazyDrop_claim{value: 1.1 ether}(
-            address(erc721), other, 1, testClaimCondition.currency, testClaimCondition.pricePerToken
-        );
-
-        assertEq(nftOwner.balance, 0.9 ether);
-        assertEq(appOwner.balance, 0.1 ether);
-        assertEq(socialConscienceLayer.balance, 0.1 ether);
-    }
-
     function test_pays_price_to_recipient() public {
         // update claim condition price per token and currency
         testClaimCondition.pricePerToken = 1 ether;
@@ -537,72 +434,6 @@ contract ERC721LazyDropFacet_ERC721LazyDrop_claim is Setup {
         );
 
         assertEq(erc20.balanceOf(nftOwner), 1 ether);
-    }
-
-    function test_pays_application_fee() public {
-        // set application fee
-        vm.prank(appOwner);
-        SettingsFacet(address(app)).setApplicationFee(tenPercentBPS, appOwner);
-
-        /// update claim condition price per token and currency
-        testClaimCondition.pricePerToken = 1 ether;
-        testClaimCondition.currency = address(erc20);
-        vm.prank(nftOwner);
-        ERC721LazyDropFacet(address(app)).ERC721LazyDrop_setClaimCondition(address(erc721), testClaimCondition, false);
-
-        // make claim with erc20
-        vm.prank(other);
-        ERC721LazyDropFacet(address(app)).ERC721LazyDrop_claim(
-            address(erc721), other, 1, testClaimCondition.currency, testClaimCondition.pricePerToken
-        );
-
-        assertEq(erc20.balanceOf(nftOwner), 0.9 ether);
-        assertEq(erc20.balanceOf(appOwner), 0.1 ether);
-    }
-
-    function test_pays_platform_fee() public {
-        // update claim condition price per token
-        testClaimCondition.pricePerToken = 1 ether;
-        testClaimCondition.currency = address(erc20);
-        vm.prank(nftOwner);
-        ERC721LazyDropFacet(address(app)).ERC721LazyDrop_setClaimCondition(address(erc721), testClaimCondition, false);
-
-        // set platform fee
-        globals.setPlatformFee(0.1 ether, 0, socialConscienceLayer);
-
-        // make claim with platform fee
-        vm.prank(other);
-        ERC721LazyDropFacet(address(app)).ERC721LazyDrop_claim{value: 0.1 ether}(
-            address(erc721), other, 1, testClaimCondition.currency, testClaimCondition.pricePerToken
-        );
-
-        assertEq(erc20.balanceOf(nftOwner), 1 ether);
-        assertEq(socialConscienceLayer.balance, 0.1 ether);
-    }
-
-    function test_pays_platform_and_application_fee() public {
-        // update claim condition price per token
-        testClaimCondition.pricePerToken = 1 ether;
-        testClaimCondition.currency = address(erc20);
-        vm.prank(nftOwner);
-        ERC721LazyDropFacet(address(app)).ERC721LazyDrop_setClaimCondition(address(erc721), testClaimCondition, false);
-
-        // set platform fee
-        globals.setPlatformFee(0.1 ether, 0, socialConscienceLayer);
-
-        // set application fee
-        vm.prank(appOwner);
-        SettingsFacet(address(app)).setApplicationFee(tenPercentBPS, appOwner);
-
-        // make claim with ether
-        vm.prank(other);
-        ERC721LazyDropFacet(address(app)).ERC721LazyDrop_claim{value: 0.1 ether}(
-            address(erc721), other, 1, testClaimCondition.currency, testClaimCondition.pricePerToken
-        );
-
-        assertEq(erc20.balanceOf(nftOwner), 0.9 ether);
-        assertEq(erc20.balanceOf(appOwner), 0.1 ether);
-        assertEq(socialConscienceLayer.balance, 0.1 ether);
     }
 
     function test_reverts_when_quantity_per_wallet_limit_exceeded() public {

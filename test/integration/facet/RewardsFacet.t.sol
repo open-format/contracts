@@ -1,8 +1,6 @@
 // SPDX-License-Identifier: BUSL-1.1
 pragma solidity ^0.8.16;
 
-// The following tests ERC20Base integration with Globals ERC20FactoryFacet and platform fees
-
 import "forge-std/Test.sol";
 
 import {
@@ -38,16 +36,6 @@ abstract contract Helpers {
         IDiamondWritableInternal.FacetCut[] memory cuts = new IDiamondWritableInternal.FacetCut[](1);
         cuts[0] = IDiamondWritableInternal.FacetCut(cutAddress, cutAction, selectors);
         return cuts;
-    }
-}
-
-/**
- * @dev dummy contract to test platform fee is not paid when called from a contract
- *      must first grant MINTER_ROLE to this contract
- */
-contract MinterDummy {
-    function mintTo(address _erc20, address _account, uint256 _amount) public {
-        ERC20Base(_erc20).mintTo(_account, _amount);
     }
 }
 
@@ -287,7 +275,6 @@ contract RewardFacet__integration_multicall is Setup {
 
 contract ERC20Base_Setup is Setup {
     ERC20Base base;
-    MinterDummy minter;
 
     function _afterSetup() internal override {
         // add lazy mint implementation
@@ -309,11 +296,6 @@ contract ERC20Base_Setup is Setup {
         );
         // forgefmt: disable-end
 
-        // create contract that can mint
-        minter = new MinterDummy();
-        // grant minter role to minter contract
-        vm.prank(creator);
-        base.grantRole(MINTER_ROLE, address(minter));
     }
 }
 
