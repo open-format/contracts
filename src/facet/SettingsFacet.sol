@@ -2,38 +2,18 @@
 pragma solidity ^0.8.16;
 
 import {SafeOwnable, OwnableInternal} from "@solidstate/contracts/access/ownable/SafeOwnable.sol";
-import {ApplicationFee} from "../extensions/applicationFee/ApplicationFee.sol";
 import {ApplicationAccess, IApplicationAccess} from "../extensions/applicationAccess/ApplicationAccess.sol";
-import {PlatformFee} from "../extensions/platformFee/PlatformFee.sol";
+import {Global} from "../extensions/global/Global.sol";
 
 /**
  * @title   "Settings Facet"
  * @notice  A facet of the Settings contract that allows the application owner to manage application-wide settings.
- *          This contract includes extensions for ApplicationFee, PlatformFee, SafeOwnable, and ApplicationAccess,
- *          which provide functionality for managing application and platform fees, ownership management, and restricted
+ *          This contract includes extensions for SafeOwnable, and ApplicationAccess,
+ *          which provide functionality for ownership management, and restricted
  *          access to contract creation.
  */
 
-contract SettingsFacet is ApplicationFee, PlatformFee, SafeOwnable, ApplicationAccess {
-    /**
-     * @notice sets the application percentage fee in BPS and the recipient wallet
-     * @param percentBPS The percentage used to calculate application fee
-     * @param recipient The wallet or contract address to send the application fee to
-     */
-    function setApplicationFee(uint16 percentBPS, address recipient) external onlyOwner {
-        _setApplicationFee(percentBPS, recipient);
-    }
-
-    /**
-     * @notice sets the accepted currencies for the application fee
-     * @dev the arrays of currencies and approvals must be the same length
-     * @param currencies the list of currencies to edit
-     * @param approvals the list of approvals for the given currencies
-     */
-    function setAcceptedCurrencies(address[] memory currencies, bool[] memory approvals) external onlyOwner {
-        _setAcceptedCurrencies(currencies, approvals);
-    }
-
+contract SettingsFacet is SafeOwnable, Global, ApplicationAccess {
     /**
      * @notice sets the approved accounts that have access to create new token contracts,
      *         setting the zero address will open it up to all.

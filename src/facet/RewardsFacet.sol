@@ -2,9 +2,7 @@
 pragma solidity ^0.8.16;
 
 import {SafeOwnable, OwnableInternal} from "@solidstate/contracts/access/ownable/SafeOwnable.sol";
-import {ApplicationFee} from "../extensions/applicationFee/ApplicationFee.sol";
 import {ApplicationAccess, IApplicationAccess} from "../extensions/applicationAccess/ApplicationAccess.sol";
-import {PlatformFee} from "../extensions/platformFee/PlatformFee.sol";
 import {Multicall} from "@solidstate/contracts/utils/Multicall.sol";
 
 interface NFT {
