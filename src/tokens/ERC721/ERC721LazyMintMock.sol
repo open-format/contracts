@@ -13,10 +13,4 @@ contract ERC721LazyMintMock is ERC721LazyMint {
     ) ERC721LazyMint(true) {
         initialize(msg.sender, _name, _symbol, _royaltyReceiver, _royaltyBPS, _data);
     }
-
-    /* STORAGE HELPERS */
-
-    function _globals() external view returns (address) {
-        return _getGlobalsAddress();
-    }
 }

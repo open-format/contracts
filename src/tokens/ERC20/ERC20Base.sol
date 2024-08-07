@@ -13,8 +13,6 @@ import {ReentrancyGuard} from "@solidstate/contracts/utils/ReentrancyGuard.sol";
 import {ContractMetadata, IContractMetadata} from "@extensions/contractMetadata/ContractMetadata.sol";
 import {Initializable} from "@extensions/initializable/Initializable.sol";
 import {Global} from "@extensions/global/Global.sol";
-import {PlatformFee} from "@extensions/platformFee/PlatformFee.sol";
-
 import {CurrencyTransferLib} from "src/lib/CurrencyTransferLib.sol";
 
 /**
@@ -45,8 +43,6 @@ contract ERC20Base is
     ContractMetadata,
     Initializable,
     ERC165Base,
-    Global,
-    PlatformFee,
     ReentrancyGuard
 {
     error ERC20Base_notAuthorized();
@@ -78,15 +74,11 @@ contract ERC20Base is
             return;
         }
 
-        // decode data to app address and globals address
-        (address app, address globals) = abi.decode(_data, (address, address));
+        // decode data to app address
+        (address app) = abi.decode(_data, (address));
 
         if (app != address(0)) {
             _grantRole(MINTER_ROLE, app);
-        }
-
-        if (globals != address(0)) {
-            _setGlobals(globals);
         }
     }
 
@@ -110,11 +102,7 @@ contract ERC20Base is
             revert ERC20Base_zeroAmount();
         }
 
-        (address platformFeeRecipient, uint256 platformFeeAmount) = _checkPlatformFee();
-
         _mint(_to, _amount);
-
-        _payPlatformFee(platformFeeRecipient, platformFeeAmount);
     }
 
     /**
@@ -155,34 +143,6 @@ contract ERC20Base is
         if (account != address(0)) {
             _grantRole(MINTER_ROLE, account);
         }
-    }
-
-    /*//////////////////////////////////////////////////////////////
-                        Internal (platform fee) functions
-    //////////////////////////////////////////////////////////////*/
-
-    function _checkPlatformFee() internal view returns (address recipient, uint256 amount) {
-        // don't charge platform fee if sender is a contract or globals address is not set
-        if (_isContract(msg.sender) || _getGlobalsAddress() == address(0)) {
-            return (address(0), 0);
-        }
-
-        (recipient, amount) = _platformFeeInfo(0);
-
-        // ensure the ether being sent was included in the transaction
-        if (amount > msg.value) {
-            revert CurrencyTransferLib.CurrencyTransferLib_insufficientValue();
-        }
-    }
-
-    function _payPlatformFee(address recipient, uint256 amount) internal {
-        if (amount == 0) {
-            return;
-        }
-
-        CurrencyTransferLib.safeTransferNativeToken(recipient, amount);
-
-        emit PaidPlatformFee(address(0), amount);
     }
 
     /**

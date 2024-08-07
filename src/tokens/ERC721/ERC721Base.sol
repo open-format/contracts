@@ -17,8 +17,6 @@ import {Royalty} from "@extensions/royalty/Royalty.sol";
 import {MintMetadata} from "@extensions/mintMetadata/MintMetadata.sol";
 import {BatchMintMetadata} from "@extensions/batchMintMetadata/BatchMintMetadata.sol";
 import {ContractMetadata, IContractMetadata} from "@extensions/contractMetadata/ContractMetadata.sol";
-import {Global} from "@extensions/global/Global.sol";
-import {PlatformFee} from "@extensions/platformFee/PlatformFee.sol";
 
 import {CurrencyTransferLib} from "src/lib/CurrencyTransferLib.sol";
 
@@ -34,8 +32,6 @@ contract ERC721Base is
     ContractMetadata,
     Royalty,
     Multicall,
-    Global,
-    PlatformFee,
     ReentrancyGuard,
     Ownable
 {
@@ -67,15 +63,11 @@ contract ERC721Base is
             return;
         }
 
-        // decode data to app address and globals address
-        (address app, address globals) = abi.decode(_data, (address, address));
+        // decode data to app address
+        (address app) = abi.decode(_data, (address));
 
         if (app != address(0)) {
             _grantRole(MINTER_ROLE, app);
-        }
-
-        if (globals != address(0)) {
-            _setGlobals(globals);
         }
     }
 
@@ -129,14 +121,10 @@ contract ERC721Base is
             revert ERC721Base_notAuthorized();
         }
 
-        (address platformFeeRecipient, uint256 platformFeeAmount) = _checkPlatformFee();
-
         _mintMetadata(_nextTokenId(), _tokenURI);
         _safeMint(_to, 1);
 
         emit Minted(_to, _tokenURI);
-
-        _payPlatformFee(platformFeeRecipient, platformFeeAmount);
     }
 
     /**
@@ -153,14 +141,10 @@ contract ERC721Base is
             revert ERC721Base_notAuthorized();
         }
 
-        (address platformFeeRecipient, uint256 platformFeeAmount) = _checkPlatformFee();
-
         _batchMintMetadata(_nextTokenId(), _quantity, _baseURI);
         _safeMint(_to, _quantity);
 
         emit BatchMinted(_to, _quantity, _baseURI);
-
-        _payPlatformFee(platformFeeRecipient, platformFeeAmount * _quantity);
     }
 
     /**
@@ -265,34 +249,6 @@ contract ERC721Base is
     /// @dev Returns whether contract metadata can be set in the given execution context.
     function _canSetContractURI() internal view virtual override returns (bool) {
         return _hasRole(ADMIN_ROLE, msg.sender);
-    }
-
-    /*//////////////////////////////////////////////////////////////
-                        Internal (platform fee) functions
-    //////////////////////////////////////////////////////////////*/
-
-    function _checkPlatformFee() internal view returns (address recipient, uint256 amount) {
-        // don't charge platform fee if sender is a contract or globals address is not set
-        if (_isContract(msg.sender) || _getGlobalsAddress() == address(0)) {
-            return (address(0), 0);
-        }
-
-        (recipient, amount) = _platformFeeInfo(0);
-
-        // ensure the ether being sent was included in the transaction
-        if (amount > msg.value) {
-            revert CurrencyTransferLib.CurrencyTransferLib_insufficientValue();
-        }
-    }
-
-    function _payPlatformFee(address recipient, uint256 amount) internal {
-        if (amount == 0) {
-            return;
-        }
-
-        CurrencyTransferLib.safeTransferNativeToken(recipient, amount);
-
-        emit PaidPlatformFee(address(0), amount);
     }
 
     /**

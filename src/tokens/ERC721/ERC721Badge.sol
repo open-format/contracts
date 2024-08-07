@@ -18,8 +18,6 @@ import {ERC721AUpgradeable} from "@erc721a-upgradeable/contracts/ERC721AUpgradea
 import {Royalty} from "@extensions/royalty/Royalty.sol";
 import {BatchMintMetadata} from "@extensions/batchMintMetadata/BatchMintMetadata.sol";
 import {ContractMetadata, IContractMetadata} from "@extensions/contractMetadata/ContractMetadata.sol";
-import {Global} from "@extensions/global/Global.sol";
-import {PlatformFee} from "@extensions/platformFee/PlatformFee.sol";
 
 import {CurrencyTransferLib} from "src/lib/CurrencyTransferLib.sol";
 
@@ -36,8 +34,6 @@ contract ERC721Badge is
     BatchMintMetadata,
     Royalty,
     Multicall,
-    Global,
-    PlatformFee,
     ReentrancyGuard,
     Ownable
 {
@@ -62,13 +58,11 @@ contract ERC721Badge is
 
     /**
      * @dev initialize should be called from a trusted contract and not directly by an account.
-     *      platform fee could easily be bypassed by not properly encoding data.
      *
      * @param _data bytes encoded with the signature (address,address,string)
-     *              the first will be granted a minter role
-     *              the second address will be set as the globals address
-     *              used to calculate platform fees
-     *              The string is the baseURI for all tokens on the contract
+     *              the first address will be granted a minter role
+     *              the second address is not used as there is no need for globals
+     *              the third string is the baseURI for all tokens on the contract
      */
     function initialize(
         address _owner,
@@ -93,14 +87,10 @@ contract ERC721Badge is
         }
 
         // decode data to app address and globals address
-        (address app, address globals, string memory baseURIForTokens) = abi.decode(_data, (address, address, string));
+        (address app, , string memory baseURIForTokens) = abi.decode(_data, (address, address, string));
 
         if (app != address(0)) {
             _grantRole(MINTER_ROLE, app);
-        }
-
-        if (globals != address(0)) {
-            _setGlobals(globals);
         }
 
         if (bytes(baseURIForTokens).length > 0) {
@@ -150,8 +140,6 @@ contract ERC721Badge is
             revert ERC721Badge.ERC721Badge_notAuthorized();
         }
 
-        (address platformFeeRecipient, uint256 platformFeeAmount) = _checkPlatformFee();
-
         // there will only ever be a baseURICount of zero or one
         if (_getBaseURICount() > 0) {
             _setBaseURI(MAX_INT, _baseURIForTokens);
@@ -161,8 +149,6 @@ contract ERC721Badge is
 
         emit BatchMetadataUpdate(0, MAX_INT);
         emit UpdatedBaseURI(_baseURIForTokens);
-
-        _payPlatformFee(platformFeeRecipient, platformFeeAmount);
     }
 
     /**
@@ -176,15 +162,11 @@ contract ERC721Badge is
             revert ERC721Badge_notAuthorized();
         }
 
-        (address platformFeeRecipient, uint256 platformFeeAmount) = _checkPlatformFee();
-
         uint256 tokenId = _nextTokenId();
 
         _safeMint(_to, 1);
 
         emit Minted(_to, _getBaseURI(tokenId));
-
-        _payPlatformFee(platformFeeRecipient, platformFeeAmount);
     }
 
     /**
@@ -199,14 +181,10 @@ contract ERC721Badge is
             revert ERC721Badge_notAuthorized();
         }
 
-        (address platformFeeRecipient, uint256 platformFeeAmount) = _checkPlatformFee();
-
         string memory _baseURI = _getBaseURI(_nextTokenId());
         _safeMint(_to, _quantity);
 
         emit BatchMinted(_to, _quantity, _baseURI);
-
-        _payPlatformFee(platformFeeRecipient, platformFeeAmount * _quantity);
     }
 
     /**
@@ -296,34 +274,6 @@ contract ERC721Badge is
     /// @dev Returns whether contract metadata can be set in the given execution context.
     function _canSetContractURI() internal view virtual override returns (bool) {
         return _hasRole(ADMIN_ROLE, msg.sender);
-    }
-
-    /*//////////////////////////////////////////////////////////////
-                        Internal (platform fee) functions
-    //////////////////////////////////////////////////////////////*/
-
-    function _checkPlatformFee() internal view returns (address recipient, uint256 amount) {
-        // don't charge platform fee if sender is a contract or globals address is not set
-        if (_isContract(msg.sender) || _getGlobalsAddress() == address(0)) {
-            return (address(0), 0);
-        }
-
-        (recipient, amount) = _platformFeeInfo(0);
-
-        // ensure the ether being sent was included in the transaction
-        if (amount > msg.value) {
-            revert CurrencyTransferLib.CurrencyTransferLib_insufficientValue();
-        }
-    }
-
-    function _payPlatformFee(address recipient, uint256 amount) internal {
-        if (amount == 0) {
-            return;
-        }
-
-        CurrencyTransferLib.safeTransferNativeToken(recipient, amount);
-
-        emit PaidPlatformFee(address(0), amount);
     }
 
     /**
