@@ -166,25 +166,4 @@ contract ERC20Base__integration_mintTo is ERC20Base_Setup {
         // check nft is minted to creator
         assertEq(base.balanceOf(creator), 1000);
     }
-
-    function test_pays_platform_fee() public {
-        // set platform base fee to 0.001 ether
-        uint256 basePlatformFee = 0.001 ether;
-        globals.setPlatformFee(basePlatformFee, 0, socialConscious);
-
-        vm.prank(creator);
-        base.mintTo{value: basePlatformFee}(creator, 1000);
-
-        // check platform fee has been received
-        assertEq(socialConscious.balance, basePlatformFee);
-    }
-
-    function test_does_not_pay_platform_fee_when_called_from_contract() public {
-        // set platform base fee to 0.001 ether
-        uint256 basePlatformFee = 0.001 ether;
-        globals.setPlatformFee(basePlatformFee, 0, socialConscious);
-
-        minter.mintTo(address(base), creator, 1000);
-        assertEq(base.balanceOf(creator), 1000);
-    }
 }

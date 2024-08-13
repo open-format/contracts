@@ -60,14 +60,10 @@ contract Setup is Test, Helpers {
         settingsFacet = new SettingsFacet();
 
         // add facet to registry
-        bytes4[] memory selectors = new bytes4[](7);
-        selectors[0] = settingsFacet.setApplicationFee.selector;
-        selectors[1] = settingsFacet.setAcceptedCurrencies.selector;
-        selectors[2] = settingsFacet.applicationFeeInfo.selector;
-        selectors[3] = settingsFacet.setCreatorAccess.selector;
-        selectors[4] = settingsFacet.hasCreatorAccess.selector;
-        selectors[5] = settingsFacet.platformFeeInfo.selector;
-        selectors[6] = settingsFacet.getGlobalsAddress.selector;
+        bytes4[] memory selectors = new bytes4[](3);
+        selectors[0] = settingsFacet.setCreatorAccess.selector;
+        selectors[1] = settingsFacet.hasCreatorAccess.selector;
+        selectors[2] = settingsFacet.getGlobalsAddress.selector;
 
         registry.diamondCut(
             prepareSingleFacetCut(address(settingsFacet), IDiamondWritableInternal.FacetCutAction.ADD, selectors),
@@ -83,63 +79,6 @@ contract Setup is Test, Helpers {
     }
 
     function _afterSetUp() internal virtual {}
-}
-
-contract SettingsFacet__integration_setApplicationFee is Setup {
-    function test_sets_application_fee() public {
-        vm.prank(appOwner);
-        SettingsFacet(address(app)).setApplicationFee(tenPercentBPS, appOwner);
-
-        (address recipient, uint256 amount) = SettingsFacet(address(app)).applicationFeeInfo(100);
-        assertEq(recipient, appOwner);
-        assertEq(amount, 10);
-    }
-
-    function test_revert_if_not_the_owner() public {
-        vm.prank(other);
-        vm.expectRevert();
-        SettingsFacet(address(app)).setApplicationFee(tenPercentBPS, other);
-    }
-}
-
-contract SettingsFacet__integration_applicationFeeInfo is Setup {
-    function _afterSetUp() internal override {
-        vm.prank(appOwner);
-        SettingsFacet(address(app)).setApplicationFee(tenPercentBPS, appOwner);
-    }
-
-    function test_returns_application_fee_info() public {
-        (address recipient, uint256 amount) = SettingsFacet(address(app)).applicationFeeInfo(100);
-        assertEq(recipient, appOwner);
-        assertEq(amount, 10);
-    }
-}
-
-contract SettingsFacet__integration_setAcceptedCurrencies is Setup {
-    function test_sets_accepted_currencies() public {
-        (address[] memory currencies, bool[] memory approvals) = _prepareAcceptedCurrencies();
-
-        vm.prank(appOwner);
-        SettingsFacet(address(app)).setAcceptedCurrencies(currencies, approvals);
-    }
-
-    function test_revert_if_not_the_owner() public {
-        (address[] memory currencies, bool[] memory approvals) = _prepareAcceptedCurrencies();
-
-        vm.prank(other);
-        vm.expectRevert();
-        SettingsFacet(address(app)).setAcceptedCurrencies(currencies, approvals);
-    }
-
-    function _prepareAcceptedCurrencies() internal returns (address[] memory currencies, bool[] memory approvals) {
-        currencies = new address[](2);
-        currencies[0] = address(0); // native token
-        currencies[1] = address(0xabc);
-
-        approvals = new bool[](2);
-        approvals[0] = true;
-        approvals[1] = true;
-    }
 }
 
 /**
@@ -233,17 +172,5 @@ contract SettingsFacet__integration_hasCreatorAccess is Setup {
 contract SettingsFacet__integration_getGlobalsAddress is Setup {
     function test_returns_globals_address() public {
         assertEq(SettingsFacet(address(app)).getGlobalsAddress(), address(globals));
-    }
-}
-
-contract SettingsFacet__integration_platformFeeInfo is Setup {
-    function test_returns_platform_fee_info() public {
-        // set platform base fee to 1 ether
-        globals.setPlatformFee(1 ether, 0, other);
-
-        (address recipient, uint256 amount) = SettingsFacet(address(app)).platformFeeInfo(0);
-
-        assertEq(recipient, other);
-        assertEq(amount, 1 ether);
     }
 }
