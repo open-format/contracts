@@ -21,14 +21,10 @@ contract Deploy is Script, Utils {
         SettingsFacet settingsFacet = new SettingsFacet();
 
         // construct array of function selectors
-        bytes4[] memory selectors = new bytes4[](7);
-        selectors[0] = settingsFacet.setApplicationFee.selector;
-        selectors[1] = settingsFacet.setAcceptedCurrencies.selector;
-        selectors[2] = settingsFacet.applicationFeeInfo.selector;
-        selectors[3] = settingsFacet.setCreatorAccess.selector;
-        selectors[4] = settingsFacet.hasCreatorAccess.selector;
-        selectors[5] = settingsFacet.platformFeeInfo.selector;
-        selectors[6] = settingsFacet.getGlobalsAddress.selector;
+        bytes4[] memory selectors = new bytes4[](3);
+        selectors[0] = settingsFacet.setCreatorAccess.selector;
+        selectors[1] = settingsFacet.hasCreatorAccess.selector;
+        selectors[2] = settingsFacet.getGlobalsAddress.selector;
 
         // construct and ADD facet cut
         IDiamondWritableInternal.FacetCut[] memory cuts = new IDiamondWritableInternal.FacetCut[](1);
@@ -82,15 +78,15 @@ contract Update_ExposeGlobals is Script, Utils {
         // construct array of function selectors to replace
         // keeping it neat having all selectors point to the latest deployment
         bytes4[] memory replaceSelectors = new bytes4[](5);
-        replaceSelectors[0] = settingsFacet.setApplicationFee.selector;
-        replaceSelectors[1] = settingsFacet.setAcceptedCurrencies.selector;
-        replaceSelectors[2] = settingsFacet.applicationFeeInfo.selector;
+        replaceSelectors[0] = bytes4(keccak256(bytes("setApplicationFee(uint16,address)")));
+        replaceSelectors[1] = bytes4(keccak256(bytes("setAcceptedCurrencies(address[],bool[])")));
+        replaceSelectors[2] = bytes4(keccak256(bytes("applicationFeeInfo(uint256)")));
         replaceSelectors[3] = settingsFacet.setCreatorAccess.selector;
         replaceSelectors[4] = settingsFacet.hasCreatorAccess.selector;
 
         // add globals
         bytes4[] memory addSelectors = new bytes4[](2);
-        addSelectors[0] = settingsFacet.platformFeeInfo.selector;
+        addSelectors[0] = bytes4(keccak256(bytes("platformFeeInfo(uint256)")));
         addSelectors[1] = settingsFacet.getGlobalsAddress.selector;
 
         // construct REPLACE and ADD facet cuts
@@ -104,6 +100,48 @@ contract Update_ExposeGlobals is Script, Utils {
 
         // update registry
         RegistryMock(payable(getContractDeploymentAddress("Registry"))).diamondCut(cuts, address(0), "");
+        vm.stopBroadcast();
+
+        exportContractDeployment(CONTRACT_NAME, address(settingsFacet), block.number);
+    }
+}
+
+/**
+ * @dev updates settings facet to remove platform and application fee logic
+ */
+contract Update_Remove_Platform_and_Application_Fees is Script, Utils {
+    function run() external {
+        uint256 deployerPrivateKey = vm.envUint("PRIVATE_KEY");
+        vm.startBroadcast(deployerPrivateKey);
+
+        // deploy
+        SettingsFacet settingsFacet = new SettingsFacet();
+
+        // construct array of function selectors to remove
+        bytes4[] memory removeSelectors = new bytes4[](4);
+        removeSelectors[0] = bytes4(keccak256(bytes("platformFeeInfo(uint256)")));
+        removeSelectors[1] = bytes4(keccak256(bytes("setApplicationFee(uint16,address)")));
+        removeSelectors[2] = bytes4(keccak256(bytes("applicationFeeInfo(uint256)")));
+        removeSelectors[3] = bytes4(keccak256(bytes("setAcceptedCurrencies(address[],bool[])")));
+
+        // construct array of function selectors to replace
+        bytes4[] memory replaceSelectors = new bytes4[](3);
+        replaceSelectors[0] = settingsFacet.setCreatorAccess.selector;
+        replaceSelectors[1] = settingsFacet.hasCreatorAccess.selector;
+        replaceSelectors[2] = settingsFacet.getGlobalsAddress.selector;
+
+        // construct and perform facet cut
+        IDiamondWritableInternal.FacetCut[] memory cuts = new IDiamondWritableInternal.FacetCut[](2);
+        cuts[0] = IDiamondWritableInternal.FacetCut(
+            address(0), IDiamondWritableInternal.FacetCutAction.REMOVE, removeSelectors
+        );
+        cuts[1] = IDiamondWritableInternal.FacetCut(
+            address(settingsFacet), IDiamondWritableInternal.FacetCutAction.REPLACE, replaceSelectors
+        );
+
+        // add to registry
+        RegistryMock(payable(getContractDeploymentAddress("Registry"))).diamondCut(cuts, address(0), "");
+
         vm.stopBroadcast();
 
         exportContractDeployment(CONTRACT_NAME, address(settingsFacet), block.number);
