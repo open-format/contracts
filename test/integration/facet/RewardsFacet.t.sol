@@ -85,6 +85,7 @@ contract Setup is Test, Helpers {
     // ipfs uri taken from https://docs.ipfs.tech/how-to/best-practices-for-nft-data/#types-of-ipfs-links-and-when-to-use-them
     string baseURI = "ipfs://bafybeibnsoufr2renqzsh347nrx54wcubt5lgkeivez63xvivplfwhtpym/";
     uint16 tenPercentBPS = 1000;
+    uint256 oneEther = 1 ether;
 
     event ERC721Minted(address token, uint256 quantity, address to, bytes32 id, bytes32 activityType, string uri);
     event BadgeMinted(
@@ -97,7 +98,7 @@ contract Setup is Test, Helpers {
         other = address(0x11);
         socialConscious = address(0x12);
 
-        vm.deal(creator, 1 ether);
+        vm.deal(creator, oneEther);
 
         // deploy contracts
         globals = new Globals();
@@ -223,6 +224,15 @@ contract RewardFacet__integration_mintBadge is Setup {
         vm.prank(creator);
         RewardsFacet(address(app)).mintBadge(badgeContract, other, activityId, activityType, abi.encode("testing 123"));
     }
+
+    function test_reverts_when_caller_is_not_the_app_operator() public {
+        vm.prank(creator);
+        ERC721Badge(badgeContract).grantRole(MINTER_ROLE, other);
+
+        vm.prank(other);
+        vm.expectRevert();
+        RewardsFacet(address(app)).mintBadge(badgeContract, other, activityId, activityType, "");
+    }
 }
 
 contract RewardFacet__integration_batchMintBadge is Setup {
@@ -265,6 +275,15 @@ contract RewardFacet__integration_batchMintBadge is Setup {
         vm.expectRevert();
         RewardsFacet(address(app)).batchMintBadge(badgeContract, other, 10, activityId, activityType, "");
         vm.stopPrank();
+    }
+
+    function test_reverts_when_caller_is_not_the_app_operator() public {
+        vm.prank(creator);
+        ERC721Badge(badgeContract).grantRole(MINTER_ROLE, other);
+
+        vm.prank(other);
+        vm.expectRevert();
+        RewardsFacet(address(app)).batchMintBadge(badgeContract, other, 10, activityId, activityType, "");
     }
 }
 
