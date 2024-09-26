@@ -52,6 +52,10 @@ contract RewardsFacet is Multicall, SafeOwnable {
         bytes32 _activityType,
         string calldata _uri
     ) public {
+        if (msg.sender != _operator()) {
+            revert RewardsFacet_NotAuthorized();
+        }
+
         if (!_canMint(_token)) {
             revert RewardsFacet_NotAuthorized();
         }
@@ -68,6 +72,10 @@ contract RewardsFacet is Multicall, SafeOwnable {
         bytes32 _activityType,
         string calldata _uri
     ) public {
+        if (msg.sender != _operator()) {
+            revert RewardsFacet_NotAuthorized();
+        }
+
         Token(_token).transferFrom(msg.sender, _to, _amount);
         emit TokenTransferred(_token, _to, _amount, _id, _activityType, _uri);
     }
@@ -92,6 +100,10 @@ contract RewardsFacet is Multicall, SafeOwnable {
         bytes32 _activityType,
         bytes calldata _data
     ) public {
+        if (msg.sender != _operator()) {
+            revert RewardsFacet_NotAuthorized();
+        }
+
         if (!_canMint(_badgeContract)) {
             revert RewardsFacet_NotAuthorized();
         }
@@ -118,6 +130,10 @@ contract RewardsFacet is Multicall, SafeOwnable {
         bytes32 _activityType,
         bytes calldata _data
     ) public {
+        if (msg.sender != _operator()) {
+            revert RewardsFacet_NotAuthorized();
+        }
+
         if (!_canMint(_badgeContract)) {
             revert RewardsFacet_NotAuthorized();
         }
@@ -135,6 +151,10 @@ contract RewardsFacet is Multicall, SafeOwnable {
         bytes32 _activityType,
         string calldata _uri
     ) public {
+        if (msg.sender != _operator()) {
+            revert RewardsFacet_NotAuthorized();
+        }
+
         if (!_canMint(_token)) {
             revert RewardsFacet_NotAuthorized();
         }
@@ -150,8 +170,16 @@ contract RewardsFacet is Multicall, SafeOwnable {
         bytes32 _activityType,
         string calldata _uri
     ) public {
+        if (msg.sender != _operator()) {
+            revert RewardsFacet_NotAuthorized();
+        }
+
         NFT(_token).transferFrom(msg.sender, _to, _tokenId);
         emit BadgeTransferred(_token, _to, _tokenId, _id, _activityType, _uri);
+    }
+
+    function _operator() internal virtual returns (address) {
+        return _owner();
     }
 
     function _canMint(address _token) internal virtual returns (bool) {
