@@ -56,8 +56,8 @@
     "startBlock": 53180881
   },
   "RewardFacet": {
-    "address": "0xDEc4CaD610B79a0c6e5D3530E6e45662ba6D0f3c",
-    "startBlock": 53194440
+    "address": "0x13dd8f63A9452adEA3f2152B12a13563AC433c41",
+    "startBlock": 85607165
   },
   "SettingsFacet": {
     "address": "0xe0aaaf2A2F05DbE1feDa6aA6336fF2533D079BF0",

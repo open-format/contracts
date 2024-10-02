@@ -185,12 +185,14 @@ update:; make \
 update-ERC721FactoryFacet:; forge script scripts/facet/ERC721FactoryFacet.s.sol:Update --rpc-url $(rpc) --broadcast $(verbose) $(legacy) $(slow)
 update-ERC20FactoryFacet:; forge script scripts/facet/ERC20FactoryFacet.s.sol:Update --rpc-url $(rpc) --broadcast $(verbose) $(legacy) $(slow)
 
+update-RewardsFacet:; forge script scripts/facet/RewardsFacet.s.sol:Update --rpc-url $(rpc) --broadcast $(verbose) $(legacy) $(slow)
+
 # Add badge minting functionality
 # Date 20.05.24
 # updates ERC721RewardFacet to update mintERC721 function and add mintBadge and batchMintBadge functions
 # deploys and registers RewardsFacet contract
 # PR #126 https://github.com/open-format/contracts/pull/126
-update-RewardsFacet:; forge script scripts/facet/RewardsFacet.s.sol:Update_Add_badgeMintingFunctionality --rpc-url $(rpc) --broadcast $(verbose) $(legacy) $(slow)
+update-RewardsFacet-add-badgeMintingFunctionality:; forge script scripts/facet/RewardsFacet.s.sol:Update_Add_badgeMintingFunctionality --rpc-url $(rpc) --broadcast $(verbose) $(legacy) $(slow)
 
 # Add ERC721Badge contract
 # Date 14.05.24
