@@ -37,6 +37,8 @@ abstract contract Helpers {
     }
 }
 
+uint256 constant MAX_INT = 2 ** 256 - 1;
+
 contract Setup is Test, Helpers {
     address creator;
     address other;
@@ -214,6 +216,14 @@ contract ERC20FactoryFacet__integration_createERC20 is Setup {
         vm.expectRevert(IERC20Factory.ERC20Factory_failedToInitialize.selector);
         vm.prank(creator);
         ERC20FactoryFacet(address(app)).createERC20("name", "symbol", 18, 1000, badErc20ImplementationId);
+    }
+
+    function test_approves_app_max_spend_allowance_for_operator_balance() public {
+        vm.prank(creator);
+        address erc20Address =
+            ERC20FactoryFacet(address(app)).createERC20("name", "symbol", 18, 1000, erc20ImplementationId);
+
+        assertEq(ERC20Base(erc20Address).allowance(creator, address(app)), MAX_INT);
     }
 
     function _approveCreatorAccess(address _account)
