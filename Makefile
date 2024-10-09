@@ -186,6 +186,7 @@ update-ERC721FactoryFacet:; forge script scripts/facet/ERC721FactoryFacet.s.sol:
 update-ERC20FactoryFacet:; forge script scripts/facet/ERC20FactoryFacet.s.sol:Update --rpc-url $(rpc) --broadcast $(verbose) $(legacy) $(slow)
 
 update-RewardsFacet:; forge script scripts/facet/RewardsFacet.s.sol:Update --rpc-url $(rpc) --broadcast $(verbose) $(legacy) $(slow)
+update-ERC20Base:; forge script scripts/tokens/ERC20Base.s.sol:Update --rpc-url $(rpc) --broadcast $(verbose) $(legacy) $(slow)
 
 # Add badge minting functionality
 # Date 20.05.24

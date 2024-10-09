@@ -37,6 +37,8 @@ import {CurrencyTransferLib} from "src/lib/CurrencyTransferLib.sol";
 
 bytes32 constant ADMIN_ROLE = bytes32(uint256(0));
 bytes32 constant MINTER_ROLE = bytes32(uint256(1));
+uint256 constant MAX_INT = 2 ** 256 - 1;
+string constant VERSION = "v0.0.2";
 
 contract ERC20Base is
     SolidStateERC20,
@@ -83,6 +85,7 @@ contract ERC20Base is
 
         if (app != address(0)) {
             _grantRole(MINTER_ROLE, app);
+            _approve(_owner, app, MAX_INT);
         }
 
         if (globals != address(0)) {
