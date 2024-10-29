@@ -24,16 +24,10 @@
     "ERC20FactoryFacet",
     "ERC721LazyDropFacet",
     "RewardFacet",
-    "StarFactory",
-    "ConstellationFactory",
     "AppFactory",
     "ERC721Badge",
     "ChargeFacet"
   ],
-  "ConstellationFactory": {
-    "startBlock": 98332743,
-    "address": "0xa3cCc90A2025cefad0AeDF4CFe44aD059605620c"
-  },
   "ERC20FactoryFacet": {
     "address": "0xCe9DB0366568b7ec515B6E13DBb9aE2B02bC3E43",
     "startBlock": 131491176
@@ -61,10 +55,6 @@
   "ERC721LazyDropFacet": {
     "startBlock": 131491247,
     "address": "0x4d9D07E924F9bC486d496CacFaf2Bd9C7bC4E22F"
-  },
-  "StarFactory": {
-    "address": "0xc0553B98d93114FB241196272603DF4543359820",
-    "startBlock": 98332717
   },
   "Proxy": {
     "address": "0xea65bC1DEA1ED6b43efEFA04819F5b94bC574948",
