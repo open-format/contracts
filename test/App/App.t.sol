@@ -5,13 +5,12 @@ pragma solidity ^0.8.16;
 
 import "forge-std/Test.sol";
 import {AppFactory, IApp} from "../../src/factories/App.sol";
-import {ERC20Base} from "src/tokens/ERC20/ERC20Base.sol";
 import {Globals} from "src/globals/Globals.sol";
 
 contract DummyImplementation {
     address public owner;
 
-    function init(address _owner, address _registry, address _globals) external {
+    function init(address _owner, address, address) external {
         owner = _owner;
     }
 
@@ -25,17 +24,12 @@ contract Setup is Test {
 
     AppFactory factory;
     Globals globals;
-
-    ERC20Base erc20Implementation;
     DummyImplementation implementation;
 
     function setUp() public {
         creator = address(0x10);
 
         globals = new Globals();
-
-        erc20Implementation = new ERC20Base();
-
         implementation = new DummyImplementation();
         factory = new AppFactory(address(implementation), address(0), address(0));
     }

@@ -23,6 +23,7 @@ import {ERC721Badge} from "src/tokens/ERC721/ERC721Badge.sol";
 import {IERC721Factory} from "@extensions/ERC721Factory/IERC721Factory.sol";
 import {ERC721FactoryFacet} from "src/facet/ERC721FactoryFacet.sol";
 import {ERC20Base} from "src/tokens/ERC20/ERC20Base.sol";
+import {ERC20Point} from "src/tokens/ERC20/ERC20Point.sol";
 import {IERC20Factory} from "@extensions/ERC20Factory/IERC20Factory.sol";
 import {ERC20FactoryFacet} from "src/facet/ERC20FactoryFacet.sol";
 import {RewardsFacet} from "src/facet/RewardsFacet.sol";
@@ -77,6 +78,9 @@ contract Setup is Test, Helpers {
 
     ERC20Base erc20Implementation;
     bytes32 erc20ImplementationId;
+    ERC20Point erc20PointImplementation;
+    bytes32 erc20PointImplementationId;
+
     ERC20FactoryFacet erc20FactoryFacet;
 
     string name = "Name";
@@ -115,7 +119,10 @@ contract Setup is Test, Helpers {
         erc721FactoryFacet = new ERC721FactoryFacet();
 
         erc20Implementation = new ERC20Base();
-        erc20ImplementationId = bytes32("Base");
+        erc20ImplementationId = bytes32("base");
+        erc20PointImplementation = new ERC20Point();
+        erc20PointImplementationId = bytes32("point");
+        
         erc20FactoryFacet = new ERC20FactoryFacet();
 
         // create app
@@ -127,6 +134,7 @@ contract Setup is Test, Helpers {
         globals.setERC721Implementation(badgeImplementationId, address(badgeImplementation));
         globals.setERC721Implementation(erc721ImplementationId, address(erc721Implementation));
         globals.setERC20Implementation(erc20ImplementationId, address(erc20Implementation));
+        globals.setERC20Implementation(erc20PointImplementationId, address(erc20PointImplementation));
 
         settingsFacet = new SettingsFacet();
         {
@@ -429,7 +437,7 @@ contract RewardFacet__integration_multicall is Setup {
     }
 }
 
-contract RewardsFacet__integration_mintERC20 is Setup {
+contract RewardsFacet__integration_mintERC20Base is Setup {
     address tokenContract;
 
     function _afterSetup() internal override {
@@ -517,7 +525,95 @@ contract RewardsFacet__integration_mintERC20 is Setup {
     }
 }
 
-contract RewardsFacet__integration_transferERC20 is Setup {
+contract RewardsFacet__integration_mintERC20Point is Setup {
+    address tokenContract;
+
+    function _afterSetup() internal override {
+        // use app to create credit contract
+        vm.prank(creator);
+        tokenContract = ERC20FactoryFacet(address(app)).createERC20(
+            name, symbol, 18, oneEther, erc20PointImplementationId
+        );
+    }
+
+    function test_setup() public {
+        assertEq(ERC20Point(tokenContract).balanceOf(creator), oneEther);
+    }
+
+    function test_mints_erc20point() public {
+        vm.prank(creator);
+        RewardsFacet(address(app)).mintERC20(
+            tokenContract,
+            other,
+            oneEther,
+            activityId,
+            activityType,
+            ""
+        );
+
+        assertEq(ERC20Point(tokenContract).balanceOf(other), oneEther);
+    }
+
+    function test_emits_token_minted_event() public {
+        vm.expectEmit(true, true, true, true, address(app));
+        emit TokenMinted(
+            tokenContract,
+            other,
+            oneEther,
+            activityId,
+            activityType,
+            ""
+        );
+
+        vm.prank(creator);
+        RewardsFacet(address(app)).mintERC20(
+            tokenContract,
+            other,
+            oneEther,
+            activityId,
+            activityType,
+            ""
+        );
+    }
+
+    function test_reverts_when_caller_is_not_the_app_operator() public {
+        // other has minter role
+        vm.prank(creator);
+        ERC20Point(tokenContract).grantRole(MINTER_ROLE, other);
+
+        vm.prank(other);
+        vm.expectRevert(RewardsFacet.RewardsFacet_NotAuthorized.selector);
+        RewardsFacet(address(app)).mintERC20(
+            tokenContract,
+            other,
+            oneEther,
+            activityId,
+            activityType,
+            ""
+        );
+    }
+
+    function test_reverts_when_caller_does_not_have_correct_roles_on_token_contract() public {
+        // revoke admin and minter roles
+        vm.prank(creator);
+        ERC20Point(tokenContract).revokeRole(MINTER_ROLE, creator);
+        vm.prank(creator);
+        ERC20Point(tokenContract).revokeRole(ADMIN_ROLE, creator);
+
+        vm.prank(other);
+        vm.expectRevert(RewardsFacet.RewardsFacet_NotAuthorized.selector);
+        RewardsFacet(address(app)).mintERC20(
+            tokenContract,
+            other,
+            oneEther,
+            activityId,
+            activityType,
+            ""
+        );
+    }
+}
+
+contract RewardsFacet__integration_transferERC20Base is Setup {
     address tokenContract;
 
     function _afterSetup() internal override {
@@ -586,6 +682,45 @@ contract RewardsFacet__integration_transferERC20 is Setup {
 
         vm.prank(other);
         vm.expectRevert(RewardsFacet.RewardsFacet_NotAuthorized.selector);
+        RewardsFacet(address(app)).transferERC20(
+            tokenContract,
+            other,
+            oneEther,
+            activityId,
+            activityType,
+            ""
+        );
+    }
+}
+
+contract RewardsFacet__integration_transferERC20Point is Setup {
+    address tokenContract;
+
+    function _afterSetup() internal override {
+        // use app to create credit contract
+        vm.prank(creator);
+        tokenContract = ERC20FactoryFacet(address(app)).createERC20(
+            name,
+            symbol,
+            18,
+            oneEther,
+            erc20PointImplementationId
+        );
+    }
+
+    function test_setup () public {
+        assertEq(ERC20Point(tokenContract).balanceOf(creator), oneEther);
+    }
+
+    function test_approve() public {
+        vm.prank(creator);
+        vm.expectRevert(ERC20Point.ERC20Point_nonTransferableToken.selector);
+        ERC20Point(tokenContract).approve(address(app), oneEther);
+    }
+
+    function test_transfer() public {
+        vm.prank(creator);
+        vm.expectRevert(ERC20Point.ERC20Point_nonTransferableToken.selector);
         RewardsFacet(address(app)).transferERC20(
             tokenContract,
             other,
