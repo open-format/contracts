@@ -24,7 +24,6 @@ import {AppFactory} from "src/factories/App.sol";
 import {Globals} from "src/globals/Globals.sol";
 import {SettingsFacet} from "src/facet/SettingsFacet.sol";
 import {ERC20BaseMock} from "src/tokens/ERC20/ERC20BaseMock.sol";
-import {ERC20Base} from "src/tokens/ERC20/ERC20Base.sol";
 import {CurrencyTransferLib} from "src/lib/CurrencyTransferLib.sol";
 
 import {PlatformFee, IPlatformFee, PlatformFeeInternal} from "src/extensions/platformFee/PlatformFee.sol";
@@ -101,7 +100,6 @@ contract Setup is Test, Helpers {
     RegistryMock registry;
     Globals globals;
     ERC20BaseMock erc20;
-    ERC20Base erc20Implementation;
 
     SettingsFacet settingsFacet;
     DummyDonateFacet facet;
@@ -118,8 +116,6 @@ contract Setup is Test, Helpers {
         template = new  Proxy(true);
         appFactory = new AppFactory(address(template), address(registry), address(globals));
         erc20 = new ERC20BaseMock("Dummy", "D", 18, 1000);
-
-        erc20Implementation = new ERC20Base();
 
         // Add Facets
         {

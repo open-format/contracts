@@ -14,7 +14,6 @@ import {Proxy} from "../../src/proxy/Proxy.sol";
 import {Upgradable} from "../../src/proxy/upgradable/Upgradable.sol";
 import {RegistryMock} from "../../src/registry/RegistryMock.sol";
 import {AppFactory} from "../../src/factories/App.sol";
-import {ERC20Base} from "src/tokens/ERC20/ERC20Base.sol";
 
 contract MessageFacet {
     string public message = "";
@@ -42,7 +41,6 @@ abstract contract Helpers {
 
 contract Factory__intergration is Test, Helpers {
     AppFactory appFactory;
-    ERC20Base erc20Implementation;
     Proxy template;
     RegistryMock registry;
     MessageFacet message;
@@ -55,7 +53,6 @@ contract Factory__intergration is Test, Helpers {
         registry = new RegistryMock();
         template = new  Proxy(true);
         appFactory = new AppFactory(address(template), address(registry), globals);
-        erc20Implementation = new ERC20Base();
         message = new MessageFacet();
 
         // add hello facet to registry

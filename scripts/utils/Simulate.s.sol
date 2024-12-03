@@ -8,6 +8,9 @@ import {AppFactory} from "src/factories/App.sol";
 import {ERC20FactoryFacet} from "src/facet/ERC20FactoryFacet.sol";
 import {ERC721FactoryFacet} from "src/facet/ERC721FactoryFacet.sol";
 import {RewardsFacet} from "src/facet/RewardsFacet.sol";
+import {ERC20Base} from "src/tokens/ERC20/ERC20Base.sol";
+import {ERC20Point} from "src/tokens/ERC20/ERC20Point.sol";
+import {ERC721Badge} from "src/tokens/ERC721/ERC721Badge.sol";
 
 contract SimulateAppAndRewards is Script, Utils {
     function run(string memory appName) external {
@@ -26,7 +29,11 @@ contract SimulateAppAndRewards is Script, Utils {
 
         //  create token
         address xp =
-          ERC20FactoryFacet(app).createERC20("XP", "XP", 18, 1000, "Base");
+          ERC20FactoryFacet(app).createERC20("XP", "XP", 18, 10000000000000000000, "Base");
+
+        //  create Point token
+        address points =
+          ERC20FactoryFacet(app).createERC20("Points", "Points", 18, 10000000000000000000, "Point");
 
         //  create badge
         address badge =
@@ -41,6 +48,7 @@ contract SimulateAppAndRewards is Script, Utils {
 
         //  reward badge, reward token
         RewardsFacet(app).mintERC20(xp, deployerAddress, 100, "collected berry", "ACTION", "");
+        RewardsFacet(app).mintERC20(points, deployerAddress, 100, "collected wood", "ACTION", "");
         RewardsFacet(app).mintBadge(badge, deployerAddress, "collected 10 berries", "MISSION", "");
 
         vm.stopBroadcast();
@@ -48,8 +56,10 @@ contract SimulateAppAndRewards is Script, Utils {
         console.log("App:", appName);
         console.log("App Address:", app);
         console.log("XP Address:", xp);
+        console.log("Point Address:", points);
         console.log("Badge Address:", badge);
-        console.log("XP balance:", xp);
-        console.log("Badge balance:", badge);
+        console.log("XP balance:", ERC20Base(xp).balanceOf(deployerAddress));
+        console.log("Point balance:", ERC20Point(points).balanceOf(deployerAddress));
+        console.log("Badge balance:", ERC721Badge(badge).balanceOf(deployerAddress));
     }
 }
