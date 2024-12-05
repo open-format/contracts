@@ -15,6 +15,10 @@
     "address": "0x0AA47E7048C7Ad0034b77F7564A04858Ce81D017",
     "startBlock": 22716032
   },
+  "ERC20Point": {
+    "address": "0x7BCB018b643FBcc7e9f3D6eed4D5089C701ECabA",
+    "startBlock": 23270295
+  },
   "ERC721Badge": {
     "address": "0x25F3497655a3CD93296D339165D05af29D01678A",
     "startBlock": 22715988
@@ -69,6 +73,7 @@
     "ERC721FactoryFacet",
     "ERC20FactoryFacet",
     "ERC721LazyDropFacet",
-    "ChargeFacet"
+    "ChargeFacet",
+    "ERC20Point"
   ]
 }
