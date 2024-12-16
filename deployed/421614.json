@@ -15,6 +15,10 @@
     "address": "0xAdbbCC5B721F83b0fE349AB82D4fCC68AaCDFAC3",
     "startBlock": 32647834
   },
+  "ERC20Point": {
+    "address": "0x7CCf50eD9E278E80E6C050c08aEC37E4c0d58f10",
+    "startBlock": 106106574
+  },
   "ERC721Badge": {
     "address": "0x5228a91b560718868dE04C79045ed7383fe2a97C",
     "startBlock": 61035266
@@ -89,6 +93,7 @@
     "ERC721Badge",
     "Open_Format_App",
     "XP",
-    "OFT"
+    "OFT",
+    "ERC20Point"
   ]
 }
