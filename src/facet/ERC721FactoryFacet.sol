@@ -8,6 +8,9 @@ import {ERC721Factory} from "../extensions/ERC721Factory/ERC721Factory.sol";
 import {PlatformFee} from "../extensions/platformFee/PlatformFee.sol";
 import {IVersionable} from "../extensions/versionable/IVersionable.sol";
 
+string constant FACET_VERSION = "1.0.0";
+string constant FACET_NAME = "ERC721FactoryFacet";
+
 /**
  * @title   "ERC721Factory Facet"
  * @notice  A facet of the ERC721Factory contract that provides functionality for creating new ERC721 tokens.
@@ -16,9 +19,6 @@ import {IVersionable} from "../extensions/versionable/IVersionable.sol";
  *          Before creating a new contract, a platform fee is added, which must be paid in ether.
  */
 contract ERC721FactoryFacet is ERC721Factory, Ownable, PlatformFee, ApplicationAccess, IVersionable {
-    string public constant FACET_VERSION = "1.0.0";
-    string public constant FACET_NAME = "ERC721FactoryFacet";
-
     /**
      * @dev Override to return facet version.
      * @return version This facet version.

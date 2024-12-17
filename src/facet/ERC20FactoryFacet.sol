@@ -8,6 +8,9 @@ import {PlatformFee} from "../extensions/platformFee/PlatformFee.sol";
 import {ApplicationAccess} from "../extensions/applicationAccess/ApplicationAccess.sol";
 import {IVersionable} from "../extensions/versionable/IVersionable.sol";
 
+string constant FACET_VERSION = "1.0.0";
+string constant FACET_NAME = "ERC20FactoryFacet";
+
 /**
  * @title   "ERC20Factory Facet"
  * @notice  A facet of the ERC20Factory contract that provides functionality for creating new ERC20 tokens.
@@ -15,11 +18,7 @@ import {IVersionable} from "../extensions/versionable/IVersionable.sol";
  *          platform fee collection, and restricted access to contract creation, respectively.
  *          Before creating a new contract, a platform fee is added, which must be paid in ether.
  */
-
 contract ERC20FactoryFacet is ERC20Factory, Ownable, PlatformFee, ApplicationAccess, IVersionable {
-    string public constant FACET_VERSION = "1.0.0";
-    string public constant FACET_NAME = "ERC20FactoryFacet";
-
     /**
      * @dev Override to return facet version.
      * @return version This facet version.

@@ -33,6 +33,9 @@ interface Token {
 bytes32 constant ADMIN_ROLE = bytes32(uint256(0));
 bytes32 constant MINTER_ROLE = bytes32(uint256(1));
 
+string constant FACET_VERSION = "1.0.0";
+string constant FACET_NAME = "RewardsFacet";
+
 contract RewardsFacet is Multicall, SafeOwnable, IVersionable {
     event TokenMinted(address token, address to, uint256 amount, bytes32 id, bytes32 activityType, string uri);
     event TokenTransferred(address token, address to, uint256 amount, bytes32 id, bytes32 activityType, string uri);
@@ -44,9 +47,6 @@ contract RewardsFacet is Multicall, SafeOwnable, IVersionable {
 
     error RewardsFacet_NotAuthorized();
     error RewardsFacet_InsufficientBalance();
-
-    string public constant FACET_VERSION = "1.0.0";
-    string public constant FACET_NAME = "RewardsFacet";
 
     /**
      * @dev Override to return facet version.

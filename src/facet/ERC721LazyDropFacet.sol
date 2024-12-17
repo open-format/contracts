@@ -12,17 +12,16 @@ import {CurrencyTransferLib} from "src/lib/CurrencyTransferLib.sol";
 
 import {IERC2981} from "@solidstate/contracts/interfaces/IERC2981.sol";
 
+string constant FACET_VERSION = "1.0.0";
+string constant FACET_NAME = "ERC721LazyDropFacet";
+
 /**
  * @title   "ERC721LazyDrop Facet"
  * @notice  Allows token contract admins/owners to use an app to drop lazy minted tokens for a price
  */
-
 contract ERC721LazyDropFacet is ERC721LazyDrop, PlatformFee, ApplicationFee, IVersionable {
     error ERC721LazyDropFacet_EIP2981NotSupported();
     error ERC721LazyDropFacet_royaltyRecipientNotFound();
-
-    string public constant FACET_VERSION = "1.0.0";
-    string public constant FACET_NAME = "ERC721LazyDropFacet";
 
     /**
      * @dev Override to return facet version.

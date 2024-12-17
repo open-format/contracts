@@ -7,6 +7,9 @@ import {ApplicationAccess, IApplicationAccess} from "../extensions/applicationAc
 import {PlatformFee} from "../extensions/platformFee/PlatformFee.sol";
 import {IVersionable} from "../extensions/versionable/IVersionable.sol";
 
+string constant FACET_VERSION = "1.0.0";
+string constant FACET_NAME = "SettingsFacet";
+
 /**
  * @title   "Settings Facet"
  * @notice  A facet of the Settings contract that allows the application owner to manage application-wide settings.
@@ -15,9 +18,6 @@ import {IVersionable} from "../extensions/versionable/IVersionable.sol";
  *          access to contract creation.
  */
 contract SettingsFacet is ApplicationFee, PlatformFee, SafeOwnable, ApplicationAccess, IVersionable {
-    string public constant FACET_VERSION = "1.0.0";
-    string public constant FACET_NAME = "SettingsFacet";
-
     /**
      * @dev Override to return facet version.
      * @return version This facet version.
