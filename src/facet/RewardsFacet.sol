@@ -5,6 +5,7 @@ import {SafeOwnable, OwnableInternal} from "@solidstate/contracts/access/ownable
 import {ApplicationFee} from "../extensions/applicationFee/ApplicationFee.sol";
 import {ApplicationAccess, IApplicationAccess} from "../extensions/applicationAccess/ApplicationAccess.sol";
 import {PlatformFee} from "../extensions/platformFee/PlatformFee.sol";
+import {IVersionable} from "../extensions/versionable/IVersionable.sol";
 import {Multicall} from "@solidstate/contracts/utils/Multicall.sol";
 
 interface NFT {
@@ -32,7 +33,7 @@ interface Token {
 bytes32 constant ADMIN_ROLE = bytes32(uint256(0));
 bytes32 constant MINTER_ROLE = bytes32(uint256(1));
 
-contract RewardsFacet is Multicall, SafeOwnable {
+contract RewardsFacet is Multicall, SafeOwnable, IVersionable {
     event TokenMinted(address token, address to, uint256 amount, bytes32 id, bytes32 activityType, string uri);
     event TokenTransferred(address token, address to, uint256 amount, bytes32 id, bytes32 activityType, string uri);
     event ERC721Minted(address token, uint256 quantity, address to, bytes32 id, bytes32 activityType, string uri);
@@ -43,6 +44,25 @@ contract RewardsFacet is Multicall, SafeOwnable {
 
     error RewardsFacet_NotAuthorized();
     error RewardsFacet_InsufficientBalance();
+
+    string public constant FACET_VERSION = "1.0.0";
+    string public constant FACET_NAME = "RewardsFacet";
+
+    /**
+     * @dev Override to return facet version.
+     * @return version This facet version.
+     */
+    function facetVersion() external pure override returns (string memory) {
+        return FACET_VERSION;
+    }
+
+    /**
+     * @dev Override to return facet name.
+     * @return name This facet name.
+     */
+    function facetName() external pure override returns (string memory) {
+        return FACET_NAME;
+    }
 
     function mintERC20(
         address _token,

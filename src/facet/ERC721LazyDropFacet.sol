@@ -6,6 +6,7 @@ import {ICompatibleERC721} from "src/extensions/ERC721LazyDrop/ICompatibleERC721
 import {ERC721LazyDropStorage} from "src/extensions/ERC721LazyDrop/ERC721LazyDropStorage.sol";
 
 import {PlatformFee} from "src/extensions/platformFee/PlatformFee.sol";
+import {IVersionable} from "src/extensions/versionable/IVersionable.sol";
 import {ApplicationFee} from "src/extensions/applicationFee/ApplicationFee.sol";
 import {CurrencyTransferLib} from "src/lib/CurrencyTransferLib.sol";
 
@@ -16,15 +17,34 @@ import {IERC2981} from "@solidstate/contracts/interfaces/IERC2981.sol";
  * @notice  Allows token contract admins/owners to use an app to drop lazy minted tokens for a price
  */
 
-contract ERC721LazyDropFacet is ERC721LazyDrop, PlatformFee, ApplicationFee {
+contract ERC721LazyDropFacet is ERC721LazyDrop, PlatformFee, ApplicationFee, IVersionable {
     error ERC721LazyDropFacet_EIP2981NotSupported();
     error ERC721LazyDropFacet_royaltyRecipientNotFound();
+
+    string public constant FACET_VERSION = "1.0.0";
+    string public constant FACET_NAME = "ERC721LazyDropFacet";
+
+    /**
+     * @dev Override to return facet version.
+     * @return version This facet version.
+     */
+    function facetVersion() external pure override returns (string memory) {
+        return FACET_VERSION;
+    }
+
+    /**
+     * @dev Override to return facet name.
+     * @return name This facet name.
+     */
+    function facetName() external pure override returns (string memory) {
+        return FACET_NAME;
+    }
+
     /**
      * @dev override before setClaimCondition to add platform fee
      *      requires msg.value to be equal or more than base platform fee
      *      when calling ERC721LazyDrop_setClaimCondition
      */
-
     function _beforeSetClaimCondition(address _tokenContract, ERC721LazyDropStorage.ClaimCondition calldata _condition)
         internal
         override
