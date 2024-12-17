@@ -36,6 +36,7 @@ deploy:; make \
 	deploy-ERC20FactoryFacet \
 	deploy-ERC721LazyDropFacet \
 	deploy-ChargeFacet \
+	facet-versions \
 
 # core
 deploy-Globals:; forge script scripts/core/Globals.s.sol:Deploy --rpc-url $(rpc) --broadcast $(gasPrice) $(verbose) $(legacy) $(slow)
@@ -60,6 +61,9 @@ deploy-ERC721LazyDropFacet:; forge script scripts/facet/ERC721LazyDropFacet.s.so
 
 # patch
 patch-SettingsFacet:; forge script scripts/facet/SettingsFacet.s.sol:Patch --rpc-url $(rpc) --broadcast $(verbose) $(legacy) $(slow)
+
+# versions
+facet-versions:; forge script scripts/versions/FacetVersions.s.sol:FacetVersions --rpc-url $(rpc) --broadcast $(verbose) $(legacy) $(slow)
 
 # Operations
 # All things relating to Open Formats app and $OFT
