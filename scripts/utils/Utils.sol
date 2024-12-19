@@ -20,6 +20,26 @@ contract Utils is Script {
         return abi.decode(contractAddress, (address));
     }
 
+    function exportFacetsVersions(address[] memory facetAddresses, string[] memory facetNames, string[] memory facetVersions, string[][] memory facetSelectors) 
+        internal
+    {
+        string memory path = _getVersionsFilePath();
+        string memory versionsJson;
+        string memory allFacetsJson;
+        string memory facetJson;
+
+        for (uint256 i = 0; i < facetAddresses.length; i++) {
+            facetJson = "";
+            facetJson = vm.serializeAddress(facetNames[i], "address", facetAddresses[i]);
+            facetJson = vm.serializeString(facetNames[i], "version", facetVersions[i]);
+            facetJson = vm.serializeString(facetNames[i], "selectors", facetSelectors[i]);
+
+            allFacetsJson = vm.serializeString("Facets", facetNames[i], facetJson);
+        }
+        versionsJson = vm.serializeString("json", "Facets", allFacetsJson);
+        vm.writeJson(versionsJson, path);
+    }
+
     function exportContractDeployment(string memory _contractName, address _contractAddress, uint256 _startBlock)
         internal
     {
@@ -78,6 +98,15 @@ contract Utils is Script {
         return string.concat(inputDir, file);
     }
 
+    function _getVersionsFilePath() internal view returns (string memory) {
+        string memory inputDir = string.concat(vm.projectRoot(), "/deployed/");
+        string memory file = isStaging() ?
+            string.concat(vm.toString(block.chainid), "-staging.versions.json") :
+            string.concat(vm.toString(block.chainid), ".versions.json");
+
+        return string.concat(inputDir, file);
+    }
+
     function _readDeploymentFile() internal returns (string memory) {
         try vm.readFile(_getDeployedFilePath()) returns (string memory result) {
             return result;
@@ -92,5 +121,23 @@ contract Utils is Script {
         } catch {
             return false;
         }
+    }
+
+    function bytes4ToHexString(bytes4 input) public pure returns (string memory) {
+        bytes memory buffer = new bytes(10); // "0x" + 8 hex characters = 10 bytes
+        buffer[0] = "0";
+        buffer[1] = "x";
+
+        for (uint256 i = 0; i < 4; i++) {
+            uint8 b = uint8(input[i]);
+            buffer[2 + i * 2] = _toHexChar(b >> 4); // First hex character
+            buffer[3 + i * 2] = _toHexChar(b & 0x0f); // Second hex character
+        }
+
+        return string(buffer);
+    }
+
+    function _toHexChar(uint8 value) private pure returns (bytes1) {
+        return value < 10 ? bytes1(value + 48) : bytes1(value + 87); // 0-9 => '0'-'9', 10-15 => 'a'-'f'
     }
 }

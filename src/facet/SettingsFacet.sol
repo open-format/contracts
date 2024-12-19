@@ -5,6 +5,10 @@ import {SafeOwnable, OwnableInternal} from "@solidstate/contracts/access/ownable
 import {ApplicationFee} from "../extensions/applicationFee/ApplicationFee.sol";
 import {ApplicationAccess, IApplicationAccess} from "../extensions/applicationAccess/ApplicationAccess.sol";
 import {PlatformFee} from "../extensions/platformFee/PlatformFee.sol";
+import {IVersionable} from "../extensions/versionable/IVersionable.sol";
+
+string constant FACET_VERSION = "1.0.0";
+string constant FACET_NAME = "SettingsFacet";
 
 /**
  * @title   "Settings Facet"
@@ -13,8 +17,23 @@ import {PlatformFee} from "../extensions/platformFee/PlatformFee.sol";
  *          which provide functionality for managing application and platform fees, ownership management, and restricted
  *          access to contract creation.
  */
+contract SettingsFacet is ApplicationFee, PlatformFee, SafeOwnable, ApplicationAccess, IVersionable {
+    /**
+     * @dev Override to return facet version.
+     * @return version This facet version.
+     */
+    function facetVersion() external pure override returns (string memory) {
+        return FACET_VERSION;
+    }
 
-contract SettingsFacet is ApplicationFee, PlatformFee, SafeOwnable, ApplicationAccess {
+    /**
+     * @dev Override to return facet name.
+     * @return name This facet name.
+     */
+    function facetName() external pure override returns (string memory) {
+        return FACET_NAME;
+    }
+
     /**
      * @notice sets the application percentage fee in BPS and the recipient wallet
      * @param percentBPS The percentage used to calculate application fee
