@@ -1,0 +1,79 @@
+{
+  "AppFactory": {
+    "address": "0x1F36176c0874686d6d480a90Ca039e789c7f7Fa3",
+    "startBlock": 21587443
+  },
+  "ChargeFacet": {
+    "address": "0x33E5346970914c242bcD6258195eAEDF18dF56aa",
+    "startBlock": 21587451
+  },
+  "ERC20Base": {
+    "address": "0xFf5B3c42240eFc1b37b7A063AC09A36f1887abD0",
+    "startBlock": 21587443
+  },
+  "ERC20FactoryFacet": {
+    "address": "0x2ADD75397841AE9Ed0A6304cb629fd73c7e25aA8",
+    "startBlock": 21587448
+  },
+  "ERC20Point": {
+    "address": "0xA53828D660e7a93Fa564D1aBEaba3D5782A7a4eC",
+    "startBlock": 21587444
+  },
+  "ERC721Badge": {
+    "address": "0xE8C357D72Ba1bAA16707D5fc8B78DA3dD5Ed52ED",
+    "startBlock": 21587446
+  },
+  "ERC721Base": {
+    "address": "0x44C804B74723CE68cDe1031Ae116c84eE6A0B473",
+    "startBlock": 21587444
+  },
+  "ERC721FactoryFacet": {
+    "address": "0xe480510b12093341C5681B7d605743B7BcdEBCb7",
+    "startBlock": 21587448
+  },
+  "ERC721LazyDropFacet": {
+    "address": "0xb7EC8026Ec41Ac4b6C0772ac7b0835ee7Bb9fC04",
+    "startBlock": 21587449
+  },
+  "ERC721LazyMint": {
+    "address": "0x0560aE44CeAc171C5e3BE71d76956f65130627f7",
+    "startBlock": 21587444
+  },
+  "Globals": {
+    "address": "0x321467E17B711EB64C4402FdfEe0568df882AB8f",
+    "startBlock": 21587440
+  },
+  "Proxy": {
+    "address": "0xdE56426Fff74685eE22605195BC2985654657124",
+    "startBlock": 21587442
+  },
+  "Registry": {
+    "address": "0xcB258A326BdaF32a736510F06772852CA856D95e",
+    "startBlock": 21587442
+  },
+  "RewardFacet": {
+    "address": "0x29F28D41AcAee3dF441E5b504E52d76aDAb1c0f5",
+    "startBlock": 21587446
+  },
+  "SettingsFacet": {
+    "address": "0x13b9B798f24A15BF51c0A71CA9282B5bBDBABbce",
+    "startBlock": 21587447
+  },
+  "doNotRemoveUsedToParseFile": [
+    "Globals",
+    "Registry",
+    "Proxy",
+    "AppFactory",
+    "ERC20Base",
+    "ERC20Point",
+    "ERC721Base",
+    "ERC721LazyMint",
+    "ERC721Badge",
+    "RewardFacet",
+    "SettingsFacet",
+    "ERC721FactoryFacet",
+    "ERC20FactoryFacet",
+    "ERC721LazyDropFacet",
+    "ChargeFacet"
+  ]
+}
