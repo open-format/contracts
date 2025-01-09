@@ -1,0 +1,88 @@
+{
+  "Facets": {
+    "ChargeFacet": {
+      "address": "0x8FA0b7ED4e1bD7CD2698F99F67f8E563440B4c73",
+      "selectors": [
+        "0x10c3db96",
+        "0x23d3a539",
+        "0x9eaa34ec",
+        "0x20ecd1ec"
+      ],
+      "version": "0.0.0"
+    },
+    "ERC20FactoryFacet": {
+      "address": "0xCe9DB0366568b7ec515B6E13DBb9aE2B02bC3E43",
+      "selectors": [
+        "0x2d4105d1",
+        "0x3cb20d6c",
+        "0x08721a2c"
+      ],
+      "version": "0.0.0"
+    },
+    "ERC721FactoryFacet": {
+      "address": "0x8eF67328a42e658AeaF35f8e127Ae02c762bbEf9",
+      "selectors": [
+        "0xee4506f5",
+        "0x4fc06be4",
+        "0x851ba287",
+        "0x0667aad5"
+      ],
+      "version": "0.0.0"
+    },
+    "ERC721LazyDropFacet": {
+      "address": "0x4d9D07E924F9bC486d496CacFaf2Bd9C7bC4E22F",
+      "selectors": [
+        "0x225a2b3e",
+        "0xd9854a88",
+        "0xf56cfb66",
+        "0x22ba9456",
+        "0x70ad0183"
+      ],
+      "version": "0.0.0"
+    },
+    "Registry": {
+      "address": "0x451f72Cf4174F15AcFb3AA5feEA9Ec8BE607f9E4",
+      "selectors": [
+        "0x2c408059",
+        "0x91423765",
+        "0x1f931c1c",
+        "0x7a0ed627",
+        "0xadfca15e",
+        "0x52ef6b2c",
+        "0xcdffacc6",
+        "0x01ffc9a7",
+        "0x8da5cb5b",
+        "0x8ab5150a",
+        "0xf2fde38b",
+        "0x79ba5097"
+      ],
+      "version": "-"
+    },
+    "RewardFacet": {
+      "address": "0x3a75C73042aDe9b219518ca3be59bB4652fd2db5",
+      "selectors": [
+        "0x609512c9",
+        "0xbdebfec5",
+        "0x97b4f6aa",
+        "0x3996701d",
+        "0xac9650d8",
+        "0xa6c130fc",
+        "0xb92bafd6"
+      ],
+      "version": "0.0.0"
+    },
+    "SettingsFacet": {
+      "address": "0x04D8b9165f00933452D10dE556C04a5234ce3a58",
+      "selectors": [
+        "0x561c4fc4",
+        "0xf2c9caa2",
+        "0xa9e64ec8",
+        "0xba4e4840",
+        "0xacf8569a",
+        "0x114ee370",
+        "0xf030f12e"
+      ],
+      "version": "0.0.0"
+    }
+  }
+}
