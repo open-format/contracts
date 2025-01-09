@@ -14,12 +14,12 @@ optimizer_runs = 200
 
 [rpc_endpoints]
 anvil = "http://127.0.0.1:8545"
-mumbai = "https://matic-mumbai.chainstacklabs.com"
-polygon = "${POLYGON_RPC_URL}"
 aurora = "https://mainnet.aurora.dev"
 aurora-testnet = "https://testnet.aurora.dev"
 base-sepolia = "https://sepolia.base.org"
 base = "https://mainnet.base.org"
-arbitrum-testnet = "https://sepolia-rollup.arbitrum.io/rpc"
-amoy = "https://rpc-amoy.polygon.technology/"
+arbitrum = "${ARBITRUM_RPC_URL}"
+arbitrum-sepolia = "https://sepolia-rollup.arbitrum.io/rpc"
+polygon = "${POLYGON_RPC_URL}"
+polygon-amoy = "https://rpc-amoy.polygon.technology/"
 turbo = "https://rpc-0x4e45415f.aurora-cloud.dev"
