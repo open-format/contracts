@@ -1,0 +1,88 @@
+{
+  "Facets": {
+    "ChargeFacet": {
+      "address": "0x33E5346970914c242bcD6258195eAEDF18dF56aa",
+      "selectors": [
+        "0x10c3db96",
+        "0x23d3a539",
+        "0x9eaa34ec",
+        "0x20ecd1ec"
+      ],
+      "version": "1.0.0"
+    },
+    "ERC20FactoryFacet": {
+      "address": "0x2ADD75397841AE9Ed0A6304cb629fd73c7e25aA8",
+      "selectors": [
+        "0x2d4105d1",
+        "0x3cb20d6c",
+        "0x08721a2c"
+      ],
+      "version": "1.0.0"
+    },
+    "ERC721FactoryFacet": {
+      "address": "0xe480510b12093341C5681B7d605743B7BcdEBCb7",
+      "selectors": [
+        "0xee4506f5",
+        "0x4fc06be4",
+        "0x851ba287",
+        "0x0667aad5"
+      ],
+      "version": "1.0.0"
+    },
+    "ERC721LazyDropFacet": {
+      "address": "0xb7EC8026Ec41Ac4b6C0772ac7b0835ee7Bb9fC04",
+      "selectors": [
+        "0x225a2b3e",
+        "0xd9854a88",
+        "0xf56cfb66",
+        "0x22ba9456",
+        "0x70ad0183"
+      ],
+      "version": "1.0.0"
+    },
+    "Registry": {
+      "address": "0xcB258A326BdaF32a736510F06772852CA856D95e",
+      "selectors": [
+        "0x2c408059",
+        "0x91423765",
+        "0x1f931c1c",
+        "0x7a0ed627",
+        "0xadfca15e",
+        "0x52ef6b2c",
+        "0xcdffacc6",
+        "0x01ffc9a7",
+        "0x8da5cb5b",
+        "0x8ab5150a",
+        "0xf2fde38b",
+        "0x79ba5097"
+      ],
+      "version": "-"
+    },
+    "RewardsFacet": {
+      "address": "0x29F28D41AcAee3dF441E5b504E52d76aDAb1c0f5",
+      "selectors": [
+        "0x609512c9",
+        "0xbdebfec5",
+        "0x97b4f6aa",
+        "0x3996701d",
+        "0xac9650d8",
+        "0xa6c130fc",
+        "0xb92bafd6"
+      ],
+      "version": "1.0.0"
+    },
+    "SettingsFacet": {
+      "address": "0x13b9B798f24A15BF51c0A71CA9282B5bBDBABbce",
+      "selectors": [
+        "0x561c4fc4",
+        "0xf2c9caa2",
+        "0xa9e64ec8",
+        "0xba4e4840",
+        "0xacf8569a",
+        "0x114ee370",
+        "0xf030f12e"
+      ],
+      "version": "1.0.0"
+    }
+  }
+}

@@ -1,15 +1,67 @@
 {
-  "Factory": {
-    "startBlock": 90985936,
-    "address": "0xC4d53838f4D54f1A44116b3109BfA1bf064a8301"
+  "AppFactory": {
+    "address": "0x2eBF7f4572c218217ca01CE2883E3EfF93626a8E",
+    "startBlock": 131490511
   },
-  "SettingsFacet": {
-    "address": "0x04D8b9165f00933452D10dE556C04a5234ce3a58",
-    "startBlock": 131491025
+  "ChargeFacet": {
+    "address": "0x8FA0b7ED4e1bD7CD2698F99F67f8E563440B4c73",
+    "startBlock": 131491319
   },
   "ERC20Base": {
     "address": "0x1e823247D26efd56f5172b8C19F6c44CA700F2c5",
     "startBlock": 131490541
+  },
+  "ERC20FactoryFacet": {
+    "address": "0xCe9DB0366568b7ec515B6E13DBb9aE2B02bC3E43",
+    "startBlock": 131491176
+  },
+  "ERC20Point": {
+    "address": "0x40D444b2604AE0304245f26fc6A1Edd284275723",
+    "startBlock": 136959270
+  },
+  "ERC721Badge": {
+    "address": "0x9e9248e65A7FCEA1b12b08af923F231d7b1f66B6",
+    "startBlock": 131490717
+  },
+  "ERC721Base": {
+    "address": "0xC9E9dbB9362d3A54E0E7E0489F0419AD81ec6326",
+    "startBlock": 131490595
+  },
+  "ERC721FactoryFacet": {
+    "address": "0x8eF67328a42e658AeaF35f8e127Ae02c762bbEf9",
+    "startBlock": 131491105
+  },
+  "ERC721LazyDropFacet": {
+    "address": "0x4d9D07E924F9bC486d496CacFaf2Bd9C7bC4E22F",
+    "startBlock": 131491247
+  },
+  "ERC721LazyMint": {
+    "address": "0xF492f60aa5D7c49A43E41f9f8F3730d310974a97",
+    "startBlock": 131490662
+  },
+  "Factory": {
+    "address": "0xC4d53838f4D54f1A44116b3109BfA1bf064a8301",
+    "startBlock": 90985936
+  },
+  "Globals": {
+    "address": "0xad734fad266c659d404636590A8A79fb2f698097",
+    "startBlock": 131490383
+  },
+  "Proxy": {
+    "address": "0xea65bC1DEA1ED6b43efEFA04819F5b94bC574948",
+    "startBlock": 131490466
+  },
+  "Registry": {
+    "address": "0x451f72Cf4174F15AcFb3AA5feEA9Ec8BE607f9E4",
+    "startBlock": 131490426
+  },
+  "RewardFacet": {
+    "address": "0x3a75C73042aDe9b219518ca3be59bB4652fd2db5",
+    "startBlock": 131490769
+  },
+  "SettingsFacet": {
+    "address": "0x04D8b9165f00933452D10dE556C04a5234ce3a58",
+    "startBlock": 131491025
   },
   "doNotRemoveUsedToParseFile": [
     "Globals",
@@ -26,54 +78,7 @@
     "RewardFacet",
     "AppFactory",
     "ERC721Badge",
-    "ChargeFacet"
-  ],
-  "ERC20FactoryFacet": {
-    "address": "0xCe9DB0366568b7ec515B6E13DBb9aE2B02bC3E43",
-    "startBlock": 131491176
-  },
-  "ChargeFacet": {
-    "address": "0x8FA0b7ED4e1bD7CD2698F99F67f8E563440B4c73",
-    "startBlock": 131491319
-  },
-  "ERC721FactoryFacet": {
-    "address": "0x8eF67328a42e658AeaF35f8e127Ae02c762bbEf9",
-    "startBlock": 131491105
-  },
-  "RewardFacet": {
-    "startBlock": 131490769,
-    "address": "0x3a75C73042aDe9b219518ca3be59bB4652fd2db5"
-  },
-  "Registry": {
-    "startBlock": 131490426,
-    "address": "0x451f72Cf4174F15AcFb3AA5feEA9Ec8BE607f9E4"
-  },
-  "ERC721Badge": {
-    "startBlock": 131490717,
-    "address": "0x9e9248e65A7FCEA1b12b08af923F231d7b1f66B6"
-  },
-  "ERC721LazyDropFacet": {
-    "startBlock": 131491247,
-    "address": "0x4d9D07E924F9bC486d496CacFaf2Bd9C7bC4E22F"
-  },
-  "Proxy": {
-    "address": "0xea65bC1DEA1ED6b43efEFA04819F5b94bC574948",
-    "startBlock": 131490466
-  },
-  "ERC721Base": {
-    "address": "0xC9E9dbB9362d3A54E0E7E0489F0419AD81ec6326",
-    "startBlock": 131490595
-  },
-  "ERC721LazyMint": {
-    "address": "0xF492f60aa5D7c49A43E41f9f8F3730d310974a97",
-    "startBlock": 131490662
-  },
-  "AppFactory": {
-    "startBlock": 131490511,
-    "address": "0x2eBF7f4572c218217ca01CE2883E3EfF93626a8E"
-  },
-  "Globals": {
-    "address": "0xad734fad266c659d404636590A8A79fb2f698097",
-    "startBlock": 131490383
-  }
+    "ChargeFacet",
+    "ERC20Point"
+  ]
 }

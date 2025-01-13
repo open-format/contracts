@@ -1,0 +1,75 @@
+{
+  "Facets": {
+    "ERC20FactoryFacet": {
+      "address": "0x3Cba847b1F9078eb441Bdf7707f0E0001e54ecC4",
+      "selectors": [
+        "0x2d4105d1",
+        "0x3cb20d6c",
+        "0x08721a2c"
+      ],
+      "version": "0.0.0"
+    },
+    "ERC721FactoryFacet": {
+      "address": "0xf0180bEa1F2F180025005fE40658bF6c021de7d5",
+      "selectors": [
+        "0xee4506f5",
+        "0x851ba287",
+        "0x0667aad5"
+      ],
+      "version": "0.0.0"
+    },
+    "ERC721LazyDropFacet": {
+      "address": "0x9aa6e827F5eFcF9d4FB4299D940F718590695D29",
+      "selectors": [
+        "0x225a2b3e",
+        "0xd9854a88",
+        "0xf56cfb66",
+        "0x22ba9456",
+        "0x70ad0183"
+      ],
+      "version": "0.0.0"
+    },
+    "Registry": {
+      "address": "0xCe9DB0366568b7ec515B6E13DBb9aE2B02bC3E43",
+      "selectors": [
+        "0x2c408059",
+        "0x91423765",
+        "0x1f931c1c",
+        "0x7a0ed627",
+        "0xadfca15e",
+        "0x52ef6b2c",
+        "0xcdffacc6",
+        "0x01ffc9a7",
+        "0x8da5cb5b",
+        "0x8ab5150a",
+        "0xf2fde38b",
+        "0x79ba5097"
+      ],
+      "version": "-"
+    },
+    "RewardFacet": {
+      "address": "0x49c50D754F6118eB02DF6dDaD4a4d6D2a46AD837",
+      "selectors": [
+        "0x595f5713",
+        "0x3a8e49c1",
+        "0x8662196c",
+        "0xcf141e3e",
+        "0xac9650d8"
+      ],
+      "version": "0.0.0"
+    },
+    "SettingsFacet": {
+      "address": "0x609401678A22F7e2c7AaFd817F6F5a0bbBf44e8F",
+      "selectors": [
+        "0x561c4fc4",
+        "0xf2c9caa2",
+        "0xa9e64ec8",
+        "0xba4e4840",
+        "0xacf8569a",
+        "0x114ee370",
+        "0xf030f12e"
+      ],
+      "version": "0.0.0"
+    }
+  }
+}

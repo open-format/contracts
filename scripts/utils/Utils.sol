@@ -5,6 +5,7 @@ import "forge-std/console.sol";
 
 contract Utils is Script {
     error Utils_contractAddressNotFound(string contractName);
+    error Utils_contractNameNotFound(address contractAddress);
 
     string constant namesKey = "doNotRemoveUsedToParseFile";
 
@@ -18,6 +19,28 @@ contract Utils is Script {
             revert Utils_contractAddressNotFound(contractName);
         }
         return abi.decode(contractAddress, (address));
+    }
+
+    function getContractDeploymentName(address contractAddress) internal returns (string memory) {
+        string memory deploymentFile = _readDeploymentFile();
+
+        // get all contract names from that file
+        string[] memory contractNames = abi.decode(vm.parseJson(deploymentFile, string.concat(".", namesKey)), (string[]));
+
+        // search deployment file for contract address
+        for (uint256 i = 0; i < contractNames.length; i++){
+            bytes memory matchBytes = vm.parseJson(deploymentFile, string.concat(".", contractNames[i], ".address"));
+            if (matchBytes.length == 0){
+                continue;
+            }
+
+            address matchAddress = abi.decode(matchBytes, (address));
+            if (matchAddress == contractAddress){
+                return contractNames[i];
+            }
+        }
+
+        return "";
     }
 
     function exportFacetsVersions(address[] memory facetAddresses, string[] memory facetNames, string[] memory facetVersions, string[][] memory facetSelectors) 

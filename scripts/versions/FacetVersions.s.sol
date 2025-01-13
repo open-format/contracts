@@ -35,11 +35,40 @@ contract FacetVersions is Script, Utils {
             facetVersions[i] = "-";
 
           } else {
-            facetVersions[i] = IVersionable(facetAddresses[i]).facetVersion();
-            facetNames[i] = IVersionable(facetAddresses[i]).facetName();
+            facetNames[i] = getFacetName(facetAddresses[i]);
+            facetVersions[i] = getFacetVersion(facetAddresses[i]);
           }
         }
         exportFacetsVersions(facetAddresses, facetNames, facetVersions, facetSelectors);
         vm.stopBroadcast();
+    }
+
+    // Helper function to retrieve facet version or fallback to "0.0.0"
+    function getFacetVersion(address facetAddress) private returns (string memory) {
+        try IVersionable(facetAddress).facetVersion() returns (string memory version) {
+            return version;
+        } catch {
+            return "0.0.0";
+        }
+    }
+
+    // Helper function to retrieve facet name
+    function getFacetName(address facetAddress) private returns (string memory) {
+        try IVersionable(facetAddress).facetName() returns (string memory name) {
+            return name;
+        } catch {
+            return getNameFromDeploymentFile(facetAddress);
+        }
+    }
+
+    // Attempt to find name from deployment file or fallback to "Unknown-<address>"
+    function getNameFromDeploymentFile(address facetAddress) private returns (string memory) {
+        string memory facetName = getContractDeploymentName(facetAddress);
+
+        if(bytes(facetName).length == 0){
+          return string(abi.encodePacked("Unknown-", vm.toString(facetAddress)));
+        }
+
+        return facetName;
     }
 }
