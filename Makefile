@@ -30,6 +30,7 @@ deploy:; make \
 	deploy-ERC721Base \
 	deploy-ERC721LazyMint \
 	deploy-ERC721Badge \
+	deploy-ERC721BadgeNonTransferable \
 	deploy-RewardsFacet \
 	deploy-SettingsFacet \
 	deploy-ERC721FactoryFacet \
@@ -48,6 +49,7 @@ deploy-AppFactory:; forge script scripts/core/AppFactory.s.sol:Deploy --rpc-url 
 deploy-ERC721Base:; forge script scripts/tokens/ERC721Base.s.sol:Deploy --rpc-url $(rpc) --broadcast $(verbose) $(gasPrice) $(legacy) $(slow)
 deploy-ERC721LazyMint:; forge script scripts/tokens/ERC721LazyMint.s.sol:Deploy --rpc-url $(rpc) --broadcast $(verbose) $(gasPrice) $(legacy) $(slow)
 deploy-ERC721Badge:; forge script scripts/tokens/ERC721Badge.s.sol:Deploy --rpc-url $(rpc) --broadcast $(verbose) $(gasPrice) $(legacy) $(slow)
+deploy-ERC721BadgeNonTransferable:; forge script scripts/tokens/ERC721BadgeNonTransferable.s.sol:Deploy --rpc-url $(rpc) --broadcast $(verbose) $(gasPrice) $(legacy) $(slow)
 deploy-ERC20Base:; forge script scripts/tokens/ERC20Base.s.sol:Deploy --rpc-url $(rpc) --broadcast $(verbose) $(gasPrice) $(legacy) $(slow)
 deploy-ERC20Point:; forge script scripts/tokens/ERC20Point.s.sol:Deploy --rpc-url $(rpc) --broadcast $(verbose) $(gasPrice) $(legacy) $(slow)
 
@@ -114,9 +116,19 @@ createERC721Base:; forge script scripts/facet/ERC721FactoryFacet.s.sol:CreateBas
 # Note: make sure app is setup with correct permissions and APP_ID env is set.
 createERC721Badge:; forge script scripts/facet/ERC721FactoryFacet.s.sol:CreateBadge --rpc-url $(rpc) --broadcast $(verbose) $(legacy) $(slow)
 
+# example `make createERC721BadgeNonTransferable`
+# Note: make sure app is setup with correct permissions and APP_ID env is set.
+createERC721BadgeNonTransferable:; forge script scripts/facet/ERC721FactoryFacet.s.sol:CreateBadgeNonTransferable --rpc-url $(rpc) --broadcast $(verbose) $(legacy) $(slow)
+
 # example: make ERC721Badge.mintTo args="0xaf4c80136581212185f37c5e8809120d8fbf6224"
 ERC721Badge.mintTo:; forge script \
 	scripts/tokens/ERC721Badge.s.sol:MintTo \
+	--sig "run(address)" \
+ 	--rpc-url $(rpc) --broadcast $(verbose) $(legacy) $(slow) $(args)
+
+# example: make ERC721BadgeNonTransferable.mintTo args="0xaf4c80136581212185f37c5e8809120d8fbf6224"
+ERC721BadgeNonTransferable.mintTo:; forge script \
+	scripts/tokens/ERC721BadgeNonTransferable.s.sol:MintTo \
 	--sig "run(address)" \
  	--rpc-url $(rpc) --broadcast $(verbose) $(legacy) $(slow) $(args)
 
