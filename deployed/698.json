@@ -23,6 +23,10 @@
     "address": "0x3b45A03264a67A5Ce89f51884231eCe00354b904",
     "startBlock": 15636233
   },
+  "ERC721BadgeNonTransferable": {
+    "address": "0x537ADEBA5f70DcbDbFAf0680777c494b06C6E2f1",
+    "startBlock": 18572247
+  },
   "ERC721Base": {
     "address": "0xD27eB01a0C1f94088DfBe7977A4CAd122a531357",
     "startBlock": 15636196
@@ -74,6 +78,7 @@
     "ERC721FactoryFacet",
     "ERC20FactoryFacet",
     "ERC721LazyDropFacet",
-    "ChargeFacet"
+    "ChargeFacet",
+    "ERC721BadgeNonTransferable"
   ]
 }
