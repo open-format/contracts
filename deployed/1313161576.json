@@ -1,0 +1,84 @@
+{
+  "AppFactory": {
+    "address": "0x20A9FB49618a10fD7ea79C82ac4e6D9345CB4C97",
+    "startBlock": 140558204
+  },
+  "ChargeFacet": {
+    "address": "0x413b520C3e388BCD48491C5084Df5F2db307CB15",
+    "startBlock": 140558385
+  },
+  "ERC20Base": {
+    "address": "0xcc7ED47dAF0C4d3d6F5FffdF25aAC3129BcE9109",
+    "startBlock": 140558214
+  },
+  "ERC20FactoryFacet": {
+    "address": "0xcf77026C67b916928d43B4Dd423E1Ea7b27D3B24",
+    "startBlock": 140558350
+  },
+  "ERC20Point": {
+    "address": "0xEDd778B1F80481eD122066aD09dFFf8790102C2f",
+    "startBlock": 140558228
+  },
+  "ERC721Badge": {
+    "address": "0xF992dA64F434B18032501a3d2eC4c9df2e714883",
+    "startBlock": 140558273
+  },
+  "ERC721BadgeNonTransferable": {
+    "address": "0x72738F0ACC1112EB9670276D7879416C7a274831",
+    "startBlock": 140558288
+  },
+  "ERC721Base": {
+    "address": "0xDfcB13d15C8164707757d15b42a1e87c8751CC6e",
+    "startBlock": 140558243
+  },
+  "ERC721FactoryFacet": {
+    "address": "0x056EB0Beb6Cd26c9B4ac02A7DbD3bdD1B2da6DB6",
+    "startBlock": 140558337
+  },
+  "ERC721LazyDropFacet": {
+    "address": "0x5Ffb9bAB6FEce40c05af307e27CD176c206ec178",
+    "startBlock": 140558369
+  },
+  "ERC721LazyMint": {
+    "address": "0xE03a79805Dbc245207b2Ec6eB946Be8547486F88",
+    "startBlock": 140558258
+  },
+  "Globals": {
+    "address": "0xB353B39075094C62dce268146dEb0aCFC2bf71d7",
+    "startBlock": 140558176
+  },
+  "Proxy": {
+    "address": "0x146B25cC85fD15e88c8E2a201A1225A98Cf2b1C1",
+    "startBlock": 140558195
+  },
+  "Registry": {
+    "address": "0xA0700f73a69660d8fa67D6831564f8Ee6a81C066",
+    "startBlock": 140558186
+  },
+  "RewardFacet": {
+    "address": "0x342b3e3c828f74d43Bd50f02D64931731E9cFf51",
+    "startBlock": 140558304
+  },
+  "SettingsFacet": {
+    "address": "0xF4e56BF89E969BaDE25D7A179168e7A904bd35E8",
+    "startBlock": 140558321
+  },
+  "doNotRemoveUsedToParseFile": [
+    "Globals",
+    "Registry",
+    "Proxy",
+    "AppFactory",
+    "ERC20Base",
+    "ERC20Point",
+    "ERC721Base",
+    "ERC721LazyMint",
+    "ERC721Badge",
+    "ERC721BadgeNonTransferable",
+    "RewardFacet",
+    "SettingsFacet",
+    "ERC721FactoryFacet",
+    "ERC20FactoryFacet",
+    "ERC721LazyDropFacet",
+    "ChargeFacet"
+  ]
+}
