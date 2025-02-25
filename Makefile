@@ -17,8 +17,12 @@ install :; forge install & yarn install
 remappings :; forge remappings > remappings.txt
 
 # deploy
-# to run: `make deploy rpc="<chain>"` e.g `make deploy rpc="anvil"`
-# to specify a gas price:  make deploy rpc="anvil" gasPrice="--with-gas-price 45000000000 --skip-simulation
+# To run: `make deploy rpc="<chain>"` e.g `make deploy rpc="anvil"`
+# To specify a gas price: `make deploy rpc="anvil" gasPrice="--with-gas-price 45000000000 --skip-simulation"`
+# If "deserialization error: missing field effectiveGasPrice" is thrown you will need to change the version
+# using foundryup see issue: https://github.com/foundry-rs/foundry/issues/7640.
+# Command to change to working version: `foundryup --version nightly-f625d0fa7c51e65b4bf1e8f7931cd1c6e2e285e9`
+# Then run the make deploy command, likely needing to also specifying the gas.
 # TODO: compile all contracts at start then run scripts
 deploy:; make \
 	deploy-Globals \
