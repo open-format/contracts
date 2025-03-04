@@ -7,6 +7,7 @@ import {ApplicationAccess, IApplicationAccess} from "../extensions/applicationAc
 import {PlatformFee} from "../extensions/platformFee/PlatformFee.sol";
 import {IVersionable} from "../extensions/versionable/IVersionable.sol";
 import {Multicall} from "@solidstate/contracts/utils/Multicall.sol";
+import {AccessControlInternal} from "@solidstate/contracts/access/access_control/AccessControl.sol";
 
 interface NFT {
     function mintTo(address to, string memory tokenURI) external;
@@ -31,12 +32,12 @@ interface Token {
 }
 
 bytes32 constant ADMIN_ROLE = bytes32(uint256(0));
-bytes32 constant MINTER_ROLE = bytes32(uint256(1));
+bytes32 constant OPERATOR_ROLE = bytes32(uint256(1));
 
-string constant FACET_VERSION = "1.0.0";
+string constant FACET_VERSION = "1.1.0";
 string constant FACET_NAME = "RewardsFacet";
 
-contract RewardsFacet is Multicall, SafeOwnable, IVersionable {
+contract RewardsFacet is Multicall, SafeOwnable, AccessControlInternal, IVersionable {
     event TokenMinted(address token, address to, uint256 amount, bytes32 id, bytes32 activityType, string uri);
     event TokenTransferred(address token, address to, uint256 amount, bytes32 id, bytes32 activityType, string uri);
     event ERC721Minted(address token, uint256 quantity, address to, bytes32 id, bytes32 activityType, string uri);
@@ -72,11 +73,7 @@ contract RewardsFacet is Multicall, SafeOwnable, IVersionable {
         bytes32 _activityType,
         string calldata _uri
     ) public {
-        if (msg.sender != _operator()) {
-            revert RewardsFacet_NotAuthorized();
-        }
-
-        if (!_canMint(_token)) {
+        if (!_isOperator()) {
             revert RewardsFacet_NotAuthorized();
         }
 
@@ -92,7 +89,7 @@ contract RewardsFacet is Multicall, SafeOwnable, IVersionable {
         bytes32 _activityType,
         string calldata _uri
     ) public {
-        if (msg.sender != _operator()) {
+        if (!_isOperator()) {
             revert RewardsFacet_NotAuthorized();
         }
 
@@ -120,11 +117,7 @@ contract RewardsFacet is Multicall, SafeOwnable, IVersionable {
         bytes32 _activityType,
         bytes calldata _data
     ) public {
-        if (msg.sender != _operator()) {
-            revert RewardsFacet_NotAuthorized();
-        }
-
-        if (!_canMint(_badgeContract)) {
+        if (!_isOperator()) {
             revert RewardsFacet_NotAuthorized();
         }
 
@@ -150,11 +143,7 @@ contract RewardsFacet is Multicall, SafeOwnable, IVersionable {
         bytes32 _activityType,
         bytes calldata _data
     ) public {
-        if (msg.sender != _operator()) {
-            revert RewardsFacet_NotAuthorized();
-        }
-
-        if (!_canMint(_badgeContract)) {
+        if (!_isOperator()) {
             revert RewardsFacet_NotAuthorized();
         }
 
@@ -171,13 +160,10 @@ contract RewardsFacet is Multicall, SafeOwnable, IVersionable {
         bytes32 _activityType,
         string calldata _uri
     ) public {
-        if (msg.sender != _operator()) {
+        if (!_isOperator()) {
             revert RewardsFacet_NotAuthorized();
         }
 
-        if (!_canMint(_token)) {
-            revert RewardsFacet_NotAuthorized();
-        }
         NFT(_token).batchMintTo(_to, _quantity, _baseURI);
         emit ERC721Minted(_token, _quantity, _to, _id, _activityType, _uri);
     }
@@ -190,7 +176,7 @@ contract RewardsFacet is Multicall, SafeOwnable, IVersionable {
         bytes32 _activityType,
         string calldata _uri
     ) public {
-        if (msg.sender != _operator()) {
+        if (!_isOperator()) {
             revert RewardsFacet_NotAuthorized();
         }
 
@@ -198,11 +184,17 @@ contract RewardsFacet is Multicall, SafeOwnable, IVersionable {
         emit BadgeTransferred(_token, _to, _tokenId, _id, _activityType, _uri);
     }
 
-    function _operator() internal virtual returns (address) {
-        return _owner();
-    }
+    function _isOperator() internal virtual returns (bool) {
+        if (msg.sender == _owner()){
+            return true;
+        }
+        if (_hasRole(ADMIN_ROLE, msg.sender)){
+            return true;
+        }
+        if (_hasRole(OPERATOR_ROLE, msg.sender)){
+            return true;
+        }
 
-    function _canMint(address _token) internal virtual returns (bool) {
-        return Token(_token).hasRole(ADMIN_ROLE, msg.sender) || Token(_token).hasRole(MINTER_ROLE, msg.sender);
+        return false;
     }
 }
