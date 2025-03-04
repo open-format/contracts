@@ -21,7 +21,7 @@ contract Deploy is Script, Utils {
         SettingsFacet settingsFacet = new SettingsFacet();
 
         // construct array of function selectors
-        bytes4[] memory selectors = new bytes4[](7);
+        bytes4[] memory selectors = new bytes4[](13);
         selectors[0] = settingsFacet.setApplicationFee.selector;
         selectors[1] = settingsFacet.setAcceptedCurrencies.selector;
         selectors[2] = settingsFacet.applicationFeeInfo.selector;
@@ -29,6 +29,12 @@ contract Deploy is Script, Utils {
         selectors[4] = settingsFacet.hasCreatorAccess.selector;
         selectors[5] = settingsFacet.platformFeeInfo.selector;
         selectors[6] = settingsFacet.getGlobalsAddress.selector;
+        selectors[7] = settingsFacet.enableAccessControl.selector;
+        selectors[8] = settingsFacet.grantRole.selector;
+        selectors[9] = settingsFacet.hasRole.selector;
+        selectors[10] = settingsFacet.getRoleAdmin.selector;
+        selectors[11] = settingsFacet.revokeRole.selector;
+        selectors[12] = settingsFacet.renounceRole.selector;
 
         // construct and ADD facet cut
         IDiamondWritableInternal.FacetCut[] memory cuts = new IDiamondWritableInternal.FacetCut[](1);
