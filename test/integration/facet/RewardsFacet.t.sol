@@ -27,7 +27,7 @@ import {ERC20Point} from "src/tokens/ERC20/ERC20Point.sol";
 import {IERC20Factory} from "@extensions/ERC20Factory/IERC20Factory.sol";
 import {ERC20FactoryFacet} from "src/facet/ERC20FactoryFacet.sol";
 import {RewardsFacet} from "src/facet/RewardsFacet.sol";
-import {SettingsFacet, IApplicationAccess} from "src/facet/SettingsFacet.sol";
+import {SettingsFacet, IApplicationAccess, OPERATOR_ROLE} from "src/facet/SettingsFacet.sol";
 
 import {Deploy} from "scripts/core/Globals.s.sol";
 
@@ -139,8 +139,13 @@ contract Setup is Test, Helpers {
         settingsFacet = new SettingsFacet();
         {
             // add SettingsFacet to registry
-            bytes4[] memory selectors = new bytes4[](1);
+            bytes4[] memory selectors = new bytes4[](6);
             selectors[0] = settingsFacet.setCreatorAccess.selector;
+            selectors[1] = settingsFacet.enableAccessControl.selector;
+            selectors[2] = settingsFacet.grantRole.selector;
+            selectors[3] = settingsFacet.hasRole.selector;
+            selectors[4] = settingsFacet.revokeRole.selector;
+            selectors[5] = settingsFacet.renounceRole.selector;
 
             registry.diamondCut(
                 prepareSingleFacetCut(address(settingsFacet), IDiamondWritableInternal.FacetCutAction.ADD, selectors),
@@ -270,6 +275,19 @@ contract RewardFacet__integration_batchMintBadge is Setup {
         assertEq(ERC721Badge(badgeContract).balanceOf(other), 10);
     }
 
+
+    function test_rewards_multiple_badges_when_caller_has_been_granted_operator_role() public {
+        vm.startPrank(creator);
+        SettingsFacet(address(app)).enableAccessControl();
+        SettingsFacet(address(app)).grantRole(OPERATOR_ROLE, other);
+        vm.stopPrank();
+
+        vm.prank(other);
+        RewardsFacet(address(app)).batchMintBadge(badgeContract, other, 10, activityId, activityType, "");
+
+        assertEq(ERC721Base(badgeContract).balanceOf(other), 10);
+    }
+
     function test_emits_badge_minted_event() public {
         vm.expectEmit(true, true, true, true);
         emit BadgeMinted(badgeContract, 10, other, activityId, activityType, "");
@@ -320,6 +338,18 @@ contract RewardFacet__integration_mintERC721 is Setup {
 
     function test_rewards_multiple_badges() public {
         vm.prank(creator);
+        RewardsFacet(address(app)).mintERC721(baseContract, other, 10, baseURI, activityId, activityType, "");
+
+        assertEq(ERC721Base(baseContract).balanceOf(other), 10);
+    }
+
+    function test_rewards_multiple_badges_when_caller_has_been_granted_operator_role() public {
+        vm.startPrank(creator);
+        SettingsFacet(address(app)).enableAccessControl();
+        SettingsFacet(address(app)).grantRole(OPERATOR_ROLE, other);
+        vm.stopPrank();
+
+        vm.prank(other);
         RewardsFacet(address(app)).mintERC721(baseContract, other, 10, baseURI, activityId, activityType, "");
 
         assertEq(ERC721Base(baseContract).balanceOf(other), 10);
@@ -379,6 +409,24 @@ contract RewardFacet__integration_transferERC721 is Setup {
 
         assertEq(ERC721Base(baseContract).ownerOf(0), other);
         assertEq(ERC721Base(baseContract).isApprovedOrOwner(address(app), 0), false);
+    }
+
+    function test_transfers_erc721_when_caller_has_been_granted_operator_role() public {
+        vm.startPrank(creator);
+        SettingsFacet(address(app)).enableAccessControl();
+        SettingsFacet(address(app)).grantRole(OPERATOR_ROLE, other);
+
+        ERC721Base(baseContract).mintTo(other, baseURI);
+        assertEq(ERC721Base(baseContract).ownerOf(1), other);
+        vm.stopPrank();
+
+        vm.startPrank(other);
+        ERC721Base(baseContract).setApprovalForAll(address(app), true);
+        RewardsFacet(address(app)).transferERC721(baseContract, creator, 1, activityId, activityType, "");
+        vm.stopPrank();
+
+        assertEq(ERC721Base(baseContract).balanceOf(creator), 2);
+        assertEq(ERC721Base(baseContract).balanceOf(other), 0);
     }
 
     function test_emits_badge_transferred_event() public {
@@ -454,6 +502,25 @@ contract RewardsFacet__integration_mintERC20Base is Setup {
 
     function test_mints_erc20() public {
         vm.prank(creator);
+        RewardsFacet(address(app)).mintERC20(
+            tokenContract,
+            other,
+            oneEther,
+            activityId,
+            activityType,
+            ""
+        );
+
+        assertEq(ERC20Base(tokenContract).balanceOf(other), oneEther);
+    }
+
+    function test_mints_erc20_when_caller_has_been_granted_operator_role() public {
+        vm.startPrank(creator);
+        SettingsFacet(address(app)).enableAccessControl();
+        SettingsFacet(address(app)).grantRole(OPERATOR_ROLE, other);
+        vm.stopPrank();
+
+        vm.prank(other);
         RewardsFacet(address(app)).mintERC20(
             tokenContract,
             other,
@@ -542,6 +609,25 @@ contract RewardsFacet__integration_mintERC20Point is Setup {
 
     function test_mints_erc20point() public {
         vm.prank(creator);
+        RewardsFacet(address(app)).mintERC20(
+            tokenContract,
+            other,
+            oneEther,
+            activityId,
+            activityType,
+            ""
+        );
+
+        assertEq(ERC20Point(tokenContract).balanceOf(other), oneEther);
+    }
+
+    function test_mints_erc20point_when_caller_has_been_granted_operator_role() public {
+        vm.startPrank(creator);
+        SettingsFacet(address(app)).enableAccessControl();
+        SettingsFacet(address(app)).grantRole(OPERATOR_ROLE, other);
+        vm.stopPrank();
+
+        vm.prank(other);
         RewardsFacet(address(app)).mintERC20(
             tokenContract,
             other,
@@ -647,6 +733,29 @@ contract RewardsFacet__integration_transferERC20Base is Setup {
             activityType,
             ""
         );
+
+        assertEq(ERC20Base(tokenContract).balanceOf(other), oneEther);
+    }
+
+
+    function test_mints_erc20_when_caller_has_been_granted_operator_role() public {
+        vm.startPrank(creator);
+        ERC20Base(tokenContract).mintTo(other, oneEther);
+        SettingsFacet(address(app)).enableAccessControl();
+        SettingsFacet(address(app)).grantRole(OPERATOR_ROLE, other);
+        vm.stopPrank();
+
+        vm.startPrank(other);
+        ERC20Base(tokenContract).approve(address(app), oneEther);
+        RewardsFacet(address(app)).transferERC20(
+            tokenContract,
+            other,
+            oneEther,
+            activityId,
+            activityType,
+            ""
+        );
+        vm.stopPrank();
 
         assertEq(ERC20Base(tokenContract).balanceOf(other), oneEther);
     }
