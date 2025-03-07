@@ -181,6 +181,17 @@ RewardsFacet.batchMintBadge:; forge script \
 	--sig "run(address)" \
  	--rpc-url $(rpc) --broadcast $(verbose) $(legacy) $(slow) $(args)
 
+# example: make SettingsFacet.enableAccessControl
+SettingsFacet.enableAccessControl:; forge script \
+	scripts/facet/SettingsFacet.s.sol:EnableAccessControl \
+ 	--rpc-url $(rpc) --broadcast $(verbose) $(legacy) $(slow) $(args)
+
+# example: make SettingsFacet.grantRoleOperator args="0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266"
+SettingsFacet.grantRoleOperator:; forge script \
+	scripts/facet/SettingsFacet.s.sol:GrantRoleOperator \
+	--sig "run(address)" \
+ 	--rpc-url $(rpc) --broadcast $(verbose) $(legacy) $(slow) $(args)
+
 # Simulate create new app and issues rewards
 # example: make SimulateAppAndRewards rpc="anvil" args="appName"
 SimulateAppAndRewards:; forge script \
@@ -205,6 +216,16 @@ update-ERC20FactoryFacet:; forge script scripts/facet/ERC20FactoryFacet.s.sol:Up
 
 update-RewardsFacet:; forge script scripts/facet/RewardsFacet.s.sol:Update --rpc-url $(rpc) --broadcast $(verbose) $(legacy) $(slow)
 update-ERC20Base:; forge script scripts/tokens/ERC20Base.s.sol:Update --rpc-url $(rpc) --broadcast $(verbose) $(legacy) $(slow)
+
+# Add access control
+# Date 07.03.25
+# updates SettingsFacet and RewardsFacet to add access control to apps
+# PR #155 https://github.com/open-format/contracts/pull/155
+update-AddAccessControl:; make \
+	update-RewardsFacet \
+	update-SettingsFacet-addAccessControl
+
+update-SettingsFacet-addAccessControl:; forge script scripts/facet/SettingsFacet.s.sol:Update_AddAccessControl --rpc-url $(rpc) --broadcast $(verbose) $(legacy) $(slow)
 
 # Add badge minting functionality
 # Date 20.05.24
