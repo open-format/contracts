@@ -28,6 +28,7 @@ import {IERC20Factory} from "@extensions/ERC20Factory/IERC20Factory.sol";
 import {ERC20FactoryFacet} from "src/facet/ERC20FactoryFacet.sol";
 import {RewardsFacet} from "src/facet/RewardsFacet.sol";
 import {SettingsFacet, IApplicationAccess, OPERATOR_ROLE} from "src/facet/SettingsFacet.sol";
+import {RedeployAllFacets} from "scripts/facet/AllFacets.s.sol";
 
 import {Deploy} from "scripts/core/Globals.s.sol";
 
@@ -67,21 +68,15 @@ contract Setup is Test, Helpers {
     RegistryMock registry;
     Globals globals;
 
-    SettingsFacet settingsFacet;
-    RewardsFacet rewardsFacet;
-
     ERC721Base erc721Implementation;
     bytes32 erc721ImplementationId;
     ERC721Badge badgeImplementation;
     bytes32 badgeImplementationId;
-    ERC721FactoryFacet erc721FactoryFacet;
 
     ERC20Base erc20Implementation;
     bytes32 erc20ImplementationId;
     ERC20Point erc20PointImplementation;
     bytes32 erc20PointImplementationId;
-
-    ERC20FactoryFacet erc20FactoryFacet;
 
     string name = "Name";
     string symbol = "Symbol";
@@ -99,12 +94,16 @@ contract Setup is Test, Helpers {
     event BadgeTransferred(address token, address to, uint256 tokenId, bytes32 id, bytes32 activityType, string uri);
 
     function setUp() public {
+        console.log("sender", msg.sender);
+
         // assign addresses
         creator = address(0x10);
         other = address(0x11);
         socialConscious = address(0x12);
 
         vm.deal(creator, oneEther);
+
+        vm.startPrank(msg.sender);
 
         // deploy contracts
         globals = new Globals();
@@ -116,18 +115,11 @@ contract Setup is Test, Helpers {
         erc721ImplementationId = bytes32("Base");
         badgeImplementation = new ERC721Badge(false);
         badgeImplementationId = bytes32("Badge");
-        erc721FactoryFacet = new ERC721FactoryFacet();
 
         erc20Implementation = new ERC20Base();
         erc20ImplementationId = bytes32("base");
         erc20PointImplementation = new ERC20Point();
         erc20PointImplementationId = bytes32("point");
-        
-        erc20FactoryFacet = new ERC20FactoryFacet();
-
-        // create app
-        vm.prank(creator);
-        app = Proxy(payable(appFactory.create("RewardFacetTest", creator)));
 
         // setup globals
         globals.setPlatformFee(0, 0, socialConscious);
@@ -136,73 +128,14 @@ contract Setup is Test, Helpers {
         globals.setERC20Implementation(erc20ImplementationId, address(erc20Implementation));
         globals.setERC20Implementation(erc20PointImplementationId, address(erc20PointImplementation));
 
-        settingsFacet = new SettingsFacet();
-        {
-            // add SettingsFacet to registry
-            bytes4[] memory selectors = new bytes4[](6);
-            selectors[0] = settingsFacet.setCreatorAccess.selector;
-            selectors[1] = settingsFacet.enableAccessControl.selector;
-            selectors[2] = settingsFacet.grantRole.selector;
-            selectors[3] = settingsFacet.hasRole.selector;
-            selectors[4] = settingsFacet.revokeRole.selector;
-            selectors[5] = settingsFacet.renounceRole.selector;
+        vm.stopPrank();
 
-            registry.diamondCut(
-                prepareSingleFacetCut(address(settingsFacet), IDiamondWritableInternal.FacetCutAction.ADD, selectors),
-                address(0),
-                ""
-            );
-        }
+        RedeployAllFacets redeployAllFacets = new RedeployAllFacets();
+        redeployAllFacets.runTest(address(registry));
 
-        rewardsFacet = new RewardsFacet();
-        {
-            // add RewardsFacet to registry
-            bytes4[] memory selectors = new bytes4[](7);
-            selectors[0] = rewardsFacet.mintERC20.selector;
-            selectors[1] = rewardsFacet.transferERC20.selector;
-            selectors[2] = rewardsFacet.mintERC721.selector;
-            selectors[3] = rewardsFacet.transferERC721.selector;
-            selectors[4] = rewardsFacet.multicall.selector;
-            selectors[5] = rewardsFacet.mintBadge.selector;
-            selectors[6] = rewardsFacet.batchMintBadge.selector;
-
-            registry.diamondCut(
-                prepareSingleFacetCut(address(rewardsFacet), IDiamondWritableInternal.FacetCutAction.ADD, selectors),
-                address(0),
-                ""
-            );
-        }
-
-        {
-            // add erc721FactoryFacet to registry
-            bytes4[] memory selectors = new bytes4[](4);
-            selectors[0] = erc721FactoryFacet.createERC721.selector;
-            selectors[1] = erc721FactoryFacet.createERC721WithTokenURI.selector;
-            selectors[2] = erc721FactoryFacet.getERC721FactoryImplementation.selector;
-            selectors[3] = erc721FactoryFacet.calculateERC721FactoryDeploymentAddress.selector;
-            registry.diamondCut(
-                prepareSingleFacetCut(
-                    address(erc721FactoryFacet), IDiamondWritableInternal.FacetCutAction.ADD, selectors
-                ),
-                address(0),
-                ""
-            );
-        }
-
-        {
-            // add erc20FactoryFacet to registry
-            bytes4[] memory selectors = new bytes4[](3);
-            selectors[0] = erc20FactoryFacet.createERC20.selector;
-            selectors[1] = erc20FactoryFacet.getERC20FactoryImplementation.selector;
-            selectors[2] = erc20FactoryFacet.calculateERC20FactoryDeploymentAddress.selector;
-            registry.diamondCut(
-                prepareSingleFacetCut(
-                    address(erc20FactoryFacet), IDiamondWritableInternal.FacetCutAction.ADD, selectors
-                ),
-                address(0),
-                ""
-            );
-        }
+        // create app
+        vm.prank(creator);
+        app = Proxy(payable(appFactory.create("RewardFacetTest", creator)));
 
         _afterSetup();
     }
