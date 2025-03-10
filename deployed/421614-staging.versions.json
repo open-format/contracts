@@ -1,36 +1,36 @@
 {
   "Facets": {
     "ChargeFacet": {
-      "address": "0x87d62B44557F731c5B9D93fbBa096928Fb382799",
+      "address": "0x4B234fe1499d63DBA7937a990D73A7D885f28405",
       "selectors": [
         "0x10c3db96",
-        "0x20ecd1ec",
         "0x23d3a539",
-        "0x9eaa34ec"
+        "0x9eaa34ec",
+        "0x20ecd1ec"
       ],
-      "version": "0.0.0"
+      "version": "1.0.0"
     },
     "ERC20FactoryFacet": {
-      "address": "0x2C227862Be6F0B1A6fd398E0630A60C09B34A077",
+      "address": "0xAB2c0a77E4a84ac6Fd669a11784a644CFEd1f93D",
       "selectors": [
         "0x2d4105d1",
         "0x3cb20d6c",
         "0x08721a2c"
       ],
-      "version": "0.0.0"
+      "version": "1.0.0"
     },
     "ERC721FactoryFacet": {
-      "address": "0x9147Deb9D788e86b98757a16269a9d033974BfA3",
+      "address": "0xb5b32F47500d9f7F589eD446817fB4637F411F8c",
       "selectors": [
         "0xee4506f5",
         "0x4fc06be4",
         "0x851ba287",
         "0x0667aad5"
       ],
-      "version": "0.0.0"
+      "version": "1.0.0"
     },
     "ERC721LazyDropFacet": {
-      "address": "0x24FEdc64981C3ccD789AF7e695e3070Dc7006389",
+      "address": "0xEBD73dB378Fc0e95DF3C8D4149F34742a0aaa666",
       "selectors": [
         "0x225a2b3e",
         "0xd9854a88",
@@ -38,7 +38,7 @@
         "0x22ba9456",
         "0x70ad0183"
       ],
-      "version": "0.0.0"
+      "version": "1.0.0"
     },
     "Registry": {
       "address": "0x11cd7aB1B36674a1f41BD19Bbc9e15EaAaF9857F",
@@ -58,8 +58,8 @@
       ],
       "version": "-"
     },
-    "RewardFacet": {
-      "address": "0x13dd8f63A9452adEA3f2152B12a13563AC433c41",
+    "RewardsFacet": {
+      "address": "0xd1b3fBb731FE7235344973247D88c61d17686E26",
       "selectors": [
         "0x609512c9",
         "0xbdebfec5",
@@ -69,10 +69,10 @@
         "0xa6c130fc",
         "0xb92bafd6"
       ],
-      "version": "0.0.0"
+      "version": "1.1.0"
     },
     "SettingsFacet": {
-      "address": "0xe0aaaf2A2F05DbE1feDa6aA6336fF2533D079BF0",
+      "address": "0x00226ca6D7b9ac91aa4d22CEb873F18381Fc59ea",
       "selectors": [
         "0x561c4fc4",
         "0xf2c9caa2",
@@ -80,9 +80,15 @@
         "0xba4e4840",
         "0xacf8569a",
         "0x114ee370",
-        "0xf030f12e"
+        "0xf030f12e",
+        "0x36f5f45e",
+        "0x2f2ff15d",
+        "0x91d14854",
+        "0x248a9ca3",
+        "0xd547741f",
+        "0x8bb9c5bf"
       ],
-      "version": "0.0.0"
+      "version": "1.1.0"
     }
   }
 }
