@@ -7,10 +7,46 @@ import {
     IDiamondWritableInternal
 } from "@solidstate/contracts/proxy/diamond/writable/IDiamondWritable.sol";
 import {Utils} from "scripts/utils/Utils.sol";
-import {ChargeFacet} from "src/facet/ChargeFacet.sol";
+import {ChargeFacet, Charge} from "src/facet/ChargeFacet.sol";
 import {RegistryMock} from "src/registry/RegistryMock.sol";
+import {IDeployer} from "./IDeployer.sol";
 
 string constant CONTRACT_NAME = "ChargeFacet";
+
+contract Deployer is IDeployer, Script, Utils {
+    address private addr;
+    uint256 private blockNumber;
+
+    function deploy() external returns (address) {
+        uint256 deployerPrivateKey = vm.envUint("PRIVATE_KEY");
+        vm.startBroadcast(deployerPrivateKey);
+        address chargeFacet = address(new ChargeFacet());
+        vm.stopBroadcast();
+
+        addr = chargeFacet;
+        blockNumber = block.number;
+
+        return chargeFacet;
+    }
+
+    function deployTest() external returns (address) {
+        return address(new ChargeFacet());
+    }
+
+    function export() external {
+        exportContractDeployment(CONTRACT_NAME, addr, blockNumber);
+    }
+
+    function selectors () external returns (bytes4[] memory){
+        bytes4[] memory s = new bytes4[](4);
+        s[0] = Charge.chargeUser.selector;
+        s[1] = Charge.setRequiredTokenBalance.selector;
+        s[2] = Charge.getRequiredTokenBalance.selector;
+        s[3] = Charge.hasFunds.selector;
+
+        return s;
+    }
+}
 
 contract Deploy is Script, Utils {
     function run() external {

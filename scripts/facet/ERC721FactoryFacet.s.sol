@@ -8,10 +8,46 @@ import {
     IDiamondWritableInternal
 } from "@solidstate/contracts/proxy/diamond/writable/IDiamondWritable.sol";
 import {Utils} from "scripts/utils/Utils.sol";
-import {ERC721FactoryFacet} from "src/facet/ERC721FactoryFacet.sol";
+import {ERC721FactoryFacet, ERC721Factory} from "src/facet/ERC721FactoryFacet.sol";
 import {RegistryMock} from "src/registry/RegistryMock.sol";
+import {IDeployer} from "./IDeployer.sol";
 
 string constant CONTRACT_NAME = "ERC721FactoryFacet";
+
+contract Deployer is IDeployer, Script, Utils {
+    address private addr;
+    uint256 private blockNumber;
+
+    function deploy() external returns (address) {
+        uint256 deployerPrivateKey = vm.envUint("PRIVATE_KEY");
+        vm.startBroadcast(deployerPrivateKey);
+        address erc721FactoryFacet = address(new ERC721FactoryFacet());
+        vm.stopBroadcast();
+
+        addr = erc721FactoryFacet;
+        blockNumber = block.number;
+
+        return erc721FactoryFacet;
+    }
+
+    function deployTest() external returns (address) {
+        return address(new ERC721FactoryFacet());
+    }
+
+    function export() external {
+        exportContractDeployment(CONTRACT_NAME, addr, blockNumber);
+    }
+
+    function selectors () external returns (bytes4[] memory){
+        bytes4[] memory s = new bytes4[](4);
+        s[0] = ERC721Factory.createERC721.selector;
+        s[1] = ERC721Factory.createERC721WithTokenURI.selector;
+        s[2] = ERC721Factory.getERC721FactoryImplementation.selector;
+        s[3] = ERC721Factory.calculateERC721FactoryDeploymentAddress.selector;
+
+        return s;
+    }
+}
 
 contract Deploy is Script, Utils {
     function run() external {

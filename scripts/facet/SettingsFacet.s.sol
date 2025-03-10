@@ -7,10 +7,55 @@ import {
     IDiamondWritableInternal
 } from "@solidstate/contracts/proxy/diamond/writable/IDiamondWritable.sol";
 import {Utils} from "scripts/utils/Utils.sol";
-import {SettingsFacet, OPERATOR_ROLE} from "src/facet/SettingsFacet.sol";
+import {SettingsFacet, OPERATOR_ROLE, AccessControl, ApplicationFee, PlatformFee} from "src/facet/SettingsFacet.sol";
 import {RegistryMock} from "src/registry/RegistryMock.sol";
+import {IDeployer} from "./IDeployer.sol";
 
 string constant CONTRACT_NAME = "SettingsFacet";
+
+contract Deployer is IDeployer, Script, Utils {
+    address private addr;
+    uint256 private blockNumber;
+
+    function deploy() external returns (address) {
+        uint256 deployerPrivateKey = vm.envUint("PRIVATE_KEY");
+        vm.startBroadcast(deployerPrivateKey);
+        address settingsFacet = address(new SettingsFacet());
+        vm.stopBroadcast();
+
+        addr = settingsFacet;
+        blockNumber = block.number;
+
+        return settingsFacet;
+    }
+
+    function deployTest() external returns (address) {
+        return address(new SettingsFacet());
+    }
+
+    function export() external {
+        exportContractDeployment(CONTRACT_NAME, addr, blockNumber);
+    }
+
+    function selectors () external returns (bytes4[] memory){
+        bytes4[] memory s = new bytes4[](13);
+        s[0] = SettingsFacet.setApplicationFee.selector;
+        s[1] = SettingsFacet.setAcceptedCurrencies.selector;
+        s[2] = ApplicationFee.applicationFeeInfo.selector;
+        s[3] = SettingsFacet.setCreatorAccess.selector;
+        s[4] = SettingsFacet.hasCreatorAccess.selector;
+        s[5] = PlatformFee.platformFeeInfo.selector;
+        s[6] = SettingsFacet.getGlobalsAddress.selector;
+        s[7] = SettingsFacet.enableAccessControl.selector;
+        s[8] = AccessControl.grantRole.selector;
+        s[9] = AccessControl.hasRole.selector;
+        s[10] = AccessControl.getRoleAdmin.selector;
+        s[11] = AccessControl.revokeRole.selector;
+        s[12] = AccessControl.renounceRole.selector;
+
+        return s;
+    }
+}
 
 contract Deploy is Script, Utils {
     function run() external {
