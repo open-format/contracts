@@ -29,6 +29,9 @@ The Open Format Smart Contracts are the core of the Open Format ecosystem.
 🔨 ERC-4626 - Tokenised vaults
 
 ## Deployments
+
+For all supported chains see the [deployed folder](/deployed).
+
 ### Arbitrum Sepolia (testnet)
 | Contract Name           | Contract Address                                                                                                             | Contract Type |
 | ----------------------- | ---------------------------------------------------------------------------------------------------------------------------- | ------------- |
