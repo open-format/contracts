@@ -4,44 +4,44 @@
     "startBlock": 15636148
   },
   "ChargeFacet": {
-    "address": "0x7049F6b996C68BfFE422502eB03Ec096f705A7d8",
-    "startBlock": 15636352
+    "address": "0xC347341Dc67aFfC7cE91cC4F6f736Ef5024645D3",
+    "startBlock": 20385253
   },
   "ERC20Base": {
-    "address": "0x868C2Ffb18e354DF6c98DF32B519eE2c08669A73",
-    "startBlock": 15636160
+    "address": "0x5eebDa0251abB4D92B37b0f8Fe25858D4Ac7CdBF",
+    "startBlock": 20385347
   },
   "ERC20FactoryFacet": {
-    "address": "0xD17752f9D965F059c6A10fcEa7a751F2A516A0fB",
-    "startBlock": 15636311
+    "address": "0x104Ac40bBa1E85c329657c9537B94e48836b71f4",
+    "startBlock": 20385253
   },
   "ERC20Point": {
-    "address": "0xF8dcF4A16733fA978D8e7F5d18b813aDf69A64ef",
-    "startBlock": 15636179
+    "address": "0x5A73E5F9a2204bCfc35629631d51f427A7d55302",
+    "startBlock": 20385358
   },
   "ERC721Badge": {
-    "address": "0x3b45A03264a67A5Ce89f51884231eCe00354b904",
-    "startBlock": 15636233
+    "address": "0x48460c4CF84a0970941c07BD3791F9aB6e3059d3",
+    "startBlock": 20385326
   },
   "ERC721BadgeNonTransferable": {
-    "address": "0x537ADEBA5f70DcbDbFAf0680777c494b06C6E2f1",
-    "startBlock": 18572247
+    "address": "0xb0A9FE7E51d7560972d2242BC2e122f79FB40aBb",
+    "startBlock": 20385337
   },
   "ERC721Base": {
-    "address": "0xD27eB01a0C1f94088DfBe7977A4CAd122a531357",
-    "startBlock": 15636196
+    "address": "0xd5fdFE186F3b59Ca226E349238DcC6c8E3BEE6e2",
+    "startBlock": 20385305
   },
   "ERC721FactoryFacet": {
-    "address": "0xD07B058E0De6865a5b4994b07a7FD8bd9f2B0187",
-    "startBlock": 15636291
+    "address": "0x8C86cd6a6962Dd22312C542E2a6C36ba1097640f",
+    "startBlock": 20385253
   },
   "ERC721LazyDropFacet": {
-    "address": "0xe39600461a51322c7F915496001807D8195D4fe1",
-    "startBlock": 15636330
+    "address": "0x489171058f378E8C809c66c2F5308e9c6e44048e",
+    "startBlock": 20385253
   },
   "ERC721LazyMint": {
-    "address": "0x5fC72aa9145E79A55Cadf196Ff44f8E15e24Efca",
-    "startBlock": 15636215
+    "address": "0xDE43d51034d67656f1471843e6a5D3c290B7e8dB",
+    "startBlock": 20385315
   },
   "Globals": {
     "address": "0x31fbDB04f3df97bD8db36DE4A0998fB9F02e78F3",
@@ -56,12 +56,12 @@
     "startBlock": 15636124
   },
   "RewardFacet": {
-    "address": "0x1126aB6DCba79FE76EBC8454A78CFd2b8FDB1919",
-    "startBlock": 15636252
+    "address": "0x20E7A8846740675f963C1E1D6BFAe9a935281053",
+    "startBlock": 20385253
   },
   "SettingsFacet": {
-    "address": "0x82dFAeCcA72e4d936A8Df2EB1307ccf6C7E1E9B3",
-    "startBlock": 15636272
+    "address": "0x94977FAf734fB50e47E4451EcE1A6d7881aa08E1",
+    "startBlock": 20385253
   },
   "doNotRemoveUsedToParseFile": [
     "Globals",

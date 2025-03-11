@@ -8,24 +8,28 @@
     "startBlock": 7874111
   },
   "ERC20Base": {
-    "address": "0x6F36f7A3CD912F284bc13f85ee04c57Da14319c1",
-    "startBlock": 53181398
+    "address": "0x568f440f4462024f18FB1841333e582F4aAEb11d",
+    "startBlock": 7879813
   },
   "ERC20FactoryFacet": {
     "address": "0xAB2c0a77E4a84ac6Fd669a11784a644CFEd1f93D",
     "startBlock": 7874111
   },
   "ERC20Point": {
-    "address": "0x81c44F762785dD26FC94E4c549B872E9FE19c2dD",
-    "startBlock": 106106959
+    "address": "0xbAD08De2AE4Aa2e5eC301FA6a47C6c9c487F6A0b",
+    "startBlock": 7879814
   },
   "ERC721Badge": {
-    "address": "0x9f5c73BffCD63c5e9d1ADf18aAc9D6F6695EAe70",
-    "startBlock": 53194358
+    "address": "0xeb311c1B3C5c18bC5D56dA2482CB9FB7f7C4396D",
+    "startBlock": 7879811
+  },
+  "ERC721BadgeNonTransferable": {
+    "address": "0xd7fB9a60009dA856091B62C991786b1bf73b6BEf",
+    "startBlock": 7879813
   },
   "ERC721Base": {
-    "address": "0xC4d53838f4D54f1A44116b3109BfA1bf064a8301",
-    "startBlock": 53193947
+    "address": "0x858378654686780458E5f2b7c0b273e35ed7226b",
+    "startBlock": 7879810
   },
   "ERC721FactoryFacet": {
     "address": "0xb5b32F47500d9f7F589eD446817fB4637F411F8c",
@@ -36,8 +40,8 @@
     "startBlock": 7874111
   },
   "ERC721LazyMint": {
-    "address": "0x937bb2985eE71F62360E9c3AB88B54822Af248a3",
-    "startBlock": 53194310
+    "address": "0x50D5145Bf4d0F5c4285204Ccc9f1ed4dE025AFb2",
+    "startBlock": 7879811
   },
   "Globals": {
     "address": "0x58d82389CaedB0323660D98F2CadE93D365a38a3",
@@ -89,6 +93,7 @@
     "XP",
     "OFT",
     "ChargeFacet",
-    "ERC20Point"
+    "ERC20Point",
+    "ERC721BadgeNonTransferable"
   ]
 }
