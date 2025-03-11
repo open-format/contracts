@@ -7,10 +7,55 @@ import {
     IDiamondWritableInternal
 } from "@solidstate/contracts/proxy/diamond/writable/IDiamondWritable.sol";
 import {Utils} from "scripts/utils/Utils.sol";
-import {SettingsFacet} from "src/facet/SettingsFacet.sol";
+import {SettingsFacet, OPERATOR_ROLE, AccessControl, ApplicationFee, PlatformFee} from "src/facet/SettingsFacet.sol";
 import {RegistryMock} from "src/registry/RegistryMock.sol";
+import {IDeployer} from "./IDeployer.sol";
 
 string constant CONTRACT_NAME = "SettingsFacet";
+
+contract Deployer is IDeployer, Script, Utils {
+    address private addr;
+    uint256 private blockNumber;
+
+    function deploy() external returns (address) {
+        uint256 deployerPrivateKey = vm.envUint("PRIVATE_KEY");
+        vm.startBroadcast(deployerPrivateKey);
+        address settingsFacet = address(new SettingsFacet());
+        vm.stopBroadcast();
+
+        addr = settingsFacet;
+        blockNumber = block.number;
+
+        return settingsFacet;
+    }
+
+    function deployTest() external returns (address) {
+        return address(new SettingsFacet());
+    }
+
+    function export() external {
+        exportContractDeployment(CONTRACT_NAME, addr, blockNumber);
+    }
+
+    function selectors () external returns (bytes4[] memory){
+        bytes4[] memory s = new bytes4[](13);
+        s[0] = SettingsFacet.setApplicationFee.selector;
+        s[1] = SettingsFacet.setAcceptedCurrencies.selector;
+        s[2] = ApplicationFee.applicationFeeInfo.selector;
+        s[3] = SettingsFacet.setCreatorAccess.selector;
+        s[4] = SettingsFacet.hasCreatorAccess.selector;
+        s[5] = PlatformFee.platformFeeInfo.selector;
+        s[6] = SettingsFacet.getGlobalsAddress.selector;
+        s[7] = SettingsFacet.enableAccessControl.selector;
+        s[8] = AccessControl.grantRole.selector;
+        s[9] = AccessControl.hasRole.selector;
+        s[10] = AccessControl.getRoleAdmin.selector;
+        s[11] = AccessControl.revokeRole.selector;
+        s[12] = AccessControl.renounceRole.selector;
+
+        return s;
+    }
+}
 
 contract Deploy is Script, Utils {
     function run() external {
@@ -48,6 +93,79 @@ contract Deploy is Script, Utils {
         vm.stopBroadcast();
 
         exportContractDeployment(CONTRACT_NAME, address(settingsFacet), block.number);
+    }
+}
+
+contract EnableAccessControl is Script, Utils {
+    function run() public {
+        uint256 deployerPrivateKey = vm.envUint("PRIVATE_KEY");
+        address appId = vm.envAddress("APP_ID");
+
+        vm.startBroadcast(deployerPrivateKey);
+        SettingsFacet(appId).enableAccessControl();
+        vm.stopBroadcast();
+    }
+}
+
+contract GrantRoleOperator is Script, Utils {
+    function run(address account) public {
+        uint256 deployerPrivateKey = vm.envUint("PRIVATE_KEY");
+        address appId = vm.envAddress("APP_ID");
+
+        vm.startBroadcast(deployerPrivateKey);
+        SettingsFacet(appId).grantRole(OPERATOR_ROLE, account);
+        vm.stopBroadcast();
+    }
+}
+
+/**
+ * @dev use this script to updated deployments of SettingsFacet from v1.0.0 to v1.1.0
+ * PR #155 https://github.com/open-format/contracts/pull/155
+ */
+contract Update_AddAccessControl is Script, Utils {
+    function run() public {
+        uint256 deployerPrivateKey = vm.envUint("PRIVATE_KEY");
+        address deployerAddress = vm.addr(deployerPrivateKey);
+
+        vm.startBroadcast(deployerPrivateKey);
+
+        // deploy
+        SettingsFacet settingsFacet = new SettingsFacet();
+
+        bytes4[] memory replaceSelectors = new bytes4[](7);
+        replaceSelectors[0] = settingsFacet.setApplicationFee.selector;
+        replaceSelectors[1] = settingsFacet.setAcceptedCurrencies.selector;
+        replaceSelectors[2] = settingsFacet.applicationFeeInfo.selector;
+        replaceSelectors[3] = settingsFacet.setCreatorAccess.selector;
+        replaceSelectors[4] = settingsFacet.hasCreatorAccess.selector;
+        replaceSelectors[5] = settingsFacet.platformFeeInfo.selector;
+        replaceSelectors[6] = settingsFacet.getGlobalsAddress.selector;
+
+        // construct array of function selectors to add
+        bytes4[] memory addSelectors = new bytes4[](6);
+        addSelectors[0] = settingsFacet.enableAccessControl.selector;
+        addSelectors[1] = settingsFacet.grantRole.selector;
+        addSelectors[2] = settingsFacet.hasRole.selector;
+        addSelectors[3] = settingsFacet.getRoleAdmin.selector;
+        addSelectors[4] = settingsFacet.revokeRole.selector;
+        addSelectors[5] = settingsFacet.renounceRole.selector;
+
+        // construct facet cuts
+        IDiamondWritableInternal.FacetCut[] memory cuts = new IDiamondWritableInternal.FacetCut[](2);
+        cuts[0] = IDiamondWritableInternal.FacetCut(
+            address(settingsFacet), IDiamondWritableInternal.FacetCutAction.REPLACE, replaceSelectors
+        );
+        cuts[1] = IDiamondWritableInternal.FacetCut(
+            address(settingsFacet), IDiamondWritableInternal.FacetCutAction.ADD, addSelectors
+        );
+
+        // add to registry
+        RegistryMock(payable(getContractDeploymentAddress("Registry"))).diamondCut(cuts, address(0), "");
+
+        vm.stopBroadcast();
+
+        exportContractDeployment(CONTRACT_NAME, address(settingsFacet), block.number);
+
     }
 }
 

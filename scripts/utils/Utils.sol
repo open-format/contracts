@@ -3,6 +3,12 @@ pragma solidity ^0.8.16;
 import "forge-std/Script.sol";
 import "forge-std/console.sol";
 
+import {IDiamondReadable} from "@solidstate/contracts/proxy/diamond/readable/IDiamondReadable.sol";
+import {
+    IDiamondWritable,
+    IDiamondWritableInternal
+} from "@solidstate/contracts/proxy/diamond/writable/IDiamondWritable.sol";
+
 contract Utils is Script {
     error Utils_contractAddressNotFound(string contractName);
     error Utils_contractNameNotFound(address contractAddress);
@@ -162,5 +168,36 @@ contract Utils is Script {
 
     function _toHexChar(uint8 value) private pure returns (bytes1) {
         return value < 10 ? bytes1(value + 48) : bytes1(value + 87); // 0-9 => '0'-'9', 10-15 => 'a'-'f'
+    }
+
+    /**
+     * Create an "add" facet diamond cut.
+     */
+    function facetCutAdd(address target, bytes4[] memory selectors) internal pure returns (IDiamondWritableInternal.FacetCut memory) {
+      return IDiamondWritableInternal.FacetCut(target, IDiamondWritableInternal.FacetCutAction.ADD, selectors);
+    }
+
+    /**
+     * Construct the 'diamond cuts' to remove all facets and selectors except those found on the registry contract
+     */
+    function getRemoveCuts(address registryAddress) internal view returns (IDiamondWritableInternal.FacetCut[] memory) {
+        IDiamondReadable.Facet[] memory facets = IDiamondReadable(registryAddress).facets();
+        //`facets.length -1` accounts for registry facet being returned from `facets` function above
+        IDiamondWritableInternal.FacetCut[] memory cuts = new IDiamondWritableInternal.FacetCut[](facets.length - 1);
+        uint256 cutCount = 0;
+        for (uint256 i = 0; i < facets.length; i++) {
+            // Registry facet selectors are imitable so it will revert if removal is attempted.
+            if (facets[i].target == registryAddress) {
+                continue;
+            }
+
+            cuts[cutCount] = IDiamondWritableInternal.FacetCut(
+                address(0), IDiamondWritableInternal.FacetCutAction.REMOVE, facets[i].selectors
+            );
+
+            cutCount++;
+        }
+
+        return cuts;
     }
 }
