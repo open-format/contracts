@@ -1,25 +1,36 @@
 {
   "Facets": {
+    "ChargeFacet": {
+      "address": "0xF961DF607F31916a4fA210F2513Acd9D2d09bFd5",
+      "selectors": [
+        "0x10c3db96",
+        "0x23d3a539",
+        "0x9eaa34ec",
+        "0x20ecd1ec"
+      ],
+      "version": "1.0.0"
+    },
     "ERC20FactoryFacet": {
-      "address": "0xc21125b654a1071D9Bc8162C71A71Cd88fD99E85",
+      "address": "0x716fd6975bcbD388fE0c0d7919190EC4492B5703",
       "selectors": [
         "0x2d4105d1",
         "0x3cb20d6c",
         "0x08721a2c"
       ],
-      "version": "0.0.0"
+      "version": "1.0.0"
     },
     "ERC721FactoryFacet": {
-      "address": "0x19145dc9b36DDdd9a874195c6e51f4067aeb796a",
+      "address": "0x2Ba4bD2B51af9a0578c57546e1c64B3982913bE1",
       "selectors": [
         "0xee4506f5",
+        "0x4fc06be4",
         "0x851ba287",
         "0x0667aad5"
       ],
-      "version": "0.0.0"
+      "version": "1.0.0"
     },
     "ERC721LazyDropFacet": {
-      "address": "0x47b5760dDba0D3D80d83fc689D3c5Cb45efe93B4",
+      "address": "0xF6785e3575717EfF762123AF99F16bF4Fa9e441B",
       "selectors": [
         "0x225a2b3e",
         "0xd9854a88",
@@ -27,7 +38,7 @@
         "0x22ba9456",
         "0x70ad0183"
       ],
-      "version": "0.0.0"
+      "version": "1.0.0"
     },
     "Registry": {
       "address": "0x7aFE68988db5158B68ce64cEFBe750E5D3539e71",
@@ -47,19 +58,21 @@
       ],
       "version": "-"
     },
-    "RewardFacet": {
-      "address": "0xaCde8917a4427DcE86aaDF7Bf853e730aa72A398",
+    "RewardsFacet": {
+      "address": "0x96cE8aC7233DC066DAAba89E13f9561187A48a08",
       "selectors": [
         "0x609512c9",
         "0xbdebfec5",
         "0x97b4f6aa",
         "0x3996701d",
-        "0xac9650d8"
+        "0xac9650d8",
+        "0xa6c130fc",
+        "0xb92bafd6"
       ],
-      "version": "0.0.0"
+      "version": "1.1.0"
     },
     "SettingsFacet": {
-      "address": "0x3Fbe54Cc6B5f377830f6DE55a3A9B0f811AAfea9",
+      "address": "0x5c993B380ED9A14D55722B321B5f485a7EA86FB9",
       "selectors": [
         "0x561c4fc4",
         "0xf2c9caa2",
@@ -67,9 +80,15 @@
         "0xba4e4840",
         "0xacf8569a",
         "0x114ee370",
-        "0xf030f12e"
+        "0xf030f12e",
+        "0x36f5f45e",
+        "0x2f2ff15d",
+        "0x91d14854",
+        "0x248a9ca3",
+        "0xd547741f",
+        "0x8bb9c5bf"
       ],
-      "version": "0.0.0"
+      "version": "1.1.0"
     }
   }
 }

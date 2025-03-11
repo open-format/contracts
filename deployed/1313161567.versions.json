@@ -1,7 +1,7 @@
 {
   "Facets": {
     "ChargeFacet": {
-      "address": "0xcf02b4be31bFEAf53d54435AD9e5082c3d4dC86B",
+      "address": "0x9bD035842203F4DdCfB6636cAD70589F13B8A0bB",
       "selectors": [
         "0x10c3db96",
         "0x23d3a539",
@@ -11,7 +11,7 @@
       "version": "1.0.0"
     },
     "ERC20FactoryFacet": {
-      "address": "0xc8D561043FD4e4ADBC355C9f391D40f7a1015Ad4",
+      "address": "0xDefdB6E9fEc864B386D5bb4dBD389485D98778b2",
       "selectors": [
         "0x2d4105d1",
         "0x3cb20d6c",
@@ -20,7 +20,7 @@
       "version": "1.0.0"
     },
     "ERC721FactoryFacet": {
-      "address": "0xdC78cE00BD385095e08c82Bc12D7fFff7681086b",
+      "address": "0xBE88645b80D079Bbb50f2d84E8FC402c5Cb5cbd3",
       "selectors": [
         "0xee4506f5",
         "0x4fc06be4",
@@ -30,7 +30,7 @@
       "version": "1.0.0"
     },
     "ERC721LazyDropFacet": {
-      "address": "0x421CD33fc08aE7393dE34ac13650c5c884240911",
+      "address": "0xD44966Cc27e47b8C4021f234fC92A13542a1Bca7",
       "selectors": [
         "0x225a2b3e",
         "0xd9854a88",
@@ -59,7 +59,7 @@
       "version": "-"
     },
     "RewardsFacet": {
-      "address": "0x8ccE30c7cafD100B528e392d21c80ae7f0F3Da0c",
+      "address": "0x9373607A49E8687b491a9f5D7c2B4d00F71bf2C6",
       "selectors": [
         "0x609512c9",
         "0xbdebfec5",
@@ -69,10 +69,10 @@
         "0xa6c130fc",
         "0xb92bafd6"
       ],
-      "version": "1.0.0"
+      "version": "1.1.0"
     },
     "SettingsFacet": {
-      "address": "0x01545529b379471231D1d32a651cED6c8a57E7Ee",
+      "address": "0x95Ae1CCa8e67C3339128f9d04C3b0A3F6d7aB770",
       "selectors": [
         "0x561c4fc4",
         "0xf2c9caa2",
@@ -80,9 +80,15 @@
         "0xba4e4840",
         "0xacf8569a",
         "0x114ee370",
-        "0xf030f12e"
+        "0xf030f12e",
+        "0x36f5f45e",
+        "0x2f2ff15d",
+        "0x91d14854",
+        "0x248a9ca3",
+        "0xd547741f",
+        "0x8bb9c5bf"
       ],
-      "version": "1.0.0"
+      "version": "1.1.0"
     }
   }
 }
