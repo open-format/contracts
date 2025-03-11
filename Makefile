@@ -66,6 +66,13 @@ deploy-ERC20FactoryFacet:; forge script scripts/facet/ERC20FactoryFacet.s.sol:De
 deploy-ERC721LazyDropFacet:; forge script scripts/facet/ERC721LazyDropFacet.s.sol:Deploy --rpc-url $(rpc) --broadcast $(verbose) $(gasPrice) $(legacy) $(slow)
 
 redeploy-AllFacets:; forge script scripts/facet/AllFacets.s.sol:RedeployAllFacets --rpc-url $(rpc) --broadcast $(verbose) $(gasPrice) $(legacy) $(slow)
+redeploy-AllTokens:; make \
+	deploy-ERC721Base \
+	deploy-ERC721LazyMint \
+	deploy-ERC721Badge \
+	deploy-ERC721BadgeNonTransferable \
+	deploy-ERC20Base \
+	deploy-ERC20Point
 
 # patch
 patch-SettingsFacet:; forge script scripts/facet/SettingsFacet.s.sol:Patch --rpc-url $(rpc) --broadcast $(verbose) $(legacy) $(slow)
@@ -196,6 +203,10 @@ SettingsFacet.enableAccessControl:; forge script \
 SettingsFacet.grantRoleOperator:; forge script \
 	scripts/facet/SettingsFacet.s.sol:GrantRoleOperator \
 	--sig "run(address)" \
+ 	--rpc-url $(rpc) --broadcast $(verbose) $(legacy) $(slow) $(args)
+
+Registry.owner:; forge script \
+	scripts/core/Registry.s.sol:Owner \
  	--rpc-url $(rpc) --broadcast $(verbose) $(legacy) $(slow) $(args)
 
 # Simulate create new app and issues rewards
