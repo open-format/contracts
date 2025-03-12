@@ -20,3 +20,16 @@ contract Deploy is Script, Utils {
         exportContractDeployment(CONTRACT_NAME, address(registry), block.number);
     }
 }
+
+contract Owner is Script, Utils {
+    function run() external {
+        uint256 deployerPrivateKey = vm.envUint("PRIVATE_KEY");
+        address deployerAddress = vm.addr(deployerPrivateKey);
+        vm.startBroadcast(deployerPrivateKey);
+        address registry = getContractDeploymentAddress(CONTRACT_NAME);
+        address owner = RegistryMock(payable (registry)).owner();
+        vm.stopBroadcast();
+        console.log("Caller: ", deployerAddress);
+        console.log(" Owner: ", owner);
+    }
+}

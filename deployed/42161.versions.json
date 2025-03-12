@@ -1,0 +1,94 @@
+{
+  "Facets": {
+    "ChargeFacet": {
+      "address": "0x3de26bD228375d98024473E5237B30Baa013eDfE",
+      "selectors": [
+        "0x10c3db96",
+        "0x23d3a539",
+        "0x9eaa34ec",
+        "0x20ecd1ec"
+      ],
+      "version": "1.0.0"
+    },
+    "ERC20FactoryFacet": {
+      "address": "0xae4F65c676Ae55203842b5D6139DD9b81A9d8678",
+      "selectors": [
+        "0x2d4105d1",
+        "0x3cb20d6c",
+        "0x08721a2c"
+      ],
+      "version": "1.0.0"
+    },
+    "ERC721FactoryFacet": {
+      "address": "0x6afd9BeB940d813d0CB61C5ae3D0bc25930D5F93",
+      "selectors": [
+        "0xee4506f5",
+        "0x4fc06be4",
+        "0x851ba287",
+        "0x0667aad5"
+      ],
+      "version": "1.0.0"
+    },
+    "ERC721LazyDropFacet": {
+      "address": "0x1799946Dd3AA051F0a333284E968d60d97a59bBE",
+      "selectors": [
+        "0x225a2b3e",
+        "0xd9854a88",
+        "0xf56cfb66",
+        "0x22ba9456",
+        "0x70ad0183"
+      ],
+      "version": "1.0.0"
+    },
+    "Registry": {
+      "address": "0xcB258A326BdaF32a736510F06772852CA856D95e",
+      "selectors": [
+        "0x2c408059",
+        "0x91423765",
+        "0x1f931c1c",
+        "0x7a0ed627",
+        "0xadfca15e",
+        "0x52ef6b2c",
+        "0xcdffacc6",
+        "0x01ffc9a7",
+        "0x8da5cb5b",
+        "0x8ab5150a",
+        "0xf2fde38b",
+        "0x79ba5097"
+      ],
+      "version": "-"
+    },
+    "RewardsFacet": {
+      "address": "0x73F277d44c4Be61Da13Ba5c70958b05B96b2c677",
+      "selectors": [
+        "0x609512c9",
+        "0xbdebfec5",
+        "0x97b4f6aa",
+        "0x3996701d",
+        "0xac9650d8",
+        "0xa6c130fc",
+        "0xb92bafd6"
+      ],
+      "version": "1.1.0"
+    },
+    "SettingsFacet": {
+      "address": "0xA8dC7D714D849DAb30406b79601fAFBCCA0D3B5c",
+      "selectors": [
+        "0x561c4fc4",
+        "0xf2c9caa2",
+        "0xa9e64ec8",
+        "0xba4e4840",
+        "0xacf8569a",
+        "0x114ee370",
+        "0xf030f12e",
+        "0x36f5f45e",
+        "0x2f2ff15d",
+        "0x91d14854",
+        "0x248a9ca3",
+        "0xd547741f",
+        "0x8bb9c5bf"
+      ],
+      "version": "1.1.0"
+    }
+  }
+}

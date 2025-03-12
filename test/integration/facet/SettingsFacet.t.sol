@@ -16,9 +16,7 @@ import {Upgradable} from "src/proxy/upgradable/Upgradable.sol";
 import {RegistryMock} from "src/registry/RegistryMock.sol";
 import {AppFactory} from "src/factories/App.sol";
 import {Globals} from "src/globals/Globals.sol";
-import {ERC20Base} from "src/tokens/ERC20/ERC20Base.sol";
-
-import {SettingsFacet, IApplicationAccess} from "src/facet/SettingsFacet.sol";
+import {SettingsFacet, IApplicationAccess, ADMIN_ROLE, OPERATOR_ROLE} from "src/facet/SettingsFacet.sol";
 
 abstract contract Helpers {
     function prepareSingleFacetCut(
@@ -60,7 +58,7 @@ contract Setup is Test, Helpers {
         settingsFacet = new SettingsFacet();
 
         // add facet to registry
-        bytes4[] memory selectors = new bytes4[](7);
+        bytes4[] memory selectors = new bytes4[](13);
         selectors[0] = settingsFacet.setApplicationFee.selector;
         selectors[1] = settingsFacet.setAcceptedCurrencies.selector;
         selectors[2] = settingsFacet.applicationFeeInfo.selector;
@@ -68,6 +66,12 @@ contract Setup is Test, Helpers {
         selectors[4] = settingsFacet.hasCreatorAccess.selector;
         selectors[5] = settingsFacet.platformFeeInfo.selector;
         selectors[6] = settingsFacet.getGlobalsAddress.selector;
+        selectors[7] = settingsFacet.enableAccessControl.selector;
+        selectors[8] = settingsFacet.grantRole.selector;
+        selectors[9] = settingsFacet.hasRole.selector;
+        selectors[10] = settingsFacet.getRoleAdmin.selector;
+        selectors[11] = settingsFacet.revokeRole.selector;
+        selectors[12] = settingsFacet.renounceRole.selector;
 
         registry.diamondCut(
             prepareSingleFacetCut(address(settingsFacet), IDiamondWritableInternal.FacetCutAction.ADD, selectors),
@@ -245,5 +249,50 @@ contract SettingsFacet__integration_platformFeeInfo is Setup {
 
         assertEq(recipient, other);
         assertEq(amount, 1 ether);
+    }
+}
+
+contract SettingsFacet__intergration_enableAccessControl is Setup {
+    function test_can_enable_access_control() public {
+        vm.prank(appOwner);
+        SettingsFacet(address(app)).enableAccessControl();
+
+        assertTrue(
+            SettingsFacet(address(app)).hasRole(ADMIN_ROLE, appOwner)
+        );
+    }
+
+    function test_reverts_if_not_app_owner() public {
+        vm.prank(other);
+        vm.expectRevert(IOwnableInternal.Ownable__NotOwner.selector);
+        SettingsFacet(address(app)).enableAccessControl();
+    }
+}
+
+
+contract SettingsFacet__intergration_grantRole is Setup {
+    function test_can_grant_operator_role() public {
+        vm.prank(appOwner);
+        SettingsFacet(address(app)).enableAccessControl();
+
+        vm.prank(appOwner);
+        SettingsFacet(address(app)).grantRole(OPERATOR_ROLE, other);
+        assertTrue(SettingsFacet(address(app)).hasRole(OPERATOR_ROLE, other));
+    }
+
+    function test_reverts_if_not_app_owner() public {
+        vm.prank(appOwner);
+        SettingsFacet(address(app)).enableAccessControl();
+
+        vm.prank(other);
+        vm.expectRevert(
+                abi.encodePacked(
+                    'AccessControl: account ',
+                    vm.toString(other),
+                    ' is missing role ',
+                    vm.toString(ADMIN_ROLE)
+                )
+            );
+        SettingsFacet(address(app)).grantRole(OPERATOR_ROLE, other);
     }
 }

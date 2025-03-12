@@ -5,7 +5,9 @@ import {SafeOwnable, OwnableInternal} from "@solidstate/contracts/access/ownable
 import {ApplicationFee} from "../extensions/applicationFee/ApplicationFee.sol";
 import {ApplicationAccess, IApplicationAccess} from "../extensions/applicationAccess/ApplicationAccess.sol";
 import {PlatformFee} from "../extensions/platformFee/PlatformFee.sol";
+import {IVersionable} from "../extensions/versionable/IVersionable.sol";
 import {Multicall} from "@solidstate/contracts/utils/Multicall.sol";
+import {AccessControlInternal} from "@solidstate/contracts/access/access_control/AccessControl.sol";
 
 interface NFT {
     function mintTo(address to, string memory tokenURI) external;
@@ -30,9 +32,12 @@ interface Token {
 }
 
 bytes32 constant ADMIN_ROLE = bytes32(uint256(0));
-bytes32 constant MINTER_ROLE = bytes32(uint256(1));
+bytes32 constant OPERATOR_ROLE = bytes32(uint256(1));
 
-contract RewardsFacet is Multicall, SafeOwnable {
+string constant FACET_VERSION = "1.1.0";
+string constant FACET_NAME = "RewardsFacet";
+
+contract RewardsFacet is Multicall, SafeOwnable, AccessControlInternal, IVersionable {
     event TokenMinted(address token, address to, uint256 amount, bytes32 id, bytes32 activityType, string uri);
     event TokenTransferred(address token, address to, uint256 amount, bytes32 id, bytes32 activityType, string uri);
     event ERC721Minted(address token, uint256 quantity, address to, bytes32 id, bytes32 activityType, string uri);
@@ -44,6 +49,22 @@ contract RewardsFacet is Multicall, SafeOwnable {
     error RewardsFacet_NotAuthorized();
     error RewardsFacet_InsufficientBalance();
 
+    /**
+     * @dev Override to return facet version.
+     * @return version This facet version.
+     */
+    function facetVersion() external pure override returns (string memory) {
+        return FACET_VERSION;
+    }
+
+    /**
+     * @dev Override to return facet name.
+     * @return name This facet name.
+     */
+    function facetName() external pure override returns (string memory) {
+        return FACET_NAME;
+    }
+
     function mintERC20(
         address _token,
         address _to,
@@ -52,7 +73,7 @@ contract RewardsFacet is Multicall, SafeOwnable {
         bytes32 _activityType,
         string calldata _uri
     ) public {
-        if (!_canMint(_token)) {
+        if (!_isOperator()) {
             revert RewardsFacet_NotAuthorized();
         }
 
@@ -68,6 +89,10 @@ contract RewardsFacet is Multicall, SafeOwnable {
         bytes32 _activityType,
         string calldata _uri
     ) public {
+        if (!_isOperator()) {
+            revert RewardsFacet_NotAuthorized();
+        }
+
         Token(_token).transferFrom(msg.sender, _to, _amount);
         emit TokenTransferred(_token, _to, _amount, _id, _activityType, _uri);
     }
@@ -92,7 +117,7 @@ contract RewardsFacet is Multicall, SafeOwnable {
         bytes32 _activityType,
         bytes calldata _data
     ) public {
-        if (!_canMint(_badgeContract)) {
+        if (!_isOperator()) {
             revert RewardsFacet_NotAuthorized();
         }
 
@@ -118,7 +143,7 @@ contract RewardsFacet is Multicall, SafeOwnable {
         bytes32 _activityType,
         bytes calldata _data
     ) public {
-        if (!_canMint(_badgeContract)) {
+        if (!_isOperator()) {
             revert RewardsFacet_NotAuthorized();
         }
 
@@ -135,9 +160,10 @@ contract RewardsFacet is Multicall, SafeOwnable {
         bytes32 _activityType,
         string calldata _uri
     ) public {
-        if (!_canMint(_token)) {
+        if (!_isOperator()) {
             revert RewardsFacet_NotAuthorized();
         }
+
         NFT(_token).batchMintTo(_to, _quantity, _baseURI);
         emit ERC721Minted(_token, _quantity, _to, _id, _activityType, _uri);
     }
@@ -150,11 +176,25 @@ contract RewardsFacet is Multicall, SafeOwnable {
         bytes32 _activityType,
         string calldata _uri
     ) public {
+        if (!_isOperator()) {
+            revert RewardsFacet_NotAuthorized();
+        }
+
         NFT(_token).transferFrom(msg.sender, _to, _tokenId);
         emit BadgeTransferred(_token, _to, _tokenId, _id, _activityType, _uri);
     }
 
-    function _canMint(address _token) internal virtual returns (bool) {
-        return Token(_token).hasRole(ADMIN_ROLE, msg.sender) || Token(_token).hasRole(MINTER_ROLE, msg.sender);
+    function _isOperator() internal virtual returns (bool) {
+        if (msg.sender == _owner()){
+            return true;
+        }
+        if (_hasRole(ADMIN_ROLE, msg.sender)){
+            return true;
+        }
+        if (_hasRole(OPERATOR_ROLE, msg.sender)){
+            return true;
+        }
+
+        return false;
     }
 }

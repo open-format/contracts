@@ -2,9 +2,17 @@
 pragma solidity ^0.8.16;
 
 import {SafeOwnable, OwnableInternal} from "@solidstate/contracts/access/ownable/SafeOwnable.sol";
+import {AccessControl} from "@solidstate/contracts/access/access_control/AccessControl.sol";
 import {ApplicationFee} from "../extensions/applicationFee/ApplicationFee.sol";
 import {ApplicationAccess, IApplicationAccess} from "../extensions/applicationAccess/ApplicationAccess.sol";
 import {PlatformFee} from "../extensions/platformFee/PlatformFee.sol";
+import {IVersionable} from "../extensions/versionable/IVersionable.sol";
+
+string constant FACET_VERSION = "1.1.0";
+string constant FACET_NAME = "SettingsFacet";
+
+bytes32 constant ADMIN_ROLE = bytes32(uint256(0));
+bytes32 constant OPERATOR_ROLE = bytes32(uint256(1));
 
 /**
  * @title   "Settings Facet"
@@ -13,8 +21,30 @@ import {PlatformFee} from "../extensions/platformFee/PlatformFee.sol";
  *          which provide functionality for managing application and platform fees, ownership management, and restricted
  *          access to contract creation.
  */
+contract SettingsFacet is
+    ApplicationFee,
+    PlatformFee,
+    SafeOwnable,
+    AccessControl,
+    ApplicationAccess,
+    IVersionable
+    {
+    /**
+     * @dev Override to return facet version.
+     * @return version This facet version.
+     */
+    function facetVersion() external pure override returns (string memory) {
+        return FACET_VERSION;
+    }
 
-contract SettingsFacet is ApplicationFee, PlatformFee, SafeOwnable, ApplicationAccess {
+    /**
+     * @dev Override to return facet name.
+     * @return name This facet name.
+     */
+    function facetName() external pure override returns (string memory) {
+        return FACET_NAME;
+    }
+
     /**
      * @notice sets the application percentage fee in BPS and the recipient wallet
      * @param percentBPS The percentage used to calculate application fee
@@ -65,5 +95,12 @@ contract SettingsFacet is ApplicationFee, PlatformFee, SafeOwnable, ApplicationA
      */
     function _transferOwnership(address account) internal override(OwnableInternal, SafeOwnable) {
         SafeOwnable._transferOwnership(account);
+    }
+
+    /**
+     * @dev enables access control by granting the owner the admin role.
+     */
+    function enableAccessControl() external onlyOwner() {
+        _grantRole(ADMIN_ROLE, _owner());
     }
 }

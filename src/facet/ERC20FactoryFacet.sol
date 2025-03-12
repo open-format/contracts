@@ -6,6 +6,10 @@ import {CurrencyTransferLib} from "src/lib/CurrencyTransferLib.sol";
 import {ERC20Factory} from "../extensions/ERC20Factory/ERC20Factory.sol";
 import {PlatformFee} from "../extensions/platformFee/PlatformFee.sol";
 import {ApplicationAccess} from "../extensions/applicationAccess/ApplicationAccess.sol";
+import {IVersionable} from "../extensions/versionable/IVersionable.sol";
+
+string constant FACET_VERSION = "1.0.0";
+string constant FACET_NAME = "ERC20FactoryFacet";
 
 /**
  * @title   "ERC20Factory Facet"
@@ -14,8 +18,23 @@ import {ApplicationAccess} from "../extensions/applicationAccess/ApplicationAcce
  *          platform fee collection, and restricted access to contract creation, respectively.
  *          Before creating a new contract, a platform fee is added, which must be paid in ether.
  */
+contract ERC20FactoryFacet is ERC20Factory, Ownable, PlatformFee, ApplicationAccess, IVersionable {
+    /**
+     * @dev Override to return facet version.
+     * @return version This facet version.
+     */
+    function facetVersion() external pure override returns (string memory) {
+        return FACET_VERSION;
+    }
 
-contract ERC20FactoryFacet is ERC20Factory, Ownable, PlatformFee, ApplicationAccess {
+    /**
+     * @dev Override to return facet name.
+     * @return name This facet name.
+     */
+    function facetName() external pure override returns (string memory) {
+        return FACET_NAME;
+    }
+
     /**
      * @dev uses applicationAccess extension for create access for new erc20 contracts
      */

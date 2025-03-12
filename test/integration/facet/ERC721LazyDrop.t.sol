@@ -17,7 +17,6 @@ import {AppFactory} from "src/factories/App.sol";
 import {Globals} from "src/globals/Globals.sol";
 
 import {ERC20BaseMock} from "src/tokens/ERC20/ERC20BaseMock.sol";
-import {ERC20Base} from "src/tokens/ERC20/ERC20Base.sol";
 import {ERC721LazyMint} from "src/tokens/ERC721/ERC721LazyMint.sol";
 
 import {ERC721LazyDropFacet, ERC721LazyDropStorage} from "src/facet/ERC721LazyDropFacet.sol";
@@ -69,7 +68,6 @@ contract Setup is Test, Helpers {
 
     ERC721LazyMint erc721;
     ERC20BaseMock erc20;
-    ERC20Base erc20Implementation;
 
     function setUp() public {
         // assign addresses
@@ -85,8 +83,6 @@ contract Setup is Test, Helpers {
         registry = new RegistryMock();
         appImplementation = new  Proxy(true);
         appFactory = new AppFactory(address(appImplementation), address(registry), address(globals));
-
-        erc20Implementation = new ERC20Base();
 
         {
             settingsFacet = new SettingsFacet();

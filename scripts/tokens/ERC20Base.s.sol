@@ -25,3 +25,20 @@ contract Deploy is Script, Utils {
         exportContractDeployment(CONTRACT_NAME, address(erc20base), block.number);
     }
 }
+
+contract Update is Script, Utils {
+    function run() external {
+        uint256 deployerPrivateKey = vm.envUint("PRIVATE_KEY");
+        vm.startBroadcast(deployerPrivateKey);
+
+        // deploy
+        ERC20Base erc20base = new ERC20Base();
+
+        // add to globals
+        Globals(getContractDeploymentAddress("Globals")).setERC20Implementation(implementationId, address(erc20base));
+
+        vm.stopBroadcast();
+
+        exportContractDeployment(CONTRACT_NAME, address(erc20base), block.number);
+    }
+}

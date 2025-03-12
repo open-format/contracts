@@ -18,8 +18,6 @@ import {RegistryMock} from "src/registry/RegistryMock.sol";
 import {AppFactory} from "src/factories/App.sol";
 import {Globals} from "src/globals/Globals.sol";
 
-import {ERC20Base} from "src/tokens/ERC20/ERC20Base.sol";
-
 import {PlatformFee, IPlatformFee} from "src/extensions/platformFee/PlatformFee.sol";
 
 contract DummyFacet is PlatformFee {
@@ -78,7 +76,6 @@ contract Setup is Test, Helpers {
     RegistryMock registry;
     DummyFacet facet;
     Globals globals;
-    ERC20Base erc20Implementation;
 
     function setUp() public {
         creator = address(0x10);
@@ -89,8 +86,6 @@ contract Setup is Test, Helpers {
         template = new  Proxy(true);
         appFactory = new AppFactory(address(template), address(registry), address(globals));
         facet = new DummyFacet();
-
-        erc20Implementation = new ERC20Base();
 
         // add facet to registry
         bytes4[] memory selectors = new bytes4[](2);

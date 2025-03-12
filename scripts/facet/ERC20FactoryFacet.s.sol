@@ -7,10 +7,45 @@ import {
     IDiamondWritableInternal
 } from "@solidstate/contracts/proxy/diamond/writable/IDiamondWritable.sol";
 import {Utils} from "scripts/utils/Utils.sol";
-import {ERC20FactoryFacet} from "src/facet/ERC20FactoryFacet.sol";
+import {ERC20FactoryFacet, ERC20Factory} from "src/facet/ERC20FactoryFacet.sol";
 import {RegistryMock} from "src/registry/RegistryMock.sol";
+import {IDeployer} from "./IDeployer.sol";
 
 string constant CONTRACT_NAME = "ERC20FactoryFacet";
+
+contract Deployer is IDeployer, Script, Utils {
+    address private addr;
+    uint256 private blockNumber;
+
+    function deploy() external returns (address) {
+        uint256 deployerPrivateKey = vm.envUint("PRIVATE_KEY");
+        vm.startBroadcast(deployerPrivateKey);
+        address erc20FactoryFacet = address(new ERC20FactoryFacet());
+        vm.stopBroadcast();
+
+        addr = erc20FactoryFacet;
+        blockNumber = block.number;
+
+        return erc20FactoryFacet;
+    }
+
+    function deployTest() external returns (address) {
+        return address(new ERC20FactoryFacet());
+    }
+
+    function export() external {
+        exportContractDeployment(CONTRACT_NAME, addr, blockNumber);
+    }
+
+    function selectors () external returns (bytes4[] memory){
+        bytes4[] memory s = new bytes4[](3);
+        s[0] = ERC20Factory.createERC20.selector;
+        s[1] = ERC20Factory.getERC20FactoryImplementation.selector;
+        s[2] = ERC20Factory.calculateERC20FactoryDeploymentAddress.selector;
+
+        return s;
+    }
+}
 
 contract Deploy is Script, Utils {
     function run() external {

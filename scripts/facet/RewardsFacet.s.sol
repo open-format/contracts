@@ -7,11 +7,50 @@ import {
     IDiamondWritableInternal
 } from "@solidstate/contracts/proxy/diamond/writable/IDiamondWritable.sol";
 import {Utils} from "scripts/utils/Utils.sol";
-import {RewardsFacet} from "src/facet/RewardsFacet.sol";
+import {RewardsFacet, Multicall} from "src/facet/RewardsFacet.sol";
 import {RegistryMock} from "src/registry/RegistryMock.sol";
 import {ERC20Base} from "src/tokens/ERC20/ERC20Base.sol";
+import {IDeployer} from "./IDeployer.sol";
 
 string constant CONTRACT_NAME = "RewardFacet";
+
+contract Deployer is IDeployer, Script, Utils {
+    address private addr;
+    uint256 private blockNumber;
+
+    function deploy() external returns (address) {
+        uint256 deployerPrivateKey = vm.envUint("PRIVATE_KEY");
+        vm.startBroadcast(deployerPrivateKey);
+        address rewardsFacet = address(new RewardsFacet());
+        vm.stopBroadcast();
+
+        addr = rewardsFacet;
+        blockNumber = block.number;
+
+        return rewardsFacet;
+    }
+
+    function deployTest() external returns (address) {
+        return address(new RewardsFacet());
+    }
+
+    function export() external {
+        exportContractDeployment(CONTRACT_NAME, addr, blockNumber);
+    }
+
+    function selectors () external returns (bytes4[] memory){
+        bytes4[] memory s = new bytes4[](7);
+        s[0] = RewardsFacet.mintERC20.selector;
+        s[1] = RewardsFacet.transferERC20.selector;
+        s[2] = RewardsFacet.mintERC721.selector;
+        s[3] = RewardsFacet.transferERC721.selector;
+        s[4] = Multicall.multicall.selector;
+        s[5] = RewardsFacet.mintBadge.selector;
+        s[6] = RewardsFacet.batchMintBadge.selector;
+
+        return s;
+    }
+}
 
 contract Deploy is Script, Utils {
     function run() external {

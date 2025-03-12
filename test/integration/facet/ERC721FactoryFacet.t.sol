@@ -16,7 +16,6 @@ import {RegistryMock} from "src/registry/RegistryMock.sol";
 import {AppFactory} from "src/factories/App.sol";
 import {Globals} from "src/globals/Globals.sol";
 
-import {ERC20Base} from "src/tokens/ERC20/ERC20Base.sol";
 import {IERC721Factory} from "@extensions/ERC721Factory/IERC721Factory.sol";
 import {ERC721Base, ADMIN_ROLE, MINTER_ROLE} from "src/tokens/ERC721/ERC721Base.sol";
 import {ERC721LazyMint} from "src/tokens/ERC721/ERC721LazyMint.sol";
@@ -58,7 +57,6 @@ contract Setup is Test, Helpers {
 
     SettingsFacet settingsFacet;
 
-    ERC20Base erc20Implementation;
     ERC721Base erc721Implementation;
     bytes32 erc721ImplementationId;
     ERC721FactoryFacet erc721FactoryFacet;
@@ -76,8 +74,6 @@ contract Setup is Test, Helpers {
         registry = new RegistryMock();
         appImplementation = new Proxy(true);
         appFactory = new AppFactory(address(appImplementation), address(registry), address(globals));
-
-        erc20Implementation = new ERC20Base();
 
         erc721Implementation = new ERC721Base();
         erc721ImplementationId = bytes32("Base");

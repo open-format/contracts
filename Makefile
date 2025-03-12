@@ -17,8 +17,12 @@ install :; forge install & yarn install
 remappings :; forge remappings > remappings.txt
 
 # deploy
-# to run: `make deploy rpc="<chain>"` e.g `make deploy rpc="anvil"`
-# to specify a gas price:  make deploy rpc="anvil" gasPrice="--with-gas-price 45000000000 --skip-simulation
+# To run: `make deploy rpc="<chain>"` e.g `make deploy rpc="anvil"`
+# To specify a gas price: `make deploy rpc="anvil" gasPrice="--with-gas-price 45000000000 --skip-simulation"`
+# If "deserialization error: missing field effectiveGasPrice" is thrown you will need to change the version
+# using foundryup see issue: https://github.com/foundry-rs/foundry/issues/7640.
+# Command to change to working version: `foundryup --version nightly-f625d0fa7c51e65b4bf1e8f7931cd1c6e2e285e9`
+# Then run the make deploy command, likely needing to also specifying the gas.
 # TODO: compile all contracts at start then run scripts
 deploy:; make \
 	deploy-Globals \
@@ -26,14 +30,18 @@ deploy:; make \
 	deploy-Proxy \
 	deploy-AppFactory \
 	deploy-ERC20Base \
+	deploy-ERC20Point \
 	deploy-ERC721Base \
 	deploy-ERC721LazyMint \
 	deploy-ERC721Badge \
+	deploy-ERC721BadgeNonTransferable \
 	deploy-RewardsFacet \
 	deploy-SettingsFacet \
 	deploy-ERC721FactoryFacet \
 	deploy-ERC20FactoryFacet \
 	deploy-ERC721LazyDropFacet \
+	deploy-ChargeFacet \
+	facet-versions \
 
 # core
 deploy-Globals:; forge script scripts/core/Globals.s.sol:Deploy --rpc-url $(rpc) --broadcast $(gasPrice) $(verbose) $(legacy) $(slow)
@@ -45,17 +53,32 @@ deploy-AppFactory:; forge script scripts/core/AppFactory.s.sol:Deploy --rpc-url 
 deploy-ERC721Base:; forge script scripts/tokens/ERC721Base.s.sol:Deploy --rpc-url $(rpc) --broadcast $(verbose) $(gasPrice) $(legacy) $(slow)
 deploy-ERC721LazyMint:; forge script scripts/tokens/ERC721LazyMint.s.sol:Deploy --rpc-url $(rpc) --broadcast $(verbose) $(gasPrice) $(legacy) $(slow)
 deploy-ERC721Badge:; forge script scripts/tokens/ERC721Badge.s.sol:Deploy --rpc-url $(rpc) --broadcast $(verbose) $(gasPrice) $(legacy) $(slow)
+deploy-ERC721BadgeNonTransferable:; forge script scripts/tokens/ERC721BadgeNonTransferable.s.sol:Deploy --rpc-url $(rpc) --broadcast $(verbose) $(gasPrice) $(legacy) $(slow)
 deploy-ERC20Base:; forge script scripts/tokens/ERC20Base.s.sol:Deploy --rpc-url $(rpc) --broadcast $(verbose) $(gasPrice) $(legacy) $(slow)
+deploy-ERC20Point:; forge script scripts/tokens/ERC20Point.s.sol:Deploy --rpc-url $(rpc) --broadcast $(verbose) $(gasPrice) $(legacy) $(slow)
 
 # facets
+deploy-ChargeFacet:; forge script scripts/facet/ChargeFacet.s.sol:Deploy --rpc-url $(rpc) --broadcast $(verbose) $(gasPrice) $(legacy) $(slow)
 deploy-RewardsFacet:; forge script scripts/facet/RewardsFacet.s.sol:Deploy --rpc-url $(rpc) --broadcast $(verbose) $(gasPrice) $(legacy) $(slow)
 deploy-SettingsFacet:; forge script scripts/facet/SettingsFacet.s.sol:Deploy --rpc-url $(rpc) --broadcast $(verbose) $(gasPrice) $(legacy) $(slow)
 deploy-ERC721FactoryFacet:; forge script scripts/facet/ERC721FactoryFacet.s.sol:Deploy --rpc-url $(rpc) --broadcast $(verbose) $(gasPrice) $(legacy) $(slow)
 deploy-ERC20FactoryFacet:; forge script scripts/facet/ERC20FactoryFacet.s.sol:Deploy --rpc-url $(rpc) --broadcast $(verbose) $(gasPrice) $(legacy) $(slow)
 deploy-ERC721LazyDropFacet:; forge script scripts/facet/ERC721LazyDropFacet.s.sol:Deploy --rpc-url $(rpc) --broadcast $(verbose) $(gasPrice) $(legacy) $(slow)
 
+redeploy-AllFacets:; forge script scripts/facet/AllFacets.s.sol:RedeployAllFacets --rpc-url $(rpc) --broadcast $(verbose) $(gasPrice) $(legacy) $(slow)
+redeploy-AllTokens:; make \
+	deploy-ERC721Base \
+	deploy-ERC721LazyMint \
+	deploy-ERC721Badge \
+	deploy-ERC721BadgeNonTransferable \
+	deploy-ERC20Base \
+	deploy-ERC20Point
+
 # patch
 patch-SettingsFacet:; forge script scripts/facet/SettingsFacet.s.sol:Patch --rpc-url $(rpc) --broadcast $(verbose) $(legacy) $(slow)
+
+# versions
+facet-versions:; forge script scripts/versions/FacetVersions.s.sol:FacetVersions --rpc-url $(rpc) --broadcast $(verbose) $(legacy) $(slow)
 
 # Operations
 # All things relating to Open Formats app and $OFT
@@ -106,9 +129,19 @@ createERC721Base:; forge script scripts/facet/ERC721FactoryFacet.s.sol:CreateBas
 # Note: make sure app is setup with correct permissions and APP_ID env is set.
 createERC721Badge:; forge script scripts/facet/ERC721FactoryFacet.s.sol:CreateBadge --rpc-url $(rpc) --broadcast $(verbose) $(legacy) $(slow)
 
+# example `make createERC721BadgeNonTransferable`
+# Note: make sure app is setup with correct permissions and APP_ID env is set.
+createERC721BadgeNonTransferable:; forge script scripts/facet/ERC721FactoryFacet.s.sol:CreateBadgeNonTransferable --rpc-url $(rpc) --broadcast $(verbose) $(legacy) $(slow)
+
 # example: make ERC721Badge.mintTo args="0xaf4c80136581212185f37c5e8809120d8fbf6224"
 ERC721Badge.mintTo:; forge script \
 	scripts/tokens/ERC721Badge.s.sol:MintTo \
+	--sig "run(address)" \
+ 	--rpc-url $(rpc) --broadcast $(verbose) $(legacy) $(slow) $(args)
+
+# example: make ERC721BadgeNonTransferable.mintTo args="0xaf4c80136581212185f37c5e8809120d8fbf6224"
+ERC721BadgeNonTransferable.mintTo:; forge script \
+	scripts/tokens/ERC721BadgeNonTransferable.s.sol:MintTo \
 	--sig "run(address)" \
  	--rpc-url $(rpc) --broadcast $(verbose) $(legacy) $(slow) $(args)
 
@@ -126,6 +159,27 @@ ERC721Base.mintTo:; forge script \
  	--rpc-url $(rpc) --broadcast $(verbose) $(legacy) $(slow) \
 	$(word 1, $(args)) $(word 2, $(args))
 
+# example: make ChargeFacet.chargeUser args="0xaf4c80136581212185f37c5e8809120d8fbf6224 0xe182c3aaFF5AC9968Fb14bBa6f833A9530EeF904 1"
+ChargeFacet.chargeUser:; forge script \
+	scripts/facet/ChargeFacet.s.sol:ChargeUser \
+	--sig "run(address,address,uint256)" \
+ 	--rpc-url $(rpc) --broadcast $(verbose) $(legacy) $(slow) \
+	$(word 1, $(args)) $(word 2, $(args)) `cast --to-wei $(word 3, $(args))`
+
+# example: make ChargeFacet.setMinimumCreditBalance args="0xe182c3aaFF5AC9968Fb14bBa6f833A9530EeF904 1"
+ChargeFacet.setMinimumCreditBalance:; forge script \
+	scripts/facet/ChargeFacet.s.sol:SetMinimumCreditBalance \
+	--sig "run(address,uint256)" \
+ 	--rpc-url $(rpc) --broadcast $(verbose) $(legacy) $(slow) \
+	$(word 1, $(args)) `cast --to-wei $(word 2, $(args))`
+
+# example: make ChargeFacet.hasFunds args="0xaf4c80136581212185f37c5e8809120d8fbf6224 0xe182c3aaFF5AC9968Fb14bBa6f833A9530EeF904"
+ChargeFacet.hasFunds:; forge script \
+	scripts/facet/ChargeFacet.s.sol:HasFunds \
+	--sig "run(address,address)" \
+ 	--rpc-url $(rpc) --broadcast $(verbose) $(legacy) $(slow) \
+	$(word 1, $(args)) $(word 2, $(args))
+
 # pass the badge contract address as an argument
 # example: make RewardFacet.mintBadge args="0xaf4c80136581212185f37c5e8809120d8fbf6224"
 RewardsFacet.mintBadge:; forge script \
@@ -138,6 +192,21 @@ RewardsFacet.mintBadge:; forge script \
 RewardsFacet.batchMintBadge:; forge script \
 	scripts/facet/RewardsFacet.s.sol:batchMintBadge \
 	--sig "run(address)" \
+ 	--rpc-url $(rpc) --broadcast $(verbose) $(legacy) $(slow) $(args)
+
+# example: make SettingsFacet.enableAccessControl
+SettingsFacet.enableAccessControl:; forge script \
+	scripts/facet/SettingsFacet.s.sol:EnableAccessControl \
+ 	--rpc-url $(rpc) --broadcast $(verbose) $(legacy) $(slow) $(args)
+
+# example: make SettingsFacet.grantRoleOperator args="0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266"
+SettingsFacet.grantRoleOperator:; forge script \
+	scripts/facet/SettingsFacet.s.sol:GrantRoleOperator \
+	--sig "run(address)" \
+ 	--rpc-url $(rpc) --broadcast $(verbose) $(legacy) $(slow) $(args)
+
+Registry.owner:; forge script \
+	scripts/core/Registry.s.sol:Owner \
  	--rpc-url $(rpc) --broadcast $(verbose) $(legacy) $(slow) $(args)
 
 # Simulate create new app and issues rewards
@@ -162,12 +231,25 @@ update:; make \
 update-ERC721FactoryFacet:; forge script scripts/facet/ERC721FactoryFacet.s.sol:Update --rpc-url $(rpc) --broadcast $(verbose) $(legacy) $(slow)
 update-ERC20FactoryFacet:; forge script scripts/facet/ERC20FactoryFacet.s.sol:Update --rpc-url $(rpc) --broadcast $(verbose) $(legacy) $(slow)
 
+update-RewardsFacet:; forge script scripts/facet/RewardsFacet.s.sol:Update --rpc-url $(rpc) --broadcast $(verbose) $(legacy) $(slow)
+update-ERC20Base:; forge script scripts/tokens/ERC20Base.s.sol:Update --rpc-url $(rpc) --broadcast $(verbose) $(legacy) $(slow)
+
+# Add access control
+# Date 07.03.25
+# updates SettingsFacet and RewardsFacet to add access control to apps
+# PR #155 https://github.com/open-format/contracts/pull/155
+update-AddAccessControl:; make \
+	update-RewardsFacet \
+	update-SettingsFacet-addAccessControl
+
+update-SettingsFacet-addAccessControl:; forge script scripts/facet/SettingsFacet.s.sol:Update_AddAccessControl --rpc-url $(rpc) --broadcast $(verbose) $(legacy) $(slow)
+
 # Add badge minting functionality
 # Date 20.05.24
 # updates ERC721RewardFacet to update mintERC721 function and add mintBadge and batchMintBadge functions
 # deploys and registers RewardsFacet contract
 # PR #126 https://github.com/open-format/contracts/pull/126
-update-RewardsFacet:; forge script scripts/facet/RewardsFacet.s.sol:Update_Add_badgeMintingFunctionality --rpc-url $(rpc) --broadcast $(verbose) $(legacy) $(slow)
+update-RewardsFacet-add-badgeMintingFunctionality:; forge script scripts/facet/RewardsFacet.s.sol:Update_Add_badgeMintingFunctionality --rpc-url $(rpc) --broadcast $(verbose) $(legacy) $(slow)
 
 # Add ERC721Badge contract
 # Date 14.05.24
@@ -192,6 +274,11 @@ update-addPlatformFeeToTokens:; make \
 	deploy-ERC721Base \
 	deploy-ERC721LazyMint \
 	deploy-ERC20Base \
+
+# Rename functions in charge facet on staging contracts
+# Date 31.07.24 (Executed on arbitrum-sepolia-staging contracts)
+# updates ChargeFacet to rename functions and use token naming convention instead of credits
+update-ChargeFacet_useTokensNamingConvention:; forge script scripts/facet/ChargeFacet.s.sol:Update_useTokensNamingConvention --rpc-url $(rpc) --broadcast $(verbose) $(legacy) $(slow)
 
 # Expose globals
 # deploys a new settings facet, replaces exisitng function selectors and adds new ones
