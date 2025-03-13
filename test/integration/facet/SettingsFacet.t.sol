@@ -17,6 +17,8 @@ import {RegistryMock} from "src/registry/RegistryMock.sol";
 import {AppFactory} from "src/factories/App.sol";
 import {Globals} from "src/globals/Globals.sol";
 import {SettingsFacet, IApplicationAccess, ADMIN_ROLE, OPERATOR_ROLE} from "src/facet/SettingsFacet.sol";
+import {Multicall} from "src/facet/RewardsFacet.sol";
+import {RedeployAllFacets} from "scripts/facet/AllFacets.s.sol";
 
 abstract contract Helpers {
     function prepareSingleFacetCut(
@@ -31,6 +33,7 @@ abstract contract Helpers {
 }
 
 contract Setup is Test, Helpers {
+    address constant openformat = 0x1804c8AB1F12E6bbf3894d4083f33e07309d1f38;
     address appOwner;
     address other;
 
@@ -42,12 +45,12 @@ contract Setup is Test, Helpers {
     RegistryMock registry;
     Globals globals;
 
-    SettingsFacet settingsFacet;
-
     function setUp() public {
         // assign addresses
         appOwner = address(0x10);
         other = address(0x11);
+
+        vm.startPrank(openformat);
 
         // deploy contracts
         globals = new Globals();
@@ -55,29 +58,10 @@ contract Setup is Test, Helpers {
         appImplementation = new  Proxy(true);
         appFactory = new AppFactory(address(appImplementation), address(registry), address(globals));
 
-        settingsFacet = new SettingsFacet();
+        vm.stopPrank();
 
-        // add facet to registry
-        bytes4[] memory selectors = new bytes4[](13);
-        selectors[0] = settingsFacet.setApplicationFee.selector;
-        selectors[1] = settingsFacet.setAcceptedCurrencies.selector;
-        selectors[2] = settingsFacet.applicationFeeInfo.selector;
-        selectors[3] = settingsFacet.setCreatorAccess.selector;
-        selectors[4] = settingsFacet.hasCreatorAccess.selector;
-        selectors[5] = settingsFacet.platformFeeInfo.selector;
-        selectors[6] = settingsFacet.getGlobalsAddress.selector;
-        selectors[7] = settingsFacet.enableAccessControl.selector;
-        selectors[8] = settingsFacet.grantRole.selector;
-        selectors[9] = settingsFacet.hasRole.selector;
-        selectors[10] = settingsFacet.getRoleAdmin.selector;
-        selectors[11] = settingsFacet.revokeRole.selector;
-        selectors[12] = settingsFacet.renounceRole.selector;
-
-        registry.diamondCut(
-            prepareSingleFacetCut(address(settingsFacet), IDiamondWritableInternal.FacetCutAction.ADD, selectors),
-            address(0),
-            ""
-        );
+        RedeployAllFacets redeployAllFacets = new RedeployAllFacets();
+        redeployAllFacets.runTest(address(registry));
 
         // create app
         vm.prank(appOwner);
@@ -243,6 +227,7 @@ contract SettingsFacet__integration_getGlobalsAddress is Setup {
 contract SettingsFacet__integration_platformFeeInfo is Setup {
     function test_returns_platform_fee_info() public {
         // set platform base fee to 1 ether
+        vm.prank(openformat);
         globals.setPlatformFee(1 ether, 0, other);
 
         (address recipient, uint256 amount) = SettingsFacet(address(app)).platformFeeInfo(0);
@@ -294,5 +279,19 @@ contract SettingsFacet__intergration_grantRole is Setup {
                 )
             );
         SettingsFacet(address(app)).grantRole(OPERATOR_ROLE, other);
+    }
+}
+
+contract SettingsFacet__intergration_multicall is Setup {
+    function test_can_update_multiple_settings_using_multicall() public {
+        bytes[] memory calls = new bytes[](2);
+        calls[0] = abi.encodeCall(SettingsFacet(address(app)).enableAccessControl, ());
+        calls[1] = abi.encodeCall(SettingsFacet(address(app)).grantRole, (OPERATOR_ROLE, other));
+
+        vm.prank(appOwner);
+        Multicall(address(app)).multicall(calls);
+
+        assertTrue(SettingsFacet(address(app)).hasRole(ADMIN_ROLE, appOwner));
+        assertTrue(SettingsFacet(address(app)).hasRole(OPERATOR_ROLE, other));
     }
 }
